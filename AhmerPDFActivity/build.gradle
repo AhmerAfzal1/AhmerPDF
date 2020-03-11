@@ -8,8 +8,13 @@ android {
         applicationId "com.ahmer.ahmerpdf"
         minSdkVersion 16
         targetSdkVersion 29
+        vectorDrawables.useSupportLibrary = true
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath true
+            }
+        }
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -20,11 +25,11 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
-
 }
 
 dependencies {
     implementation project(path: ':AhmerPdfium')
     implementation project(path: ':AhmerPDFViewer')
     implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0'
 }

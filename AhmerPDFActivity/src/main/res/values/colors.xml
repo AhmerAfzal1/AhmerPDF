@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
+    <color name="colorPrimary">#F34336</color>
+    <color name="colorPrimaryDark">#B22828</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="off_white">#e5e5e5</color>
+    <color name="black">#000000</color>
+    <color name="common_touch_bg">#E3E3E3</color>
+    <color name="transparent">#00000000</color>
+    <color name="primary">#9E9E9E</color>
+
+    <color name="main_blue_color">#1f89ed</color>
+    <color name="main_normal_black_color">#666666</color>
+
+    <color name="circleImageViewColourDark">#FF222222</color>
+    <color name="circleImageViewColourLight">#FFEEEEEE</color>
 </resources>

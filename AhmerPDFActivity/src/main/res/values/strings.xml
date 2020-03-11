@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">AhmerPDF</string>
+    <string name="action_settings_string">Settings</string>
+
+    <!-- Miscellaneous strings -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="pick_file">Pick file</string>
+    <string name="attention">Attention Please!</string>
+    <string name="attention_info">Document Info</string>
+    <string name="enter_password">Password</string>
+    <string name="pdf_protected_title">This file is protected</string>
+    <string name="pdf_protected_msg">Please enter the password \nto open PDF file</string>
+    <string name="open_pdf">Open</string>
+    <string name="exit_pdf">Exit</string>
+    <string name="logo">Book Logo</string>
+    <string name="skip">Skip</string>
+    <string name="rose_pdf_view">Rose PDF Viewer</string>
+    <string name="error_loading_pdf">Error loading PDF document</string>
 </resources>

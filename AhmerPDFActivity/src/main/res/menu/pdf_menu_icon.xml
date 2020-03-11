@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_night_mode_icon"
+        android:icon="@drawable/ic_night_mode"
+        android:title="@string/pick_file"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_info_icon"
+        android:icon="@drawable/info_icon_animation"
+        android:title="@string/pick_file"
+        app:showAsAction="always"/>
+
+</menu>

@@ -12,7 +12,6 @@ core.openPage(document, pageIndex);
 List<PdfDocument.Link> links = core.getPageLinks(document, pageIndex);
 for (PdfDocument.Link link : links) {
     RectF mappedRect = core.mapRectToDevice(document, pageIndex, ..., link.getBounds())
-
     if (clickedArea(mappedRect)) {
         String uri = link.getUri();
         if (link.getDestPageIdx() != null) {
@@ -22,7 +21,6 @@ for (PdfDocument.Link link : links) {
         }
     }
 }
-
 ```
 
 ## Simple example
@@ -34,25 +32,17 @@ void openPdf() {
     PdfiumCore pdfiumCore = new PdfiumCore(context);
     try {
         PdfDocument pdfDocument = pdfiumCore.newDocument(fd);
-
         pdfiumCore.openPage(pdfDocument, pageNum);
-
         int width = pdfiumCore.getPageWidthPoint(pdfDocument, pageNum);
         int height = pdfiumCore.getPageHeightPoint(pdfDocument, pageNum);
-
         // ARGB_8888 - best quality, high memory usage, higher possibility of OutOfMemoryError
         // RGB_565 - little worse quality, twice less memory usage
-        Bitmap bitmap = Bitmap.createBitmap(width, height,
-                Bitmap.Config.RGB_565);
-        pdfiumCore.renderPageBitmap(pdfDocument, bitmap, pageNum, 0, 0,
-                width, height);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        pdfiumCore.renderPageBitmap(pdfDocument, bitmap, pageNum, 0, 0, width, height);
         //if you need to render annotations and form fields, you can use
         //the same method above adding 'true' as last param
-
         iv.setImageBitmap(bitmap);
-
         printInfo(pdfiumCore, pdfDocument);
-
         pdfiumCore.closeDocument(pdfDocument); // important!
     } catch(IOException ex) {
         ex.printStackTrace();
@@ -69,20 +59,16 @@ public void printInfo(PdfiumCore core, PdfDocument doc) {
     Log.e(TAG, "producer = " + meta.getProducer());
     Log.e(TAG, "creationDate = " + meta.getCreationDate());
     Log.e(TAG, "modDate = " + meta.getModDate());
-
     printBookmarksTree(core.getTableOfContents(doc), "-");
-
 }
 
 public void printBookmarksTree(List<PdfDocument.Bookmark> tree, String sep) {
     for (PdfDocument.Bookmark b : tree) {
-
         Log.e(TAG, String.format("%s %s, p %d", sep, b.getTitle(), b.getPageIdx()));
-
         if (b.hasChildren()) {
             printBookmarksTree(b.getChildren(), sep + "-");
         }
     }
 }
-
 ```
+
