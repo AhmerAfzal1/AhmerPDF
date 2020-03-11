@@ -1,3 +1,4 @@
 rootProject.name='AhmerPDF'
-include ':Pdf'
+include ':AhmerPDFActivity'
 include ':AhmerPDFViewer'
+include ':AhmerPdfium'
