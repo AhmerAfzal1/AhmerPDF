@@ -32,7 +32,12 @@ android {
             jniLibs.srcDir 'src/main/libs'
         }
     }
-
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+            options.addStringOption('encoding', 'UTF-8')
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
