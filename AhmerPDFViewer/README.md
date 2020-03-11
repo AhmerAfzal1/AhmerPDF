@@ -11,7 +11,7 @@ Add to _build.gradle_:
 
 or if you want to use more stable version:
  
-`api 'com.github.ahmerafzal1:AhmerPdfium:7.5.4''`
+`implementation 'com.github.ahmerafzal1:AhmerPdfium:7.5.4''`
 
 ## Include PDFView in your layout
 
@@ -81,7 +81,7 @@ There is default implementation shipped with AndroidPdfViewer, and you can use i
 By using constructor with second argument (`new DefaultScrollHandle(this, true)`), handle can be placed left or top.
 
 You can also create custom scroll handles, just implement **ScrollHandle** interface.
-All methods are documented as Javadoc comments on interface [source](https://github.com/AhmerAfzal1/AhmerPdfViewer/blob/master/AhmerPDFViewer/src/main/java/com/ahmer/afzal/pdfviewer/scroll/ScrollHandle.java).
+All methods are documented as Javadoc comments on interface [source](https://github.com/AhmerAfzal1/AhmerPDF/blob/master/AhmerPDFViewer/src/main/java/com/ahmer/afzal/pdfviewer/scroll/ScrollHandle.java).
 
 ## Document sources
 _Document sources_, which are just providers for PDF documents.
@@ -104,7 +104,7 @@ By default, **DefaultLinkHandler** is used and clicking on link that references 
 and clicking on link that targets some URI causes opening it in default application.
 
 You can also create custom link handlers, just implement **LinkHandler** interface and set it using
-`Configurator#linkHandler(LinkHandler)` method. Take a look at [DefaultLinkHandler](https://github.com/barteksc/AndroidPdfViewer/tree/master/android-pdf-viewer/src/main/java/com/github/barteksc/pdfviewer/link/DefaultLinkHandler.java)
+`Configurator#linkHandler(LinkHandler)` method. Take a look at [DefaultLinkHandler](https://github.com/AhmerAfzal1/AhmerPDF/blob/master/AhmerPDFViewer/src/main/java/com/ahmer/afzal/pdfviewer/scroll/DefaultScrollHandle.java)
 source to implement custom behavior.
 
 ## Pages fit policy
