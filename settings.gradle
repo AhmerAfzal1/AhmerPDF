@@ -1,2 +1,3 @@
 rootProject.name='AhmerPDF'
 include ':Pdf'
+include ':AhmerPDFViewer'
