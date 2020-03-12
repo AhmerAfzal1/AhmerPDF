@@ -692,6 +692,28 @@ JNI_FUNC(jobject, PdfiumCore, nativeDeviceCoordsToPage)(JNI_ARGS, jlong pagePtr,
 //////////////////////////////////////////
 //Begin FPDF_TEXTPAGE section
 
+unsigned short *convertWideString(JNIEnv *env, jstring query) {
+
+    std::wstring value;
+    const jchar *raw = env->GetStringChars(query, 0);
+    jsize len = env->GetStringLength(query);
+    value.assign(raw, raw + len);
+    env->ReleaseStringChars(query, raw);
+
+    size_t length = sizeof(uint16_t) * (value.length() + 1);
+    unsigned short *result = static_cast<unsigned short *>(malloc(length));
+    char *ptr = reinterpret_cast<char *>(result);
+    size_t i = 0;
+    for (wchar_t w : value) {
+        ptr[i++] = w & 0xff;
+        ptr[i++] = (w >> 8) & 0xff;
+    }
+    ptr[i++] = 0;
+    ptr[i] = 0;
+
+    return result;
+}
+
 static jlong loadTextPageInternal(JNIEnv *env, DocumentFile *doc, jlong pagePtr){
     try{
         if(doc == NULL) throw "Get page document null";
