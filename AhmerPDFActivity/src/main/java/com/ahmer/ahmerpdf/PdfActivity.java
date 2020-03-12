@@ -3,60 +3,60 @@ package com.ahmer.ahmerpdf;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.OpenableColumns;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfPasswordException;
 import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.afzal.pdfviewer.link.DefaultLinkHandler;
-import com.ahmer.afzal.pdfviewer.listener.OnErrorListener;
 import com.ahmer.afzal.pdfviewer.listener.OnLoadCompleteListener;
 import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.Constants;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Objects;
 
-public class PdfActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener {
+public class PdfActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener, View.OnClickListener {
     private static final String TAG = PdfActivity.class.getSimpleName();
     private static final String sPreference = "PdfActivityRememberLastPage";
     private static final String SAMPLE_FILE = "grammar.pdf";
-    boolean swipeHorizontal = true;
+    private static boolean isHorizontal = false;
     private int totalPages = 0;
     private ProgressBar mProgressBar;
     private PDFView pdfView;
     private SharedPreferences sharedPreferences;
-    private boolean nightMode = false;
+    private boolean isNightMode = false;
+    private ImageView nightModeIV;
+    private TextView tvFileName;
+    private EditText search;
+    private RelativeLayout layoutSearch;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pdf_app_bar_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
+        setContentView(R.layout.activity_pdf);
         /*MobileAds.initialize(getApplicationContext(), getResources().getString(R.string.banner_ad_unit_id));
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -94,75 +94,68 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         });*/
         mProgressBar = findViewById(R.id.pdfProgressBar);
         pdfView = findViewById(R.id.pdfView);
-        displayFromAsset();
-    }
+        nightModeIV = findViewById(R.id.nightModeIV);
+        tvFileName = findViewById(R.id.tv_file_name);
+        layoutSearch = findViewById(R.id.layout_search);
+        search = findViewById(R.id.search);
+        ImageView info = findViewById(R.id.info_detail);
+        ImageView cancelSearch = findViewById(R.id.im_cancel_search);
+        ImageView goBack = findViewById(R.id.im_back);
+        ImageView switchHorizontal = findViewById(R.id.im_switch_view);
+        ImageView jumpTo = findViewById(R.id.im_jump);
+        ImageView imSearch = findViewById(R.id.im_search);
+        imSearch.setOnClickListener(this);
+        jumpTo.setOnClickListener(this);
+        switchHorizontal.setOnClickListener(this);
+        goBack.setOnClickListener(this);
+        cancelSearch.setOnClickListener(this);
+        info.setOnClickListener(this);
+        nightModeIV.setOnClickListener(this);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.pdf_menu_icon, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-        }
-
-        if (item.getItemId() == R.id.menu_info_icon) {
-            ((AnimationDrawable) item.getIcon()).start();
-            pickFile();
-            return true;
-        }
-
-        if (item.getItemId() == R.id.menu_night_mode_icon) {
-            if (!nightMode) {
-                nightMode = true;
-                item.setIcon(R.drawable.ic_day_mode);
-                Log.d(TAG, "Night mode is: " + nightMode);
-            } else {
-                nightMode = false;
-                item.setIcon(R.drawable.ic_night_mode);
-                Log.d(TAG, "Night mode is: " + nightMode);
             }
-            displayFromAsset();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                pdfView.startSearch(s.toString());
+            }
+        });
+
+        displayFromAsset(isHorizontal);
     }
 
-    private void displayFromAsset() {
+    private void displayFromAsset(boolean flag) {
         pdfView.setBackgroundColor(Color.GRAY);
         pdfView.fromAsset(SAMPLE_FILE)
                 .defaultPage(LoadInt())
                 .onLoad(this)
                 .onPageChange(this)
                 .onPageScroll((page, positionOffset) -> Log.d(TAG, "onPageScrolled: Page " + page + " PositionOffset " + positionOffset))
-                .onError(new OnErrorListener() {
-                    @Override
-                    public void onError(Throwable t) {
-                        if (t instanceof PdfPasswordException) {
-                            Toast.makeText(PdfActivity.this, R.string.error_loading_pdf, Toast.LENGTH_LONG).show();
-                        }
-                        t.printStackTrace();
-                        Log.d(TAG, " onError while Loading. " + t);
+                .onError(t -> {
+                    if (t instanceof PdfPasswordException) {
+                        Toast.makeText(PdfActivity.this, R.string.error_loading_pdf, Toast.LENGTH_LONG).show();
                     }
+                    t.printStackTrace();
+                    Log.d(TAG, " onError while Loading. " + t);
                 })
                 .onPageError((page, t) -> {
                     t.printStackTrace();
-                    Log.d(TAG, "onPageError while Loading. " + t);
-                    Log.e(TAG, "onPageError Cannot load page " + page);
+                    Log.v(TAG, "onPageError while Loading. " + t);
+                    Log.v(TAG, "onPageError cannot load page " + page);
                 })
-                .onRender(nbPages -> {
-                    pdfView.fitToWidth(LoadInt());
-                    mProgressBar.setVisibility(View.GONE);
-                })
+                .onRender(nbPages -> pdfView.fitToWidth(LoadInt()))
                 .onTap(e -> true)
                 .fitEachPage(true)
-                .nightMode(nightMode)
+                .nightMode(isNightMode)
                 .enableSwipe(true)
-                .swipeHorizontal(false)
+                .swipeHorizontal(flag)
                 .pageSnap(true) // snap pages to screen boundaries
                 .autoSpacing(true) // add dynamic spacing to fit each page on its own on the screen
                 .pageFling(false) // make a fling change only a single page like ViewPager
@@ -202,13 +195,25 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     @Override
     public void onPageChanged(int page, int pageCount) {
         SaveInt(page);
-        setTitle(String.format("%s %s of %s", "Page", page + 1, pageCount));
+        tvFileName.setText(String.format("%s %s of %s", "Page", page + 1, pageCount));
+        //setTitle(String.format("%s %s of %s", "Page", page + 1, pageCount));
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        search.setText("");
+        layoutSearch.setVisibility(View.GONE);
     }
 
     @Override
     public void loadComplete(int nbPages) {
         printBookmarksTree(pdfView.getTableOfContents(), "-");
         totalPages = nbPages;
+        mProgressBar.setVisibility(View.GONE);
+
+        // pdfView.startSearch("Lahore", true, true);
+        Log.v(TAG, "Search Word: " + pdfView.getSearchLength());
     }
 
     private void printBookmarksTree(List<PdfDocument.Bookmark> tree, String sep) {
@@ -220,22 +225,78 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-    private void pickFile() {
-        PdfDocument.Meta meta = pdfView.getDocumentMeta();
-        AlertDialog.Builder infoAlert = new AlertDialog.Builder(this);
-        infoAlert.setTitle(R.string.attention_info);
-        infoAlert.setIcon(R.drawable.version_os_alert);
-        infoAlert.setMessage("\nTitle: " + meta.getTitle() + "\n\nAuthor: " + meta.getAuthor() + "\n\nTotal Pages: " + totalPages +
-                "\n\nSubject: " + meta.getSubject() + "\n\nKeywords: " + meta.getKeywords() + "\n\nCreation Date: " + meta.getCreationDate() +
-                "\n\nModify Date: " + meta.getModDate() + "\n\nCreator: " + meta.getCreator() + "\n\nProducer: " + meta.getProducer());
-        infoAlert.setCancelable(true);
-        infoAlert.setPositiveButton(getString(android.R.string.ok), null);
-        AlertDialog infoDialog = infoAlert.create();
-        infoDialog.show();
-        TextView messageViewInfo = infoDialog.findViewById(android.R.id.message);
-        Objects.requireNonNull(messageViewInfo).setTextColor(Color.BLACK);
-        messageViewInfo.setTextSize(16);
-        //messageViewInfo.setTypeface(typeface);
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.im_search:
+                if (layoutSearch.getVisibility() != View.VISIBLE) {
+                    layoutSearch.setVisibility(View.VISIBLE);
+                } else {
+                    search.setText("");
+                    layoutSearch.setVisibility(View.GONE);
+                }
+                break;
+
+            case R.id.im_cancel_search:
+                search.setText("");
+                pdfView.stopSearch();
+                break;
+
+            case R.id.im_back:
+                finish();
+                overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+                break;
+
+            case R.id.im_jump:
+                GoToDialog goToDialog = new GoToDialog(PdfActivity.this, numPage -> {
+                    if (numPage > totalPages) {
+                        Toast.makeText(PdfActivity.this, getString(R.string.no_page_like), Toast.LENGTH_SHORT).show();
+                    } else {
+                        pdfView.jumpTo(numPage - 1, true);
+                    }
+                });
+                Objects.requireNonNull(goToDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                goToDialog.show();
+                break;
+
+            case R.id.im_switch_view:
+                isHorizontal = !isHorizontal;
+                displayFromAsset(isHorizontal);
+                break;
+
+            case R.id.nightModeIV:
+                if (!isNightMode) {
+                    isNightMode = true;
+                    nightModeIV.setImageResource(R.drawable.ic_day_mode);
+                } else {
+                    isNightMode = false;
+                    nightModeIV.setImageResource(R.drawable.ic_night_mode);
+                }
+                displayFromAsset(isHorizontal);
+                break;
+            case R.id.info_detail:
+                double size = (double) SAMPLE_FILE.length() / (1024 * 1024);
+                NumberFormat numberFormat = new DecimalFormat("#0.00");
+                String sizeText = numberFormat.format(size);
+                PdfDocument.Meta meta = pdfView.getDocumentMeta();
+                AlertDialog.Builder builderAlert = new AlertDialog.Builder(this);
+                builderAlert.setTitle(R.string.attention_info);
+                builderAlert.setIcon(R.drawable.ic_information);
+                builderAlert.setMessage("\nTitle: " + meta.getTitle() + "\n\nAuthor: " + meta.getAuthor() +
+                        "\n\nTotal Pages: " + totalPages + "\n\nSubject: " + meta.getSubject() + "\n\nKeywords: " + meta.getKeywords() +
+                        "\n\nCreation Date: " + meta.getCreationDate() + "\n\nModify Date: " + meta.getModDate() + "\n\nCreator: " + meta.getCreator() +
+                        "\n\nProducer: " + meta.getProducer() + "\n\nFile Size: " + sizeText + " MB");
+                builderAlert.setCancelable(true);
+                builderAlert.setPositiveButton(getString(android.R.string.ok), null);
+                AlertDialog alertDialog = builderAlert.create();
+                alertDialog.show();
+                TextView messageView = alertDialog.findViewById(android.R.id.message);
+                messageView.setTextColor(Color.BLACK);
+                messageView.setTextSize(16);
+                // messageView.setTypeface(typeface);
+            default:
+                break;
+        }
     }
 
     /*@Override
@@ -264,5 +325,9 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     private int LoadInt() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         return sharedPreferences.getInt(sPreference, 0);
+    }
+
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
     }
 }

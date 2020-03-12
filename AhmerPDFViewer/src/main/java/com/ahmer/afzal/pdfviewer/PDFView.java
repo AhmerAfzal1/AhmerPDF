@@ -40,6 +40,7 @@ import com.ahmer.afzal.pdfviewer.listener.OnRenderListener;
 import com.ahmer.afzal.pdfviewer.listener.OnTapListener;
 import com.ahmer.afzal.pdfviewer.model.PagePart;
 import com.ahmer.afzal.pdfviewer.scroll.ScrollHandle;
+import com.ahmer.afzal.pdfviewer.search.SearchResult;
 import com.ahmer.afzal.pdfviewer.source.AssetSource;
 import com.ahmer.afzal.pdfviewer.source.ByteArraySource;
 import com.ahmer.afzal.pdfviewer.source.DocumentSource;
@@ -510,7 +511,8 @@ public class PDFView extends RelativeLayout {
         if (swipeVertical) {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth();
+            } else
+                return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth();
         } else {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
@@ -531,7 +533,8 @@ public class PDFView extends RelativeLayout {
         } else {
             if (direction < 0 && currentYOffset < 0) {
                 return true;
-            } else return direction > 0 && currentYOffset + toCurrentScale(pdfFile.getMaxPageHeight()) > getHeight();
+            } else
+                return direction > 0 && currentYOffset + toCurrentScale(pdfFile.getMaxPageHeight()) > getHeight();
         }
     }
 
@@ -1235,6 +1238,44 @@ public class PDFView extends RelativeLayout {
 
     public boolean doRenderDuringScale() {
         return renderDuringScale;
+    }
+
+    public SearchResult startSearch(String query) {
+        if (pdfFile != null) {
+            return pdfFile.startSearch(query);
+        } else {
+            return null;
+        }
+    }
+
+    public SearchResult startSearch(String query, boolean matchCase, boolean matchWholeWord) {
+        if (pdfFile != null) {
+            return pdfFile.startSearch(query, matchCase, matchWholeWord);
+        } else {
+            return null;
+        }
+    }
+
+    public void stopSearch() {
+        if (pdfFile != null) {
+            pdfFile.stopSearch();
+        }
+    }
+
+    public int getSearchLength() {
+        if (pdfFile != null) {
+            return pdfFile.searchCountResult();
+        } else {
+            return -1;
+        }
+    }
+
+    public RectF mapRectToDevice(int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, RectF bounds) {
+        if (pdfFile != null) {
+            return pdfFile.mapRectToDevice(pageIndex, startX, startY, sizeX, sizeY, rotate, bounds);
+        } else {
+            return null;
+        }
     }
 
     /**

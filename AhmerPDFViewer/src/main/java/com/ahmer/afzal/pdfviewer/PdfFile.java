@@ -7,9 +7,12 @@ import android.util.SparseBooleanArray;
 
 import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfiumCore;
+import com.ahmer.afzal.pdfium.SearchHandle;
 import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfium.util.SizeF;
 import com.ahmer.afzal.pdfviewer.exception.PageRenderingException;
+import com.ahmer.afzal.pdfviewer.search.SearchItem;
+import com.ahmer.afzal.pdfviewer.search.SearchResult;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.pdfviewer.util.PageSizeCalculator;
 
@@ -85,6 +88,8 @@ class PdfFile {
      * (ex: 0, 2, 2, 8, 8, 1, 1, 1)
      */
     private int[] originalUserPages;
+
+    private SearchHandle searchHandle;
 
     PdfFile(PdfiumCore pdfiumCore, PdfDocument pdfDocument, FitPolicy pageFitPolicy, Size viewSize, int[] originalUserPages,
             boolean isVertical, int spacing, boolean autoSpacing, boolean fitEachPage) {
@@ -298,6 +303,78 @@ class PdfFile {
             }
             return false;
         }
+    }
+
+    private void newPageSearch(int pageIndex, String query, boolean matchCase, boolean matchWholeWord) {
+        searchHandle = pdfiumCore.newSearch(pdfDocument, pageIndex, query, matchCase, matchWholeWord);
+    }
+
+    public SearchResult startSearch(String query) {
+        return startSearch(query, false, false);
+    }
+
+    public SearchResult startSearch(String query, boolean matchCase, boolean matchWholeWord) {
+        List<SearchItem> partialResults = new ArrayList<>();
+        for (int i = 0; i < getPagesCount(); i++) {
+            RectF start = startSearch(i, query, matchCase, matchWholeWord);
+            if (start != null) {
+                SearchItem item = new SearchItem(partialResults.size() + 1, i, start);
+                partialResults.add(item);
+            }
+            RectF next = searchNext();
+            while (next != null) {
+                partialResults.add(new SearchItem(partialResults.size() + 1, i, next));
+                next = searchNext();
+            }
+        }
+        return new SearchResult(partialResults);
+    }
+
+    private RectF startSearch(int pageIndex, String query, boolean matchCase, boolean matchWholeWord) {
+        newPageSearch(pageIndex, query, matchCase, matchWholeWord);
+        if (searchHandle != null) {
+            return searchHandle.startSearch();
+        } else {
+            return null;
+        }
+    }
+
+    public void stopSearch() {
+        if (searchHandle != null) {
+            searchHandle.stopSearch();
+        }
+    }
+
+    private RectF searchNext() {
+        if (searchHandle != null) {
+            return searchHandle.searchNext();
+        } else {
+            return null;
+        }
+    }
+
+    private RectF searchPrev() {
+        if (searchHandle != null) {
+            return searchHandle.searchNext();
+        } else {
+            return null;
+        }
+    }
+
+    public int searchCountResult() {
+        if (searchHandle != null) {
+            return searchHandle.countResult();
+        } else {
+            return -1;
+        }
+    }
+
+    public RectF mapRectToDevice(int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, RectF bounds) {
+        RectF rectF = pdfiumCore.mapRectToDevice(pdfDocument, pageIndex, startX, startY, sizeX, sizeY, rotate, bounds);
+        int characterIndex = pdfiumCore.textPageGetCharIndexAtPos(pdfDocument, pageIndex, bounds.left, bounds.top, 100.0, 100.0);
+        // TODO get real text size from pdfium
+        double textFontSize = 12.0;
+        return new RectF(rectF.left, rectF.top, rectF.right + (float) textFontSize * searchCountResult(), rectF.bottom + (float) textFontSize);
     }
 
     public boolean pageHasError(int pageIndex) {
