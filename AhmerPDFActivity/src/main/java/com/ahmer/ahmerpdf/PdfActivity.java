@@ -1,10 +1,5 @@
 package com.ahmer.ahmerpdf;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -17,11 +12,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfPasswordException;
@@ -30,27 +29,23 @@ import com.ahmer.afzal.pdfviewer.link.DefaultLinkHandler;
 import com.ahmer.afzal.pdfviewer.listener.OnErrorListener;
 import com.ahmer.afzal.pdfviewer.listener.OnLoadCompleteListener;
 import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
-import com.ahmer.afzal.pdfviewer.listener.OnPageErrorListener;
-import com.ahmer.afzal.pdfviewer.listener.OnPageScrollListener;
-import com.ahmer.afzal.pdfviewer.listener.OnRenderListener;
-import com.ahmer.afzal.pdfviewer.listener.OnTapListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.Constants;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 
 import java.util.List;
+import java.util.Objects;
 
 public class PdfActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener {
     private static final String TAG = PdfActivity.class.getSimpleName();
     private static final String sPreference = "PdfActivityRememberLastPage";
     private static final String SAMPLE_FILE = "grammar.pdf";
+    boolean swipeHorizontal = true;
     private int totalPages = 0;
     private ProgressBar mProgressBar;
     private PDFView pdfView;
     private SharedPreferences sharedPreferences;
     private boolean nightMode = false;
-    boolean swipeHorizontal = true;
-    private FitPolicy fitPolicy = FitPolicy.BOTH;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -143,12 +138,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 .defaultPage(LoadInt())
                 .onLoad(this)
                 .onPageChange(this)
-                .onPageScroll(new OnPageScrollListener() {
-                    @Override
-                    public void onPageScrolled(int page, float positionOffset) {
-                        Log.d(TAG, "onPageScrolled: Page " + page + " PositionOffset " + positionOffset);
-                    }
-                })
+                .onPageScroll((page, positionOffset) -> Log.d(TAG, "onPageScrolled: Page " + page + " PositionOffset " + positionOffset))
                 .onError(new OnErrorListener() {
                     @Override
                     public void onError(Throwable t) {
@@ -159,27 +149,16 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                         Log.d(TAG, " onError while Loading. " + t);
                     }
                 })
-                .onPageError(new OnPageErrorListener() {
-                    @Override
-                    public void onPageError(int page, Throwable t) {
-                        t.printStackTrace();
-                        Log.d(TAG, "onPageError while Loading. " + t);
-                        Log.e(TAG, "onPageError Cannot load page " + page);
-                    }
+                .onPageError((page, t) -> {
+                    t.printStackTrace();
+                    Log.d(TAG, "onPageError while Loading. " + t);
+                    Log.e(TAG, "onPageError Cannot load page " + page);
                 })
-                .onRender(new OnRenderListener() {
-                    @Override
-                    public void onInitiallyRendered(int nbPages) {
-                        pdfView.fitToWidth(LoadInt());
-                        mProgressBar.setVisibility(View.GONE);
-                    }
+                .onRender(nbPages -> {
+                    pdfView.fitToWidth(LoadInt());
+                    mProgressBar.setVisibility(View.GONE);
                 })
-                .onTap(new OnTapListener() {
-                    @Override
-                    public boolean onTap(MotionEvent e) {
-                        return true;
-                    }
-                })
+                .onTap(e -> true)
                 .fitEachPage(true)
                 .nightMode(nightMode)
                 .enableSwipe(true)
@@ -207,15 +186,10 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
 
     private String getFileName(Uri uri) {
         String result = null;
-        if (uri.getScheme().equals("content")) {
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            try {
+        if (uri.getScheme() != null && uri.getScheme().equals("content")) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
                 }
             }
         }
@@ -259,7 +233,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         AlertDialog infoDialog = infoAlert.create();
         infoDialog.show();
         TextView messageViewInfo = infoDialog.findViewById(android.R.id.message);
-        messageViewInfo.setTextColor(Color.BLACK);
+        Objects.requireNonNull(messageViewInfo).setTextColor(Color.BLACK);
         messageViewInfo.setTextSize(16);
         //messageViewInfo.setTypeface(typeface);
     }
