@@ -175,6 +175,10 @@ class PdfFile {
         return getMaxPageSize().getHeight();
     }
 
+    public float getMaxPageHeight(int index) {
+        return Math.max(getPageSize(index).getHeight(), getMaxPageSize().getHeight());
+    }
+
     private void prepareAutoSpacing(Size viewSize) {
         pageSpacing.clear();
         for (int i = 0; i < getPagesCount(); i++) {
@@ -261,7 +265,7 @@ class PdfFile {
             float maxWidth = getMaxPageWidth();
             return zoom * (maxWidth - pageSize.getWidth()) / 2; //x
         } else {
-            float maxHeight = getMaxPageHeight();
+            float maxHeight = getMaxPageHeight(pageIndex);
             return zoom * (maxHeight - pageSize.getHeight()) / 2; //y
         }
     }
