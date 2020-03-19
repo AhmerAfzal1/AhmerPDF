@@ -108,6 +108,7 @@ public class PDFView extends RelativeLayout {
      * The index of the current sequence
      */
     private int currentPage;
+    private int currentPageJumpTo;
     /**
      * If you picture all the pages side by side in their optimal width,
      * and taking into account the zoom level, the current offset is the
@@ -190,8 +191,7 @@ public class PDFView extends RelativeLayout {
      * Antialiasing and bitmap filtering
      */
     private boolean enableAntialiasing = true;
-    private PaintFlagsDrawFilter antialiasFilter =
-            new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+    private PaintFlagsDrawFilter antialiasFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     /**
      * Spacing between pages, in px
      */
@@ -273,6 +273,7 @@ public class PDFView extends RelativeLayout {
      * @param page Page index.
      */
     public void jumpTo(int page, boolean withAnimation) {
+        currentPageJumpTo = page;
         if (pdfFile == null) {
             return;
         }
@@ -309,7 +310,7 @@ public class PDFView extends RelativeLayout {
         // difference between UserPages and DocumentPages
         pageNb = pdfFile.determineValidPageNumberFrom(pageNb);
         currentPage = pageNb;
-
+        currentPageJumpTo = pageNb;
         loadPages();
 
         if (scrollHandle != null && !documentFitsView()) {
@@ -476,11 +477,12 @@ public class PDFView extends RelativeLayout {
         float centerPointInStripXOffset = -currentXOffset + oldw * 0.5f;
         float centerPointInStripYOffset = -currentYOffset + oldh * 0.5f;
 
-        float relativeCenterPointInStripXOffset;
-        float relativeCenterPointInStripYOffset;
+        float relativeCenterPointInStripXOffset = 0;
+        float relativeCenterPointInStripYOffset = 0;
 
         if (swipeVertical) {
-            relativeCenterPointInStripXOffset = centerPointInStripXOffset / pdfFile.getMaxPageWidth();
+            //relativeCenterPointInStripXOffset = centerPointInStripXOffset / pdfFile.getMaxPageWidth();
+            relativeCenterPointInStripYOffset = centerPointInStripYOffset / pdfFile.getMaxPageHeight(currentPageJumpTo);
             relativeCenterPointInStripYOffset = centerPointInStripYOffset / pdfFile.getDocLen(zoom);
         } else {
             relativeCenterPointInStripXOffset = centerPointInStripXOffset / pdfFile.getDocLen(zoom);
@@ -495,7 +497,8 @@ public class PDFView extends RelativeLayout {
             currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getDocLen(zoom) + h * 0.5f;
         } else {
             currentXOffset = -relativeCenterPointInStripXOffset * pdfFile.getDocLen(zoom) + w * 0.5f;
-            currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getMaxPageHeight() + h * 0.5f;
+            currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getMaxPageHeight(currentPageJumpTo) + h * 0.5f;
+            //currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getMaxPageHeight() + h * 0.5f;
         }
         moveTo(currentXOffset, currentYOffset);
         loadPageByOffset();
@@ -668,7 +671,8 @@ public class PDFView extends RelativeLayout {
             localTranslationX = toCurrentScale(maxWidth - size.getWidth()) / 2;
         } else {
             localTranslationX = pdfFile.getPageOffset(part.getPage(), zoom);
-            float maxHeight = pdfFile.getMaxPageHeight();
+            float maxHeight = pdfFile.getMaxPageHeight(currentPageJumpTo);
+            //float maxHeight = pdfFile.getMaxPageHeight();
             localTranslationY = toCurrentScale(maxHeight - size.getHeight()) / 2;
         }
         canvas.translate(localTranslationX, localTranslationY);
@@ -684,9 +688,7 @@ public class PDFView extends RelativeLayout {
         // If we use float values for this rectangle, there will be
         // a possible gap between page parts, especially when
         // the zoom level is high.
-        RectF dstRect = new RectF((int) offsetX, (int) offsetY,
-                (int) (offsetX + width),
-                (int) (offsetY + height));
+        RectF dstRect = new RectF((int) offsetX, (int) offsetY, (int) (offsetX + width), (int) (offsetY + height));
 
         // Check if bitmap is in the screen
         float translationX = currentXOffset + localTranslationX;
@@ -835,7 +837,7 @@ public class PDFView extends RelativeLayout {
             }
         } else {
             // Check Y offset
-            float scaledPageHeight = toCurrentScale(pdfFile.getMaxPageHeight());
+            float scaledPageHeight = toCurrentScale(pdfFile.getMaxPageHeight(currentPageJumpTo));
             if (scaledPageHeight < getHeight()) {
                 offsetY = getHeight() / 2 - scaledPageHeight / 2;
             } else {
