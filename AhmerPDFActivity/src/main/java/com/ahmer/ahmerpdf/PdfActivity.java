@@ -124,7 +124,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
 
             @Override
             public void afterTextChanged(Editable s) {
-                pdfView.startSearch(s.toString());
+                //pdfView.startSearch(s.toString());
             }
         });
 
@@ -213,7 +213,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         mProgressBar.setVisibility(View.GONE);
 
         // pdfView.startSearch("Lahore", true, true);
-        Log.v(TAG, "Search Word: " + pdfView.getSearchLength());
+        //Log.v(TAG, "Search Word: " + pdfView.getSearchLength());
     }
 
     private void printBookmarksTree(List<PdfDocument.Bookmark> tree, String sep) {
@@ -239,7 +239,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
 
             case R.id.im_cancel_search:
                 search.setText("");
-                pdfView.stopSearch();
+                //pdfView.stopSearch();
                 break;
 
             case R.id.im_back:
