@@ -7,11 +7,11 @@ Android view for displaying PDFs rendered with PdfiumAndroid
 
 Add to _build.gradle_:
 
-`implementation 'com.github.ahmerafzal1:AhmerPDFViewer:2.6.7'`
+`implementation 'com.github.ahmerafzal1:AhmerPDFViewer:2.6.8'`
 
 or if you want to use more stable version:
  
-`implementation 'com.github.ahmerafzal1:AhmerPdfium:7.5.4''`
+`implementation 'com.github.ahmerafzal1:AhmerPdfium:7.5.5''`
 
 ## Include PDFView in your layout
 

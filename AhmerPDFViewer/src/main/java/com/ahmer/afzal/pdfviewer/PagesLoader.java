@@ -150,10 +150,8 @@ class PagesLoader {
                 range.rightBottom.col = MathUtils.floor(Math.abs(pageLastXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
                 range.rightBottom.row = MathUtils.floor(MathUtils.min(pageLastYOffset - secondaryOffset, 0) / rowHeight);
             }
-
             renderRanges.add(range);
         }
-
         return renderRanges;
     }
 
@@ -178,11 +176,9 @@ class PagesLoader {
                 break;
             }
         }
-
     }
 
-    private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol,
-                         int nbOfPartsLoadable) {
+    private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol, int nbOfPartsLoadable) {
         int loaded = 0;
         for (int row = firstRow; row <= lastRow; row++) {
             for (int col = firstCol; col <= lastCol; col++) {
@@ -218,9 +214,8 @@ class PagesLoader {
 
         if (renderWidth > 0 && renderHeight > 0) {
             if (!pdfView.cacheManager.upPartIfContained(page, pageRelativeBounds, cacheOrder)) {
-                pdfView.renderingHandler.addRenderingTask(page, renderWidth, renderHeight,
-                        pageRelativeBounds, false, cacheOrder, pdfView.isBestQuality(),
-                        pdfView.isAnnotationRendering());
+                pdfView.renderingHandler.addRenderingTask(page, renderWidth, renderHeight, pageRelativeBounds,
+                        false, cacheOrder, pdfView.isBestQuality(), pdfView.isAnnotationRendering());
             }
 
             cacheOrder++;
@@ -234,8 +229,7 @@ class PagesLoader {
         float thumbnailWidth = pageSize.getWidth() * Constants.THUMBNAIL_RATIO;
         float thumbnailHeight = pageSize.getHeight() * Constants.THUMBNAIL_RATIO;
         if (!pdfView.cacheManager.containsThumbnail(page, thumbnailRect)) {
-            pdfView.renderingHandler.addRenderingTask(page,
-                    thumbnailWidth, thumbnailHeight, thumbnailRect,
+            pdfView.renderingHandler.addRenderingTask(page, thumbnailWidth, thumbnailHeight, thumbnailRect,
                     true, 0, pdfView.isBestQuality(), pdfView.isAnnotationRendering());
         }
     }
@@ -244,7 +238,6 @@ class PagesLoader {
         cacheOrder = 1;
         xOffset = -MathUtils.max(pdfView.getCurrentXOffset(), 0);
         yOffset = -MathUtils.max(pdfView.getCurrentYOffset(), 0);
-
         loadVisible();
     }
 

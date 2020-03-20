@@ -1,5 +1,6 @@
 package com.ahmer.afzal.pdfviewer;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 
 import com.ahmer.afzal.pdfium.PdfDocument;
@@ -28,15 +29,15 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
         this.pdfiumCore = pdfiumCore;
     }
 
+    @SuppressLint("WrongThread")
     @Override
     protected Throwable doInBackground(Void... params) {
         try {
             PDFView pdfView = pdfViewReference.get();
             if (pdfView != null) {
                 PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
-                pdfFile = new PdfFile(pdfiumCore, pdfDocument, pdfView.getPageFitPolicy(), getViewSize(pdfView),
-                        userPages, pdfView.isSwipeVertical(), pdfView.getSpacingPx(), pdfView.isAutoSpacingEnabled(),
-                        pdfView.isFitEachPage());
+                pdfFile = new PdfFile(pdfiumCore, pdfDocument, pdfView.getPageFitPolicy(), getViewSize(pdfView), userPages,
+                        pdfView.isSwipeVertical(), pdfView.getSpacingPx(), pdfView.isAutoSpacingEnabled(), pdfView.isFitEachPage());
                 return null;
             } else {
                 return new NullPointerException("pdfView == null");
