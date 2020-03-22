@@ -312,7 +312,7 @@ class PdfFile {
 
     public void renderPageBitmap(Bitmap bitmap, int pageIndex, Rect bounds, boolean annotationRendering) {
         int docPage = documentPage(pageIndex);
-        pdfiumCore.renderPageBitmap(pdfDocument, bitmap, docPage,                bounds.left, bounds.top, bounds.width(), bounds.height(), annotationRendering);
+        pdfiumCore.renderPageBitmap(pdfDocument, bitmap, docPage, bounds.left, bounds.top, bounds.width(), bounds.height(), annotationRendering);
     }
 
     public PdfDocument.Meta getMetaData() {
