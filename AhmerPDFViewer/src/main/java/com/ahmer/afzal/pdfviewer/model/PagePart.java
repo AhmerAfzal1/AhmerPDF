@@ -49,7 +49,6 @@ public class PagePart {
         if (!(obj instanceof PagePart)) {
             return false;
         }
-
         PagePart part = (PagePart) obj;
         return part.getPage() == page
                 && part.getPageRelativeBounds().left == pageRelativeBounds.left
@@ -57,5 +56,4 @@ public class PagePart {
                 && part.getPageRelativeBounds().top == pageRelativeBounds.top
                 && part.getPageRelativeBounds().bottom == pageRelativeBounds.bottom;
     }
-
 }

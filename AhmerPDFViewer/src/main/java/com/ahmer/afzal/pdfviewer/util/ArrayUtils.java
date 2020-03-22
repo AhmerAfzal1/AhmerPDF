@@ -36,7 +36,6 @@ public class ArrayUtils {
         if (originalUserPages.length == 0) {
             return result;
         }
-
         int index = 0;
         result[0] = index;
         for (int i = 1; i < originalUserPages.length; i++) {
@@ -45,7 +44,6 @@ public class ArrayUtils {
             }
             result[i] = index;
         }
-
         return result;
     }
 

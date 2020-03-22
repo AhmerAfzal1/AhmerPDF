@@ -11,7 +11,6 @@ import com.ahmer.afzal.pdfviewer.model.LinkTapEvent;
 public class DefaultLinkHandler implements LinkHandler {
 
     private static final String TAG = DefaultLinkHandler.class.getSimpleName();
-
     private PDFView pdfView;
 
     public DefaultLinkHandler(PDFView pdfView) {

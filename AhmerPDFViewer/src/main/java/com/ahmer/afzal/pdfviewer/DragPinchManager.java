@@ -86,7 +86,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
             pageX = (int) pdfFile.getPageOffset(page, pdfView.getZoom());
         }
         for (PdfDocument.Link link : pdfFile.getPageLinks(page)) {
-            RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(),                    (int) pageSize.getHeight(), link.getBounds());
+            RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(), (int) pageSize.getHeight(), link.getBounds());
             mapped.sort();
             if (mapped.contains(mappedX, mappedY)) {
                 pdfView.callbacks.callLinkHandler(new LinkTapEvent(x, y, mappedX, mappedY, mapped, link));
@@ -113,7 +113,6 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         float offsetY = pdfView.getCurrentYOffset() - delta * pdfView.getZoom();
         int startingPage = pdfView.findFocusPage(offsetX, offsetY);
         int targetPage = Math.max(0, Math.min(pdfView.getPageCount() - 1, startingPage + direction));
-
         SnapEdge edge = pdfView.findSnapEdge(targetPage);
         float offset = pdfView.snapOffsetForPage(targetPage, edge);
         animationManager.startPageFlingAnimation(-offset);
@@ -124,7 +123,6 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         if (!pdfView.isDoubletapEnabled()) {
             return false;
         }
-
         if (pdfView.getZoom() < pdfView.getMidZoom()) {
             pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMidZoom());
         } else if (pdfView.getZoom() < pdfView.getMaxZoom()) {
@@ -194,10 +192,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
             }
             return true;
         }
-
         int xOffset = (int) pdfView.getCurrentXOffset();
         int yOffset = (int) pdfView.getCurrentYOffset();
-
         float minX, minY;
         PdfFile pdfFile = pdfView.pdfFile;
         if (pdfView.isSwipeVertical()) {
@@ -206,9 +202,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         } else {
             minX = -(pdfFile.getDocLen(pdfView.getZoom()) - pdfView.getWidth());
             minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight(pdfView.getCurrentPage())) - pdfView.getHeight());
-            //minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight()) - pdfView.getHeight());
         }
-
         animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY), (int) minX, 0, (int) minY, 0);
         return true;
     }
@@ -216,9 +210,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     private void onBoundedFling(float velocityX, float velocityY) {
         int xOffset = (int) pdfView.getCurrentXOffset();
         int yOffset = (int) pdfView.getCurrentYOffset();
-
         PdfFile pdfFile = pdfView.pdfFile;
-
         float pageStart = -pdfFile.getPageOffset(pdfView.getCurrentPage(), pdfView.getZoom());
         float pageEnd = pageStart - pdfFile.getPageLength(pdfView.getCurrentPage(), pdfView.getZoom());
         float minX, minY, maxX, maxY;
@@ -230,7 +222,6 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         } else {
             minX = pageEnd + pdfView.getWidth();
             minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight(pdfView.getCurrentPage())) - pdfView.getHeight());
-            //minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight()) - pdfView.getHeight());
             maxX = pageStart;
             maxY = 0;
         }
@@ -271,10 +262,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         if (!enabled) {
             return false;
         }
-
         boolean retVal = scaleGestureDetector.onTouchEvent(event);
         retVal = gestureDetector.onTouchEvent(event) || retVal;
-
         if (event.getAction() == MotionEvent.ACTION_UP) {
             if (scrolling) {
                 scrolling = false;

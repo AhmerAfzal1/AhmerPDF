@@ -47,37 +47,24 @@ class RenderingHandler extends Handler {
             final PagePart part = proceed(task);
             if (part != null) {
                 if (running) {
-                    pdfView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            pdfView.onBitmapRendered(part);
-                        }
-                    });
+                    pdfView.post(() -> pdfView.onBitmapRendered(part));
                 } else {
                     part.getRenderedBitmap().recycle();
                 }
             }
         } catch (final PageRenderingException ex) {
-            pdfView.post(new Runnable() {
-                @Override
-                public void run() {
-                    pdfView.onPageError(ex);
-                }
-            });
+            pdfView.post(() -> pdfView.onPageError(ex));
         }
     }
 
     private PagePart proceed(RenderingTask renderingTask) throws PageRenderingException {
         PdfFile pdfFile = pdfView.pdfFile;
         pdfFile.openPage(renderingTask.page);
-
         int w = Math.round(renderingTask.width);
         int h = Math.round(renderingTask.height);
-
         if (w == 0 || h == 0 || pdfFile.pageHasError(renderingTask.page)) {
             return null;
         }
-
         Bitmap render;
         try {
             render = Bitmap.createBitmap(w, h, renderingTask.bestQuality ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
@@ -86,19 +73,14 @@ class RenderingHandler extends Handler {
             return null;
         }
         calculateBounds(w, h, renderingTask.bounds);
-
         pdfFile.renderPageBitmap(render, renderingTask.page, roundedRenderBounds, renderingTask.annotationRendering);
-
-        return new PagePart(renderingTask.page, render,
-                renderingTask.bounds, renderingTask.thumbnail,
-                renderingTask.cacheOrder);
+        return new PagePart(renderingTask.page, render, renderingTask.bounds, renderingTask.thumbnail, renderingTask.cacheOrder);
     }
 
     private void calculateBounds(int width, int height, RectF pageSliceBounds) {
         renderMatrix.reset();
         renderMatrix.postTranslate(-pageSliceBounds.left * width, -pageSliceBounds.top * height);
         renderMatrix.postScale(1 / pageSliceBounds.width(), 1 / pageSliceBounds.height());
-
         renderBounds.set(0, 0, width, height);
         renderMatrix.mapRect(renderBounds);
         renderBounds.round(roundedRenderBounds);

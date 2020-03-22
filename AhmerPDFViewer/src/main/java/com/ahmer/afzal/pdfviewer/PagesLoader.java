@@ -2,6 +2,8 @@ package com.ahmer.afzal.pdfviewer;
 
 import android.graphics.RectF;
 
+import androidx.annotation.NonNull;
+
 import com.ahmer.afzal.pdfium.util.SizeF;
 import com.ahmer.afzal.pdfviewer.util.Constants;
 import com.ahmer.afzal.pdfviewer.util.MathUtils;
@@ -55,17 +57,13 @@ class PagesLoader {
 
         float fixedFirstXOffset = -MathUtils.max(firstXOffset, 0);
         float fixedFirstYOffset = -MathUtils.max(firstYOffset, 0);
-
         float fixedLastXOffset = -MathUtils.max(lastXOffset, 0);
         float fixedLastYOffset = -MathUtils.max(lastYOffset, 0);
-
         float offsetFirst = pdfView.isSwipeVertical() ? fixedFirstYOffset : fixedFirstXOffset;
         float offsetLast = pdfView.isSwipeVertical() ? fixedLastYOffset : fixedLastXOffset;
-
         int firstPage = pdfView.pdfFile.getPageAtOffset(offsetFirst, pdfView.getZoom());
         int lastPage = pdfView.pdfFile.getPageAtOffset(offsetLast, pdfView.getZoom());
         int pageCount = lastPage - firstPage + 1;
-
         List<RenderRange> renderRanges = new LinkedList<>();
 
         for (int page = firstPage; page <= lastPage; page++) {
@@ -150,10 +148,8 @@ class PagesLoader {
                 range.rightBottom.col = MathUtils.floor(Math.abs(pageLastXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
                 range.rightBottom.row = MathUtils.floor(MathUtils.min(pageLastYOffset - secondaryOffset, 0) / rowHeight);
             }
-
             renderRanges.add(range);
         }
-
         return renderRanges;
     }
 
@@ -164,7 +160,6 @@ class PagesLoader {
         float lastXOffset = -xOffset - pdfView.getWidth() - scaledPreloadOffset;
         float firstYOffset = -yOffset + scaledPreloadOffset;
         float lastYOffset = -yOffset - pdfView.getHeight() - scaledPreloadOffset;
-
         List<RenderRange> rangeList = getRenderRangeList(firstXOffset, firstYOffset, lastXOffset, lastYOffset);
 
         for (RenderRange range : rangeList) {
@@ -203,7 +198,6 @@ class PagesLoader {
         float relY = pageRelativePartHeight * row;
         float relWidth = pageRelativePartWidth;
         float relHeight = pageRelativePartHeight;
-
         float renderWidth = partRenderWidth;
         float renderHeight = partRenderHeight;
         if (relX + relWidth > 1) {
@@ -215,12 +209,10 @@ class PagesLoader {
         renderWidth *= relWidth;
         renderHeight *= relHeight;
         RectF pageRelativeBounds = new RectF(relX, relY, relX + relWidth, relY + relHeight);
-
         if (renderWidth > 0 && renderHeight > 0) {
             if (!pdfView.cacheManager.upPartIfContained(page, pageRelativeBounds, cacheOrder)) {
-                pdfView.renderingHandler.addRenderingTask(page, renderWidth, renderHeight,
-                        pageRelativeBounds, false, cacheOrder, pdfView.isBestQuality(),
-                        pdfView.isAnnotationRendering());
+                pdfView.renderingHandler.addRenderingTask(page, renderWidth, renderHeight, pageRelativeBounds,
+                        false, cacheOrder, pdfView.isBestQuality(), pdfView.isAnnotationRendering());
             }
 
             cacheOrder++;
@@ -234,8 +226,7 @@ class PagesLoader {
         float thumbnailWidth = pageSize.getWidth() * Constants.THUMBNAIL_RATIO;
         float thumbnailHeight = pageSize.getHeight() * Constants.THUMBNAIL_RATIO;
         if (!pdfView.cacheManager.containsThumbnail(page, thumbnailRect)) {
-            pdfView.renderingHandler.addRenderingTask(page,
-                    thumbnailWidth, thumbnailHeight, thumbnailRect,
+            pdfView.renderingHandler.addRenderingTask(page, thumbnailWidth, thumbnailHeight, thumbnailRect,
                     true, 0, pdfView.isBestQuality(), pdfView.isAnnotationRendering());
         }
     }
@@ -252,6 +243,7 @@ class PagesLoader {
         int row;
         int col;
 
+        @NonNull
         @Override
         public String toString() {
             return "Holder{" +
@@ -261,7 +253,21 @@ class PagesLoader {
         }
     }
 
-    private class RenderRange {
+    private static class GridSize {
+        int rows;
+        int cols;
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "GridSize{" +
+                    "rows=" + rows +
+                    ", cols=" + cols +
+                    '}';
+        }
+    }
+
+    private static class RenderRange {
         int page;
         GridSize gridSize;
         Holder leftTop;
@@ -274,6 +280,7 @@ class PagesLoader {
             this.rightBottom = new Holder();
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "RenderRange{" +
@@ -281,19 +288,6 @@ class PagesLoader {
                     ", gridSize=" + gridSize +
                     ", leftTop=" + leftTop +
                     ", rightBottom=" + rightBottom +
-                    '}';
-        }
-    }
-
-    private class GridSize {
-        int rows;
-        int cols;
-
-        @Override
-        public String toString() {
-            return "GridSize{" +
-                    "rows=" + rows +
-                    ", cols=" + cols +
                     '}';
         }
     }

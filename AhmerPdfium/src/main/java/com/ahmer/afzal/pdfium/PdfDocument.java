@@ -18,7 +18,6 @@ public class PdfDocument {
     /*package*/ final Map<Integer, Long> mNativeSearchHandlePtr = new ArrayMap<>();
     /*package*/ long mNativeDocPtr;
     /*package*/ ParcelFileDescriptor parcelFileDescriptor;
-    /*package*/ long mNativeSearchPtr;
 
     /*package*/ PdfDocument() {
     }

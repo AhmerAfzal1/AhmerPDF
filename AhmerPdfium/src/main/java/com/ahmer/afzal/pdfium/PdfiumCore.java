@@ -19,6 +19,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("ALL")
 public class PdfiumCore {
 
     private static final String TAG = PdfiumCore.class.getName();
@@ -246,7 +247,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Get page width in pixels. <br>
+     * Get page width in pixels. 
      * This method requires page to be opened.
      */
     public int getPageWidth(PdfDocument doc, int index) {
@@ -260,7 +261,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Get page height in pixels. <br>
+     * Get page height in pixels. 
      * This method requires page to be opened.
      */
     public int getPageHeight(PdfDocument doc, int index) {
@@ -274,7 +275,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Get page width in PostScript points (1/72th of an inch).<br>
+     * Get page width in PostScript points (1/72th of an inch).
      * This method requires page to be opened.
      */
     public int getPageWidthPoint(PdfDocument doc, int index) {
@@ -288,7 +289,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Get page height in PostScript points (1/72th of an inch).<br>
+     * Get page height in PostScript points (1/72th of an inch).
      * This method requires page to be opened.
      */
     public int getPageHeightPoint(PdfDocument doc, int index) {
@@ -302,7 +303,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Get size of page in pixels.<br>
+     * Get size of page in pixels.
      * This method does not require given page to be opened.
      */
     public Size getPageSize(PdfDocument doc, int index) {
@@ -312,7 +313,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Render page fragment on {@link Surface}.<br>
+     * Render page fragment on {@link Surface}.
      * Page must be opened before rendering.
      */
     public void renderPage(PdfDocument doc, Surface surface, int pageIndex, int startX, int startY, int drawSizeX, int drawSizeY) {
@@ -320,7 +321,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Render page fragment on {@link Surface}. This method allows to render annotations.<br>
+     * Render page fragment on {@link Surface}. This method allows to render annotations.
      * Page must be opened before rendering.
      */
     public void renderPage(PdfDocument doc, Surface surface, int pageIndex, int startX, int startY, int drawSizeX, int drawSizeY, boolean renderAnnot) {
@@ -329,7 +330,7 @@ public class PdfiumCore {
                 //nativeRenderPage(doc.mNativePagesPtr.get(pageIndex), surface, mCurrentDpi);
                 nativeRenderPage(doc.mNativePagesPtr.get(pageIndex), surface, mCurrentDpi, startX, startY, drawSizeX, drawSizeY, renderAnnot);
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -339,23 +340,22 @@ public class PdfiumCore {
     }
 
     /**
-     * Render page fragment on {@link Bitmap}.<br>
+     * Render page fragment on {@link Bitmap}.
      * Page must be opened before rendering.
-     * <p>
+     * 
      * Supported bitmap configurations:
-     * <ul>
-     * <li>ARGB_8888 - best quality, high memory usage, higher possibility of OutOfMemoryError
-     * <li>RGB_565 - little worse quality, twice less memory usage
-     * </ul>
+     * 
+     * ARGB_8888 - best quality, high memory usage, higher possibility of OutOfMemoryError
+     * RGB_565 - little worse quality, twice less memory usage
      */
     public void renderPageBitmap(PdfDocument doc, Bitmap bitmap, int pageIndex, int startX, int startY, int drawSizeX, int drawSizeY) {
         renderPageBitmap(doc, bitmap, pageIndex, startX, startY, drawSizeX, drawSizeY, false);
     }
 
     /**
-     * Render page fragment on {@link Bitmap}. This method allows to render annotations.<br>
+     * Render page fragment on {@link Bitmap}. This method allows to render annotations.
      * Page must be opened before rendering.
-     * <p>
+     * 
      * For more info see {@link PdfiumCore#renderPageBitmap(PdfDocument, Bitmap, int, int, int, int, int)}
      */
     public void renderPageBitmap(PdfDocument doc, Bitmap bitmap, int pageIndex, int startX, int startY, int drawSizeX, int drawSizeY, boolean renderAnnot) {
@@ -363,7 +363,7 @@ public class PdfiumCore {
             try {
                 nativeRenderPageBitmap(doc.mNativePagesPtr.get(pageIndex), bitmap, mCurrentDpi, startX, startY, drawSizeX, drawSizeY, renderAnnot);
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -569,7 +569,7 @@ public class PdfiumCore {
             try {
                 return nativeTextCountChars(doc.mNativeTextPagesPtr.get(textPageIndex));
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -593,7 +593,7 @@ public class PdfiumCore {
                 }
                 return new String(bytes, "UTF-16LE");
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -608,7 +608,7 @@ public class PdfiumCore {
             try {
                 return (char) nativeTextGetUnicode(doc.mNativeTextPagesPtr.get(textPageIndex), index);
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -629,7 +629,7 @@ public class PdfiumCore {
                 r.top = (float) o[3];
                 return r;
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -644,7 +644,7 @@ public class PdfiumCore {
             try {
                 return nativeTextGetCharIndexAtPos(doc.mNativeTextPagesPtr.get(textPageIndex), x, y, xTolerance, yTolerance);
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -659,7 +659,7 @@ public class PdfiumCore {
             try {
                 return nativeTextCountRects(doc.mNativeTextPagesPtr.get(textPageIndex), start_index, count);
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -680,7 +680,7 @@ public class PdfiumCore {
                 r.bottom = (float) o[3];
                 return r;
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");
@@ -704,7 +704,7 @@ public class PdfiumCore {
                 }
                 return new String(bytes, "UTF-16LE");
             } catch (NullPointerException e) {
-                Log.e(TAG, "mContext may be null");
+                Log.e(TAG, "Context may be null");
                 e.printStackTrace();
             } catch (Exception e) {
                 Log.e(TAG, "Exception throw from native");

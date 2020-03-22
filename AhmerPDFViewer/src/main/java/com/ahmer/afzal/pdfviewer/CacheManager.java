@@ -80,7 +80,6 @@ class CacheManager {
             while (thumbnails.size() >= THUMBNAILS_CACHE_SIZE) {
                 thumbnails.remove(0).getRenderedBitmap().recycle();
             }
-
             // Then add thumbnail
             addWithoutDuplicates(thumbnails, part);
         }
@@ -89,7 +88,6 @@ class CacheManager {
 
     public boolean upPartIfContained(int page, RectF pageRelativeBounds, int toOrder) {
         PagePart fakePart = new PagePart(page, null, pageRelativeBounds, false, 0);
-
         PagePart found;
         synchronized (passiveActiveLock) {
             if ((found = find(passiveCache, fakePart)) != null) {
@@ -98,7 +96,6 @@ class CacheManager {
                 activeCache.offer(found);
                 return true;
             }
-
             return find(activeCache, fakePart) != null;
         }
     }
@@ -173,5 +170,4 @@ class CacheManager {
             return part1.getCacheOrder() > part2.getCacheOrder() ? 1 : -1;
         }
     }
-
 }

@@ -105,7 +105,6 @@ class PdfFile {
         } else {
             pagesCount = pdfiumCore.getPageCount(pdfDocument);
         }
-
         for (int i = 0; i < pagesCount; i++) {
             Size pageSize = pdfiumCore.getPageSize(pdfDocument, documentPage(i));
             if (pageSize.getWidth() > originalMaxWidthPageSize.getWidth()) {
@@ -130,7 +129,6 @@ class PdfFile {
         PageSizeCalculator calculator = new PageSizeCalculator(pageFitPolicy, originalMaxWidthPageSize, originalMaxHeightPageSize, viewSize, fitEachPage);
         maxWidthPageSize = calculator.getOptimalMaxWidthPageSize();
         maxHeightPageSize = calculator.getOptimalMaxHeightPageSize();
-
         for (Size size : originalPageSizes) {
             pageSizes.add(calculator.calculate(size));
         }
@@ -169,6 +167,10 @@ class PdfFile {
 
     public float getMaxPageWidth() {
         return getMaxPageSize().getWidth();
+    }
+
+    public float getMaxPageWidth(int index) {
+        return Math.max(getPageSize(index).getWidth(), getMaxPageSize().getWidth());
     }
 
     public float getMaxPageHeight() {
@@ -342,7 +344,6 @@ class PdfFile {
         if (pdfiumCore != null && pdfDocument != null) {
             pdfiumCore.closeDocument(pdfDocument);
         }
-
         pdfDocument = null;
         originalUserPages = null;
     }
@@ -380,7 +381,6 @@ class PdfFile {
                 documentPage = originalUserPages[userPage];
             }
         }
-
         if (documentPage < 0 || userPage >= getPagesCount()) {
             return -1;
         }

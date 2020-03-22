@@ -1,12 +1,10 @@
 package com.ahmer.ahmerpdf;
 
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -32,6 +30,7 @@ import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.Constants;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
+import com.ahmer.afzal.utils.SharedPreferencesUtil;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -40,13 +39,12 @@ import java.util.Objects;
 
 public class PdfActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener, View.OnClickListener {
     private static final String TAG = PdfActivity.class.getSimpleName();
-    private static final String sPreference = "PdfActivityRememberLastPage";
     private static final String SAMPLE_FILE = "grammar.pdf";
     private static boolean isHorizontal = false;
     private int totalPages = 0;
     private ProgressBar mProgressBar;
     private PDFView pdfView;
-    private SharedPreferences sharedPreferences;
+    private SharedPreferencesUtil pref;
     private boolean isNightMode = false;
     private ImageView nightModeIV;
     private TextView tvFileName;
@@ -57,7 +55,9 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pdf);
-        /*MobileAds.initialize(getApplicationContext(), getResources().getString(R.string.banner_ad_unit_id));
+        pref = new SharedPreferencesUtil(this);
+        /*
+        MobileAds.initialize(getApplicationContext(), getResources().getString(R.string.banner_ad_unit_id));
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
@@ -91,7 +91,8 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 super.onAdLoaded();
                 Log.i(TAG, "onAdLoaded");
             }
-        });*/
+        });
+        */
         mProgressBar = findViewById(R.id.pdfProgressBar);
         pdfView = findViewById(R.id.pdfView);
         nightModeIV = findViewById(R.id.nightModeIV);
@@ -134,7 +135,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     private void displayFromAsset(boolean flag) {
         pdfView.setBackgroundColor(Color.GRAY);
         pdfView.fromAsset(SAMPLE_FILE)
-                .defaultPage(LoadInt())
+                .defaultPage(pref.loadIntSharedPreference(SAMPLE_FILE))
                 .onLoad(this)
                 .onPageChange(this)
                 .onPageScroll((page, positionOffset) -> Log.d(TAG, "onPageScrolled: Page " + page + " PositionOffset " + positionOffset))
@@ -150,7 +151,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                     Log.v(TAG, "onPageError while Loading. " + t);
                     Log.v(TAG, "onPageError cannot load page " + page);
                 })
-                .onRender(nbPages -> pdfView.fitToWidth(LoadInt()))
+                .onRender(nbPages -> pdfView.fitToWidth(pref.loadIntSharedPreference(SAMPLE_FILE)))
                 .onTap(e -> true)
                 .fitEachPage(true)
                 .nightMode(isNightMode)
@@ -194,9 +195,8 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
 
     @Override
     public void onPageChanged(int page, int pageCount) {
-        SaveInt(page);
+        pref.saveSharedPreferences(SAMPLE_FILE, page);
         tvFileName.setText(String.format("%s %s of %s", "Page", page + 1, pageCount));
-        //setTitle(String.format("%s %s of %s", "Page", page + 1, pageCount));
     }
 
     @Override
@@ -314,18 +314,6 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         }
         return super.onKeyDown(keyCode, event);
     }*/
-
-    private void SaveInt(int value) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(sPreference, value);
-        editor.apply();
-    }
-
-    private int LoadInt() {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        return sharedPreferences.getInt(sPreference, 0);
-    }
 
     public void onPointerCaptureChanged(boolean hasCapture) {
 

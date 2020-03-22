@@ -1,5 +1,7 @@
 package com.ahmer.afzal.pdfium.util;
 
+import androidx.annotation.NonNull;
+
 public class Size {
 
     private final int width;
@@ -33,6 +35,7 @@ public class Size {
         return false;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return width + "x" + height;
