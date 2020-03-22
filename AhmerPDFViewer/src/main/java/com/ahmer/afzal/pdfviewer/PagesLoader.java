@@ -173,11 +173,9 @@ class PagesLoader {
                 break;
             }
         }
-
     }
 
-    private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol,
-                         int nbOfPartsLoadable) {
+    private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol, int nbOfPartsLoadable) {
         int loaded = 0;
         for (int row = firstRow; row <= lastRow; row++) {
             for (int col = firstCol; col <= lastCol; col++) {
@@ -235,7 +233,6 @@ class PagesLoader {
         cacheOrder = 1;
         xOffset = -MathUtils.max(pdfView.getCurrentXOffset(), 0);
         yOffset = -MathUtils.max(pdfView.getCurrentYOffset(), 0);
-
         loadVisible();
     }
 

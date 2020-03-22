@@ -4,7 +4,7 @@ apply plugin: 'com.novoda.bintray-release'
 publish {
     def groupProjectID = 'com.github.ahmerafzal1'
     def artifactProjectID = 'AhmerPDFViewer'
-    def publishVersionID = '2.6.7'
+    def publishVersionID = '2.6.8'
 
     userOrg = 'ahmerafzal'
     repoName = 'maven'
@@ -23,14 +23,14 @@ android {
         minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
-        versionName "2.6.7"
+        versionName "2.6.8"
         consumerProguardFiles 'consumer-rules.pro'
     }
-    allprojects {
-        tasks.withType(Javadoc) {
-            options.addStringOption('Xdoclint:none', '-quiet')
-            options.addStringOption('encoding', 'UTF-8')
-        }
+    tasks.withType(Javadoc).all {
+        enabled = false
+    }
+    lintOptions {
+        abortOnError false
     }
     buildTypes {
         release {

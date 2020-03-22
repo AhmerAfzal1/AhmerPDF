@@ -647,8 +647,7 @@ public class PDFView extends RelativeLayout {
         // Check if bitmap is in the screen
         float translationX = currentXOffset + localTranslationX;
         float translationY = currentYOffset + localTranslationY;
-        if (translationX + dstRect.left >= getWidth() || translationX + dstRect.right <= 0 ||
-                translationY + dstRect.top >= getHeight() || translationY + dstRect.bottom <= 0) {
+        if (translationX + dstRect.left >= getWidth() || translationX + dstRect.right <= 0 || translationY + dstRect.top >= getHeight() || translationY + dstRect.bottom <= 0) {
             canvas.translate(-localTranslationX, -localTranslationY);
             return;
         }

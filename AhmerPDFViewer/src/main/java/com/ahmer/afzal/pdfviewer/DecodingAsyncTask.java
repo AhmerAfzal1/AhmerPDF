@@ -29,19 +29,19 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
         this.pdfiumCore = pdfiumCore;
     }
 
+    @SuppressLint("WrongThread")
     @Override
     protected Throwable doInBackground(Void... params) {
         try {
             PDFView pdfView = pdfViewReference.get();
             if (pdfView != null) {
-                @SuppressLint("WrongThread") PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
+                PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
                 pdfFile = new PdfFile(pdfiumCore, pdfDocument, pdfView.getPageFitPolicy(), getViewSize(pdfView), userPages,
                         pdfView.isSwipeVertical(), pdfView.getSpacingPx(), pdfView.isAutoSpacingEnabled(), pdfView.isFitEachPage());
                 return null;
             } else {
                 return new NullPointerException("pdfView == null");
             }
-
         } catch (Throwable t) {
             return t;
         }
