@@ -205,6 +205,10 @@ public class PDFView extends RelativeLayout {
      */
     private boolean pageFling = true;
     /**
+     * autoDispose == true resource will free when 'onDetachedFromWindow'
+     */
+    private boolean autoDispose = true;
+    /**
      * Pages numbers used when calling onDrawAllListener
      */
     private List<Integer> onDrawPagesNums = new ArrayList<>(10);
@@ -220,8 +224,22 @@ public class PDFView extends RelativeLayout {
     /**
      * Construct the initial view
      */
+    public PDFView(Context context, boolean autoDispose, AttributeSet set) {
+        super(context, set);
+        this.autoDispose = autoDispose;
+        initPDFView(context);
+    }
+
+    /**
+     * Construct the initial view
+     */
     public PDFView(Context context, AttributeSet set) {
         super(context, set);
+        initPDFView(context);
+    }
+
+    private void initPDFView(Context context) {
+        renderingHandlerThread = new HandlerThread("PDF renderer");
         if (isInEditMode()) {
             return;
         }
@@ -234,12 +252,6 @@ public class PDFView extends RelativeLayout {
         debugPaint.setStyle(Style.STROKE);
         pdfiumCore = new PdfiumCore(context);
         setWillNotDraw(false);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        renderingHandlerThread = new HandlerThread("PDF renderer");
     }
 
     ScrollHandle getScrollHandle() {
@@ -438,6 +450,13 @@ public class PDFView extends RelativeLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+        if (this.autoDispose) {
+            this.dispose();
+        }
+        super.onDetachedFromWindow();
+    }
+
+    public void dispose() {
         recycle();
         if (renderingHandlerThread != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -447,7 +466,6 @@ public class PDFView extends RelativeLayout {
             }
             renderingHandlerThread = null;
         }
-        super.onDetachedFromWindow();
     }
 
     @Override
