@@ -56,43 +56,6 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pdf);
         pref = new SharedPreferencesUtil(this);
-        /*
-        MobileAds.initialize(getApplicationContext(), getResources().getString(R.string.banner_ad_unit_id));
-        AdView mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-        mAdView.setAdListener(new AdListener() {
-            @Override
-            public void onAdClosed() {
-                super.onAdClosed();
-                Log.i(TAG, "onAdClosed");
-            }
-
-            @Override
-            public void onAdFailedToLoad(int i) {
-                super.onAdFailedToLoad(i);
-                Log.i(TAG, "onAdFailedToLoad");
-            }
-
-            @Override
-            public void onAdLeftApplication() {
-                super.onAdLeftApplication();
-                Log.i(TAG, "onAdLeftApplication");
-            }
-
-            @Override
-            public void onAdOpened() {
-                super.onAdOpened();
-                Log.i(TAG, "onAdOpened");
-            }
-
-            @Override
-            public void onAdLoaded() {
-                super.onAdLoaded();
-                Log.i(TAG, "onAdLoaded");
-            }
-        });
-        */
         mProgressBar = findViewById(R.id.pdfProgressBar);
         pdfView = findViewById(R.id.pdfView);
         nightModeIV = findViewById(R.id.nightModeIV);
@@ -128,8 +91,6 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 //pdfView.startSearch(s.toString());
             }
         });
-
-        displayFromAsset(isHorizontal);
     }
 
     private void displayFromAsset(boolean flag) {
@@ -211,9 +172,10 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         printBookmarksTree(pdfView.getTableOfContents(), "-");
         totalPages = nbPages;
         mProgressBar.setVisibility(View.GONE);
-
-        // pdfView.startSearch("Lahore", true, true);
-        //Log.v(TAG, "Search Word: " + pdfView.getSearchLength());
+        /*
+        pdfView.startSearch("Lahore", true, true);
+        Log.v(TAG, "Search Word: " + pdfView.getSearchLength());
+        */
     }
 
     private void printBookmarksTree(List<PdfDocument.Bookmark> tree, String sep) {
@@ -291,7 +253,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 AlertDialog alertDialog = builderAlert.create();
                 alertDialog.show();
                 TextView messageView = alertDialog.findViewById(android.R.id.message);
-                messageView.setTextColor(Color.BLACK);
+                Objects.requireNonNull(messageView).setTextColor(Color.BLACK);
                 messageView.setTextSize(16);
                 // messageView.setTypeface(typeface);
             default:
@@ -299,7 +261,21 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-    /*@Override
+    @Override
+    protected void onResume() {
+        super.onResume();
+        displayFromAsset(isHorizontal);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        pdfView.recycle();
+        pdfView = null;
+    }
+
+    /*
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
@@ -313,7 +289,8 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 return true;
         }
         return super.onKeyDown(keyCode, event);
-    }*/
+    }
+    */
 
     public void onPointerCaptureChanged(boolean hasCapture) {
 
