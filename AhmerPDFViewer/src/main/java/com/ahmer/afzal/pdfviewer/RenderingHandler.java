@@ -47,13 +47,23 @@ class RenderingHandler extends Handler {
             final PagePart part = proceed(task);
             if (part != null) {
                 if (running) {
-                    pdfView.post(() -> pdfView.onBitmapRendered(part));
+                    pdfView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            pdfView.onBitmapRendered(part);
+                        }
+                    });
                 } else {
                     part.getRenderedBitmap().recycle();
                 }
             }
         } catch (final PageRenderingException ex) {
-            pdfView.post(() -> pdfView.onPageError(ex));
+            pdfView.post(new Runnable() {
+                @Override
+                public void run() {
+                    pdfView.onPageError(ex);
+                }
+            });
         }
     }
 

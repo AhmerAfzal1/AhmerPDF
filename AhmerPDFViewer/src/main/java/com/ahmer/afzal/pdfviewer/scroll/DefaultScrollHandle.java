@@ -29,7 +29,12 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     private float currentPos;
 
     private Handler handler = new Handler();
-    private Runnable hidePageScrollerRunnable = this::hide;
+    private Runnable hidePageScrollerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            hide();
+        }
+    };
 
     public DefaultScrollHandle(Context context) {
         this(context, false);
