@@ -19,5 +19,13 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep class com.shockwave.**
--keepclassmembers class com.shockwave.** { *; }
+-dontwarn org.**
+-dontwarn com.**
+-dontwarn java.**
+-dontwarn javax.**
+-dontwarn sun.**
+
+-keep class com.ahmer.afzal.pdfium.*.* { *; }
+-keepclassmembers class com.ahmer.afzal.pdfium.*.* { *; }
+-keep class com.ahmer.afzal.pdfviewer.*.* { *; }
+-keepclassmembers class com.ahmer.afzal.pdfviewer.*.* { *; }

@@ -1,66 +1,16 @@
 <resources>
     <string name="app_name">AhmerPDF</string>
-    <string name="action_settings_string">Settings</string>
 
     <!-- Miscellaneous strings -->
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="pick_file">Pick file</string>
-    <string name="attention">Attention Please!</string>
     <string name="attention_info">Document Info</string>
-    <string name="enter_password">Password</string>
-    <string name="pdf_protected_title">This file is protected</string>
-    <string name="pdf_protected_msg">Please enter the password \nto open PDF file</string>
-    <string name="open_pdf">Open</string>
-    <string name="exit_pdf">Exit</string>
-    <string name="logo">Book Logo</string>
-    <string name="skip">Skip</string>
-    <string name="rose_pdf_view">Rose PDF Viewer</string>
     <string name="error_loading_pdf">Error loading PDF document</string>
 
     <!-- AhmerActivity strings -->
-    <string name="author_ahmer">App Developed By</string>
-    <string name="name">Name:</string>
-    <string name="email_address">Email:</string>
-    <string name="qq">QQ ID:</string>
-    <string name="get_app">App Link:</string>
-    <string name="facebook">Facebook:</string>
-    <string name="twitter">Twitter:</string>
-    <string name="github">Github:</string>
-    <string name="blogspot">Blogspot:</string>
-    <string name="whatsApp">WhatsApp:</string>
 
-    <string name="ahmer">Ahmer Afzal</string>
-    <string name="email"><a href="mailto:ahmerafzal@yahoo.com">ahmerafzal@yahoo.com</a></string>
-    <string name="email_2"><a href="mailto:ahmerafzal1@gmail.com">ahmerafzal1@gmail.com</a></string>
-    <string name="qq_id_ahmer">180989639</string>
-    <string name="get_app_url">http://bit.do/rose-pdf-viewer</string>
-    <string name="ahmer_facebook_graph_link">https://graph.facebook.com/v3.0/100025917301113/picture?type=large</string>
-    <string name="ahmer_facebook_url">https://www.facebook.com/mr.ahmerafzal</string>
-    <string name="ahmer_twitter_url">https://twitter.com/mrahmerafzal</string>
-    <string name="ahmer_github_url">https://github.com/AhmerAfzal1</string>
-    <string name="ahmer_blogspot_url">http://ahmerafzal1.blogspot.com</string>
-
-    <string name="meet_on_social_media_and_web">Meet on Social Media and Web</string>
-    <string name="whatsApp_not_installed">WhatsApp is not installed</string>
-    <string name="share_app_email">Send App via Email</string>
     <string name="text_copied">Text is Copied</string>
 
     <!-- Log strings -->
-    <string name="adLoaded">onAdLoaded: Ad loading…</string>
-    <string name="adFailedToLoad">onAdFailedToLoad : Failed to load Ad, Error code is: %d</string>
-    <string name="adFailedToLoad_ERROR_CODE_INTERNAL_ERROR">Something happened internally; for instance, an invalid response was received from the ad server.</string>
-    <string name="adFailedToLoad_ERROR_CODE_INVALID_REQUEST">The ad request was invalid; for instance, the ad unit ID was incorrect.</string>
-    <string name="adFailedToLoad_ERROR_CODE_NETWORK_ERROR">The ad request was unsuccessful due to network connectivity.</string>
-    <string name="adFailedToLoad_ERROR_CODE_NO_FILL">The ad request was successful, but no ad was returned due to lack of ad inventory.</string>
-    <string name="adOpened">onAdOpened: Ad opening… user tap or click the ad</string>
-    <string name="adLeftApplication">onAdLeftApplication: Ad left the App</string>
-    <string name="adClosed">onAdClosed: Ad closed</string>
 
-    <string name="cannot_delete">Can not delete file in your SD Card</string>
-    <string name="cannot_share">Can not share file from your SD Card</string>
-    <string name="file_delete">File deleted</string>
-    <string name="do_you_want_delete">Do you really want to delete this file?</string>
     <string name="please_enter_number">Please enter number page</string>
     <string name="enter_number">Enter page number</string>
     <string name="go_to">Go To</string>
@@ -68,32 +18,9 @@
     <!-- Headings -->
     <string name="goto_page">Go To Page</string>
 
-    <string name="switch_view">Switch view</string>
-    <string name="show_more_info">Show more info</string>
-    <string name="share_file">Share file</string>
-    <string name="delete_file">Delete file</string>
-    <string name="share_with">Share with</string>
-    <string name="no_pdf_found_in_this_device">No PDF found in this device</string>
     <string name="no_page_like">No page like in this document</string>
-    <string name="file_information">File Information</string>
-    <string name="file_name">File Name:</string>
-    <string name="file_path">File Path:</string>
-    <string name="file_size">File Size:</string>
 
-    <string name="about">About</string>
-    <string name="loading">Loading…</string>
-    <string name="permission_required">Permission required</string>
-    <string name="application_can_t_scan_all_pdf_files_in_your_storage_please_accept_permissions_for_application_again">Application can\'t scan all pdf files in your storage. Please accept permissions for application again.</string>
-    <string name="rescan">Rescan</string>
     <string name="search_file_name">Search file name</string>
     <string name="imageDescription">ImageDescription</string>
-    <string name="please_wait">Please Wait</string>
-    <string name="rose_corporation">Rose Corporation</string>
-    <string name="copyright">Copyright © 2008 – 2020, Rose Corporation.</string>
-    <string name="ahmer_afzal">Ahmer Afzal</string>
-    <string name="version">Version </string>
 
-    <string name="no_internet_connection">Please check your Internet connection</string>
-    <string name="connectedInternet">Connected to Internet</string>
-    <string name="sampleText">Abc</string>
 </resources>
