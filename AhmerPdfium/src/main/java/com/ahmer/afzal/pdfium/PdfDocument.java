@@ -4,7 +4,8 @@ import android.annotation.TargetApi;
 import android.graphics.RectF;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import android.util.ArrayMap;
+
+import androidx.collection.ArrayMap;
 
 import java.util.ArrayList;
 import java.util.List;

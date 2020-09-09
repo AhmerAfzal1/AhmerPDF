@@ -20,3 +20,6 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+project.ext.set("pdfViewerVersion", '2.7.1')
+project.ext.set("pdfiumVersion", '7.6.0')

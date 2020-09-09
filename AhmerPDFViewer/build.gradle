@@ -3,31 +3,36 @@ apply from: 'installviewer.gradle'
 apply from: 'bintrayviewer.gradle'
 
 android {
+    
     compileSdkVersion 30
-    buildToolsVersion '30.0.1'
+    buildToolsVersion '30.0.2'
 
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
-        versionName "2.7.1"
+        versionName project.pdfViewerVersion
         consumerProguardFiles 'consumer-rules.pro'
     }
+
     tasks.withType(Javadoc).all {
-        enabled = false
+        enabled false
     }
+
     lintOptions {
         abortOnError false
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
 }
