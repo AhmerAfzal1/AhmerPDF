@@ -1,0 +1,32 @@
+package com.ahmer.afzal.pdfium.search;
+
+import android.graphics.RectF;
+
+public interface TextSearchContext {
+
+    void prepareSearch();
+
+    int getPageIndex();
+
+    String getQuery();
+
+    boolean isMatchCase();
+
+    boolean isMatchWholeWord();
+
+    int countResult();
+
+    boolean hasNext();
+
+    boolean hasPrev();
+
+    int getCurrentPos();
+
+    RectF searchNext();
+
+    RectF searchPrev();
+
+    void startSearch();
+
+    void stopSearch();
+}

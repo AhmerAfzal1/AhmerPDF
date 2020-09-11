@@ -9,6 +9,8 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.Surface;
 
+import com.ahmer.afzal.pdfium.search.FPDFTextSearchContext;
+import com.ahmer.afzal.pdfium.search.TextSearchContext;
 import com.ahmer.afzal.pdfium.util.Size;
 
 import java.io.FileDescriptor;
@@ -155,6 +157,31 @@ public class PdfiumCore {
 
     private native void nativeFindClose(long searchHandlePtr);
 
+    ///////////////////////////////////////
+    // PDF TextPage api
+    ///////////
+    private native long nativeLoadTextPage(long docPtr, int pageIndex);
+
+    private native long[] nativeLoadTextPages(long docPtr, int fromIndex, int toIndex);
+
+    private native int nativeTextGetBoundedTextLength(long textPagePtr, double left, double top, double right, double bottom);
+
+    ///////////////////////////////////////
+    // PDF Search API
+    ///////////////////////////////////////
+
+    private native long nativeSearchStart(long textPagePtr, String query, boolean matchCase, boolean matchWholeWord);
+
+    private native void nativeSearchStop(long searchHandlePtr);
+
+    private native boolean nativeSearchNext(long searchHandlePtr);
+
+    private native boolean nativeSearchPrev(long searchHandlePtr);
+
+    private native int nativeGetCharIndexOfSearchResult(long searchHandlePtr);
+
+    private native int nativeCountSearchResult(long searchHandlePtr);
+
     /**
      * Create new document from file
      */
@@ -247,7 +274,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Get page width in pixels. 
+     * Get page width in pixels.
      * This method requires page to be opened.
      */
     public int getPageWidth(PdfDocument doc, int index) {
@@ -261,7 +288,7 @@ public class PdfiumCore {
     }
 
     /**
-     * Get page height in pixels. 
+     * Get page height in pixels.
      * This method requires page to be opened.
      */
     public int getPageHeight(PdfDocument doc, int index) {
@@ -342,9 +369,9 @@ public class PdfiumCore {
     /**
      * Render page fragment on {@link Bitmap}.
      * Page must be opened before rendering.
-     * 
+     * <p>
      * Supported bitmap configurations:
-     * 
+     * <p>
      * ARGB_8888 - best quality, high memory usage, higher possibility of OutOfMemoryError
      * RGB_565 - little worse quality, twice less memory usage
      */
@@ -355,7 +382,7 @@ public class PdfiumCore {
     /**
      * Render page fragment on {@link Bitmap}. This method allows to render annotations.
      * Page must be opened before rendering.
-     * 
+     * <p>
      * For more info see {@link PdfiumCore#renderPageBitmap(PdfDocument, Bitmap, int, int, int, int, int)}
      */
     public void renderPageBitmap(PdfDocument doc, Bitmap bitmap, int pageIndex, int startX, int startY, int drawSizeX, int drawSizeY, boolean renderAnnot) {
@@ -712,5 +739,407 @@ public class PdfiumCore {
             }
             return null;
         }
+    }
+
+    ///////////////////////////////////////
+    // FPDF_TEXTPAGE api
+    ///////////
+
+    /**
+     * Prepare information about all characters in a page.
+     * Application must call FPDFText_ClosePage to release the text page information.
+     *
+     * @param pageIndex index of page.
+     * @return A handle to the text page information structure. NULL if something goes wrong.
+     */
+    public long prepareTextInfo(PdfDocument doc, int pageIndex) {
+        long textPagePtr;
+        textPagePtr = nativeLoadTextPage(doc.mNativeDocPtr, pageIndex);
+        if (validPtr(textPagePtr)) {
+            doc.mNativeTextPagesPtr.put(pageIndex, textPagePtr);
+        }
+        return textPagePtr;
+    }
+
+    /**
+     * Release all resources allocated for a text page information structure.
+     *
+     * @param pageIndex index of page.
+     */
+    public void releaseTextInfo(PdfDocument doc, int pageIndex) {
+        long textPagePtr;
+        textPagePtr = doc.mNativeTextPagesPtr.get(pageIndex);
+        if (validPtr(textPagePtr)) {
+            nativeCloseTextPage(textPagePtr);
+        }
+    }
+
+    /**
+     * Prepare information about all characters in a range of pages.
+     * Application must call FPDFText_ClosePage to release the text page information.
+     *
+     * @param fromIndex start index of page.
+     * @param toIndex   end index of page.
+     * @return list of handles to the text page information structure. NULL if something goes wrong.
+     */
+    public long[] prepareTextInfo(PdfDocument doc, int fromIndex, int toIndex) {
+        long[] textPagesPtr;
+        textPagesPtr = nativeLoadTextPages(doc.mNativeDocPtr, fromIndex, toIndex);
+        int pageIndex = fromIndex;
+        for (long page : textPagesPtr) {
+            if (pageIndex > toIndex) break;
+            if (validPtr(page)) {
+                doc.mNativeTextPagesPtr.put(pageIndex, page);
+            }
+            pageIndex++;
+        }
+
+        return textPagesPtr;
+    }
+
+    /**
+     * Release all resources allocated for a text page information structure.
+     *
+     * @param fromIndex start index of page.
+     * @param toIndex   end index of page.
+     */
+    public void releaseTextInfo(PdfDocument doc, int fromIndex, int toIndex) {
+        long textPagesPtr;
+        for (int i = fromIndex; i < toIndex + 1; i++) {
+            textPagesPtr = doc.mNativeTextPagesPtr.get(i);
+            if (validPtr(textPagesPtr)) {
+                nativeCloseTextPage(textPagesPtr);
+            }
+        }
+    }
+
+    private Long ensureTextPage(PdfDocument doc, int pageIndex) {
+        Long ptr = doc.mNativeTextPagesPtr.get(pageIndex);
+        if (!validPtr(ptr)) {
+            return prepareTextInfo(doc, pageIndex);
+        }
+        return ptr;
+    }
+
+    public int countCharactersOnPage(PdfDocument doc, int pageIndex) {
+        try {
+            Long ptr = ensureTextPage(doc, pageIndex);
+            return validPtr(ptr) ? nativeTextCountChars(ptr) : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Extract unicode text string from the page.
+     *
+     * @param pageIndex  index of page.
+     * @param startIndex Index for the start characters.
+     * @param length     Number of characters to be extracted.
+     * @return Number of characters written into the result buffer, including the trailing terminator.
+     */
+    public String extractCharacters(PdfDocument doc, int pageIndex, int startIndex, int length) {
+        try {
+            Long ptr = ensureTextPage(doc, pageIndex);
+            if (!validPtr(ptr)) {
+                return null;
+            }
+            short[] buf = new short[length + 1];
+
+            int r = nativeTextGetText(ptr, startIndex, length, buf);
+
+            byte[] bytes = new byte[(r - 1) * 2];
+            ByteBuffer bb = ByteBuffer.wrap(bytes);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+
+            for (int i = 0; i < r - 1; i++) {
+                short s = buf[i];
+                bb.putShort(s);
+            }
+
+            return new String(bytes, "UTF-16LE");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get Unicode of a character in a page.
+     *
+     * @param pageIndex index of page.
+     * @param index     Zero-based index of the character.
+     * @return The Unicode of the particular character. If a character is not encoded in Unicode, the return value will be zero.
+     */
+    public char extractCharacter(PdfDocument doc, int pageIndex, int index) {
+        try {
+            Long ptr = ensureTextPage(doc, pageIndex);
+            return validPtr(ptr) ? (char) nativeTextGetUnicode(ptr, index) : (char) 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get bounding box of a particular character.
+     *
+     * @param pageIndex index of page.
+     * @param index     Zero-based index of the character.
+     * @return the character position measured in PDF "user space".
+     */
+    public RectF measureCharacterBox(PdfDocument doc, int pageIndex, int index) {
+        try {
+            Long ptr = ensureTextPage(doc, pageIndex);
+            if (!validPtr(ptr)) {
+                return null;
+            }
+            double[] o = nativeTextGetCharBox(ptr, index);
+            RectF r = new RectF();
+            r.left = (float) o[0];
+            r.right = (float) o[1];
+            r.bottom = (float) o[2];
+            r.top = (float) o[3];
+            return r;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get the index of a character at or nearby a certain position on the page
+     *
+     * @param pageIndex  index of page.
+     * @param x          X position in PDF "user space".
+     * @param y          Y position in PDF "user space".
+     * @param xTolerance An x-axis tolerance value for character hit detection, in point unit.
+     * @param yTolerance A y-axis tolerance value for character hit detection, in point unit.
+     * @return The zero-based index of the character at, or nearby the point (x,y). If there is no character at or nearby the point, return value will be -1. If an error occurs, -3 will be returned.
+     */
+    public int getCharacterIndex(PdfDocument doc, int pageIndex, double x, double y, double xTolerance, double yTolerance) {
+        try {
+            Long ptr = ensureTextPage(doc, pageIndex);
+            return validPtr(ptr) ? nativeTextGetCharIndexAtPos(ptr, x, y, xTolerance, yTolerance) : -1;
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Count number of rectangular areas occupied by a segment of texts.
+     * <p>
+     * This function, along with FPDFText_GetRect can be used by applications to detect the position
+     * on the page for a text segment, so proper areas can be highlighted or something.
+     * FPDFTEXT will automatically merge small character boxes into bigger one if those characters
+     * are on the same line and use same font settings.
+     *
+     * @param pageIndex index of page.
+     * @param charIndex Index for the start characters.
+     * @param count     Number of characters.
+     * @return texts areas count.
+     */
+    public int countTextRect(PdfDocument doc, int pageIndex, int charIndex, int count) {
+        try {
+            Long ptr = ensureTextPage(doc, pageIndex);
+            return validPtr(ptr) ? nativeTextCountRects(ptr, charIndex, count) : -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    /**
+     * Get a rectangular area from the result generated by FPDFText_CountRects.
+     *
+     * @param pageIndex index of page.
+     * @param rectIndex Zero-based index for the rectangle.
+     * @return the text rectangle.
+     */
+    public RectF getTextRect(PdfDocument doc, int pageIndex, int rectIndex) {
+        try {
+            Long ptr = ensureTextPage(doc, pageIndex);
+            if (!validPtr(ptr)) {
+                return null;
+            }
+            double[] o = nativeTextGetRect(ptr, rectIndex);
+            RectF r = new RectF();
+            r.left = (float) o[0];
+            r.top = (float) o[1];
+            r.right = (float) o[2];
+            r.bottom = (float) o[3];
+            return r;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Extract unicode text within a rectangular boundary on the page.
+     * If the buffer is too small, as much text as will fit is copied into it.
+     *
+     * @param pageIndex index of page.
+     * @param rect      the text rectangle to extract.
+     * @return If buffer is NULL or buflen is zero, return number of characters (not bytes) of text
+     * present within the rectangle, excluding a terminating NUL.
+     * <p>
+     * Generally you should pass a buffer at least one larger than this if you want a terminating NUL,
+     * which will be provided if space is available. Otherwise, return number of characters copied
+     * into the buffer, including the terminating NUL  when space for it is available.
+     */
+    public String extractText(PdfDocument doc, int pageIndex, RectF rect) {
+        try {
+            Long ptr = ensureTextPage(doc, pageIndex);
+            if (!validPtr(ptr)) {
+                return null;
+            }
+
+            int length = nativeTextGetBoundedTextLength(ptr, rect.left, rect.top, rect.right, rect.bottom);
+            if (length <= 0) {
+                return null;
+            }
+
+            short[] buf = new short[length + 1];
+
+            int r = nativeTextGetBoundedText(ptr, rect.left, rect.top, rect.right, rect.bottom, buf);
+
+            byte[] bytes = new byte[(r - 1) * 2];
+            ByteBuffer bb = ByteBuffer.wrap(bytes);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+
+            for (int i = 0; i < r - 1; i++) {
+                short s = buf[i];
+                bb.putShort(s);
+            }
+            return new String(bytes, "UTF-16LE");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private boolean validPtr(Long ptr) {
+        return ptr != null && ptr != -1;
+    }
+
+    /**
+     * A handle class for the search context. stopSearch must be called to release this handle.
+     *
+     * @param pageIndex      index of page.
+     * @param query          A unicode match pattern.
+     * @param matchCase      match case
+     * @param matchWholeWord match the whole word
+     * @return A handle for the search context.
+     */
+    public TextSearchContext newPageSearch(PdfDocument doc, int pageIndex, String query, boolean matchCase, boolean matchWholeWord) {
+        return new FPDFTextSearchContext(doc, pageIndex, query, matchCase, matchWholeWord) {
+
+            private Long mSearchHandlePtr;
+
+            private int currentPos = -1;
+
+            @Override
+            public void prepareSearch() {
+
+                long textPage = prepareTextInfo(document, pageIndex);
+
+                if (hasSearchHandle(document, pageIndex)) {
+                    long sPtr = document.mNativeSearchHandlePtr.get(pageIndex);
+                    nativeSearchStop(sPtr);
+                }
+
+                this.mSearchHandlePtr = nativeSearchStart(textPage, query, matchCase, matchWholeWord);
+            }
+
+            @Override
+            public int countResult() {
+                if (validPtr(mSearchHandlePtr)) {
+                    return nativeCountSearchResult(mSearchHandlePtr);
+                }
+                return -1;
+            }
+
+            @Override
+            public int getCurrentPos() {
+                return currentPos;
+            }
+
+            @Override
+            public RectF searchNext() {
+                if (validPtr(mSearchHandlePtr)) {
+                    mHasNext = nativeSearchNext(mSearchHandlePtr);
+                    if (mHasNext) {
+                        int index = nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
+                        if (index > -1) {
+                            currentPos = index;
+                            return measureCharacterBox(document, this.getPageIndex(), index);
+                        } else {
+                            currentPos = -1;
+                        }
+                    }
+                }
+
+                currentPos = -1;
+                mHasNext = false;
+                return null;
+            }
+
+
+            @Override
+            public RectF searchPrev() {
+                if (validPtr(mSearchHandlePtr)) {
+                    mHasPrev = nativeSearchPrev(mSearchHandlePtr);
+                    if (mHasPrev) {
+                        int index = nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
+                        if (index > -1) {
+                            currentPos = index;
+                            return measureCharacterBox(document, this.getPageIndex(), index);
+                        } else {
+                            currentPos = -1;
+                        }
+                    }
+                }
+
+                currentPos = -1;
+                mHasPrev = false;
+                return null;
+            }
+
+            @Override
+            public void stopSearch() {
+                super.stopSearch();
+                currentPos = -1;
+                if (validPtr(mSearchHandlePtr)) {
+                    nativeSearchStop(mSearchHandlePtr);
+                    document.mNativeSearchHandlePtr.remove(getPageIndex());
+                }
+            }
+
+            @Override
+            public int getFirstCharIndex() {
+                if (validPtr(mSearchHandlePtr)) {
+                    return nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
+                } else {
+                    return -1;
+                }
+            }
+        };
+
+    }
+
+    public int getCurrentDpi() {
+        return mCurrentDpi;
+    }
+
+    public void setCurrentDpi(int d) {
+        mCurrentDpi = d;
+    }
+
+    public boolean hasPage(PdfDocument doc, int index) {
+        return doc.mNativePagesPtr.containsKey(index);
+    }
+
+    public boolean hasTextPage(PdfDocument doc, int index) {
+        return doc.mNativeTextPagesPtr.containsKey(index);
+    }
+
+    public boolean hasSearchHandle(PdfDocument doc, int index) {
+        return doc.mNativeSearchHandlePtr.containsKey(index);
     }
 }
