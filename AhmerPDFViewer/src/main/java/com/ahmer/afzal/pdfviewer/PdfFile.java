@@ -25,6 +25,7 @@ class PdfFile {
      * else the largest page fits and other pages scale relatively
      */
     private final boolean fitEachPage;
+    private final boolean isLandscape;
     private PdfDocument pdfDocument;
     private PdfiumCore pdfiumCore;
     private int pagesCount = 0;
@@ -57,6 +58,10 @@ class PdfFile {
      */
     private SizeF maxWidthPageSize = new SizeF(0, 0);
     /**
+     * True if dualPageMode is on
+     */
+    private boolean showTwoPages;
+    /**
      * True if scrolling is vertical, else it's horizontal
      */
     private boolean isVertical;
@@ -87,7 +92,8 @@ class PdfFile {
     private int[] originalUserPages;
 
     PdfFile(PdfiumCore pdfiumCore, PdfDocument pdfDocument, FitPolicy pageFitPolicy, Size viewSize, int[] originalUserPages,
-            boolean isVertical, int spacing, boolean autoSpacing, boolean fitEachPage) {
+            boolean showTwoPages, boolean isVertical, int spacing, boolean autoSpacing, boolean fitEachPage, boolean isLandscape) {
+        this.showTwoPages = showTwoPages;
         this.pdfiumCore = pdfiumCore;
         this.pdfDocument = pdfDocument;
         this.pageFitPolicy = pageFitPolicy;
@@ -96,6 +102,7 @@ class PdfFile {
         this.spacingPx = spacing;
         this.autoSpacing = autoSpacing;
         this.fitEachPage = fitEachPage;
+        this.isLandscape = isLandscape;
         setup(viewSize);
     }
 
@@ -130,7 +137,7 @@ class PdfFile {
         maxWidthPageSize = calculator.getOptimalMaxWidthPageSize();
         maxHeightPageSize = calculator.getOptimalMaxHeightPageSize();
         for (Size size : originalPageSizes) {
-            pageSizes.add(calculator.calculate(size));
+            pageSizes.add(calculator.calculate(size, showTwoPages, isLandscape));
         }
         if (autoSpacing) {
             prepareAutoSpacing(viewSize);

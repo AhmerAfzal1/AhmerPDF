@@ -1,5 +1,6 @@
 package com.ahmer.ahmerpdf;
 
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -95,10 +96,15 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
 
     private void displayFromAsset(boolean flag) {
         pdfView.setBackgroundColor(Color.GRAY);
+        boolean isLandscape = false;
+        int orientation = this.getResources().getConfiguration().orientation;
+        isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE;
         pdfView.fromAsset(SAMPLE_FILE)
                 .defaultPage(pref.loadIntSharedPreference(SAMPLE_FILE))
                 .onLoad(this)
                 .onPageChange(this)
+                .landscapeOrientation(isLandscape)
+                .dualPageMode(true)
                 .onPageScroll((page, positionOffset) -> Log.d(TAG, "onPageScrolled: Page " + page + " PositionOffset " + positionOffset))
                 .onError(t -> {
                     if (t instanceof PdfPasswordException) {
@@ -120,7 +126,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 .swipeHorizontal(flag)
                 .pageSnap(true) // snap pages to screen boundaries
                 .autoSpacing(true) // add dynamic spacing to fit each page on its own on the screen
-                .pageFling(false) // make a fling change only a single page like ViewPager
+                .pageFling(true) // make a fling change only a single page like ViewPager
                 .enableDoubletap(true)
                 .enableAnnotationRendering(true)
                 .password("5632")
@@ -168,7 +174,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     }
 
     @Override
-    public void loadComplete(int nbPages) {
+    public void loadComplete(int nbPages, float pageWidth, float pageHeight) {
         printBookmarksTree(pdfView.getTableOfContents(), "-");
         totalPages = nbPages;
         mProgressBar.setVisibility(View.GONE);

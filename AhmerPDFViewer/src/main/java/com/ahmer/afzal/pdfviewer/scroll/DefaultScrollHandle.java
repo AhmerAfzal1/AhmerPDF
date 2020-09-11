@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -27,8 +28,8 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     private boolean inverted;
     private PDFView pdfView;
     private float currentPos;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
-    private Handler handler = new Handler();
     private Runnable hidePageScrollerRunnable = new Runnable() {
         @Override
         public void run() {
@@ -135,6 +136,10 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             pos = getY();
             viewSize = getHeight();
             pdfViewSize = pdfView.getHeight();
+        } else if (pdfView.isOnDualPageMode()) {
+            pos = getX();
+            viewSize = getWidth() / 2;
+            pdfViewSize = pdfView.getWidth() / 2;
         } else {
             pos = getX();
             viewSize = getWidth();

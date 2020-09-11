@@ -906,4 +906,18 @@ JNI_FUNC(jint, PdfiumCore, nativeCountSearchResult)(JNI_ARGS, jlong searchHandle
     FPDF_SCHHANDLE search = reinterpret_cast<FPDF_SCHHANDLE>(searchHandlePtr);
     return FPDFText_GetSchCount(search);
 }
+
+JNI_FUNC(jobject, PdfiumCore, nativeDeviceCoordsToPage)(JNI_ARGS, jlong pagePtr, jint startX,
+                                                        jint startY, jint sizeX,
+                                                        jint sizeY, jint rotate, jint deviceX,
+                                                        jint deviceY) {
+    FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+    double pageX, pageY;
+
+    FPDF_DeviceToPage(page, startX, startY, sizeX, sizeY, rotate, deviceX, deviceY, &pageX, &pageY);
+
+    jclass clazz = env->FindClass("android/graphics/PointF");
+    jmethodID constructorID = env->GetMethodID(clazz, "<init>", "(FF)V");
+    return env->NewObject(clazz, constructorID, pageX, pageY);
+}
 }//extern C

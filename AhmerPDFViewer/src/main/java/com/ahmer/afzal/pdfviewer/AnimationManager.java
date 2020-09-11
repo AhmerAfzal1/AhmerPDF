@@ -22,7 +22,7 @@ class AnimationManager {
     private OverScroller scroller;
     private boolean flinging = false;
     private boolean pageFlinging = false;
-    private int animationSpeed = 200;
+    private long animationDuration = 400;
 
     public AnimationManager(PDFView pdfView) {
         this.pdfView = pdfView;
@@ -36,7 +36,7 @@ class AnimationManager {
         animation.setInterpolator(new DecelerateInterpolator());
         animation.addUpdateListener(xAnimation);
         animation.addListener(xAnimation);
-        animation.setDuration(animationSpeed);
+        animation.setDuration(animationDuration);
         animation.start();
     }
 
@@ -47,7 +47,7 @@ class AnimationManager {
         animation.setInterpolator(new DecelerateInterpolator());
         animation.addUpdateListener(yAnimation);
         animation.addListener(yAnimation);
-        animation.setDuration(animationSpeed);
+        animation.setDuration(animationDuration);
         animation.start();
     }
 
@@ -58,7 +58,7 @@ class AnimationManager {
         ZoomAnimation zoomAnim = new ZoomAnimation(centerX, centerY);
         animation.addUpdateListener(zoomAnim);
         animation.addListener(zoomAnim);
-        animation.setDuration(animationSpeed);
+        animation.setDuration(animationDuration);
         animation.start();
     }
 
@@ -110,6 +110,14 @@ class AnimationManager {
         if (pdfView.getScrollHandle() != null) {
             pdfView.getScrollHandle().hideDelayed();
         }
+    }
+
+    public void setAnimationDuration(long animationDuration) {
+        this.animationDuration = animationDuration;
+    }
+
+    public long getAnimationDuration() {
+        return animationDuration;
     }
 
     class XAnimation extends AnimatorListenerAdapter implements AnimatorUpdateListener {
