@@ -11,7 +11,7 @@ Add to _build.gradle_:
 
 or if you want to use more stable version:
  
-`implementation 'com.github.ahmerafzal1:AhmerPdfium:7.6.2''`
+`implementation 'com.github.ahmerafzal1:AhmerPdfium:7.6.3''`
 
 ## Include PDFView in your layout
 
