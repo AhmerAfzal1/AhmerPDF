@@ -3,6 +3,7 @@ package com.ahmer.afzal.pdfviewer.link;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import com.ahmer.afzal.pdfviewer.PDFView;
@@ -31,6 +32,9 @@ public class DefaultLinkHandler implements LinkHandler {
     private void handleUri(String uri) {
         Uri parsedUri = Uri.parse(uri);
         Intent intent = new Intent(Intent.ACTION_VIEW, parsedUri);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         Context context = pdfView.getContext();
         if (intent.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(intent);
