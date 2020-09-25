@@ -20,7 +20,8 @@ import static com.ahmer.afzal.pdfviewer.util.Constants.Pinch.MINIMUM_ZOOM;
  * This Manager takes care of moving the PDFView,
  * set its zoom track user actions.
  */
-class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
+class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener,
+        ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
 
     private PDFView pdfView;
     private AnimationManager animationManager;

@@ -87,7 +87,7 @@ public class PdfDocument {
         String title;
         long pageIdx;
         long mNativePtr;
-        private List<Bookmark> children = new ArrayList<>();
+        private final List<Bookmark> children = new ArrayList<>();
 
         public List<Bookmark> getChildren() {
             return children;
@@ -107,9 +107,9 @@ public class PdfDocument {
     }
 
     public static class Link {
-        private RectF bounds;
-        private Integer destPageIdx;
-        private String uri;
+        private final RectF bounds;
+        private final Integer destPageIdx;
+        private final String uri;
 
         public Link(RectF bounds, Integer destPageIdx, String uri) {
             this.bounds = bounds;

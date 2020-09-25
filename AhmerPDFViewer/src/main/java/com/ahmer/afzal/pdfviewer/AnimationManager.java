@@ -112,12 +112,12 @@ class AnimationManager {
         }
     }
 
-    public void setAnimationDuration(long animationDuration) {
-        this.animationDuration = animationDuration;
-    }
-
     public long getAnimationDuration() {
         return animationDuration;
+    }
+
+    public void setAnimationDuration(long animationDuration) {
+        this.animationDuration = animationDuration;
     }
 
     class XAnimation extends AnimatorListenerAdapter implements AnimatorUpdateListener {

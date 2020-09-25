@@ -6,12 +6,12 @@ import com.ahmer.afzal.pdfium.PdfDocument;
 
 public class LinkTapEvent {
 
-    private float originalX;
-    private float originalY;
-    private float documentX;
-    private float documentY;
-    private RectF mappedLinkRect;
-    private PdfDocument.Link link;
+    private final float originalX;
+    private final float originalY;
+    private final float documentX;
+    private final float documentY;
+    private final RectF mappedLinkRect;
+    private final PdfDocument.Link link;
 
     public LinkTapEvent(float originalX, float originalY, float documentX, float documentY, RectF mappedLinkRect, PdfDocument.Link link) {
         this.originalX = originalX;

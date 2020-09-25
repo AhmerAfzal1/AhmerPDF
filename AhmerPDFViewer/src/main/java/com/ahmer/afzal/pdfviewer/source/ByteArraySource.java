@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class ByteArraySource implements DocumentSource {
 
-    private byte[] data;
+    private final byte[] data;
 
     public ByteArraySource(byte[] data) {
         this.data = data;

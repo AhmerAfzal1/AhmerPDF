@@ -8,12 +8,12 @@ public class PageSizeCalculator {
     private final Size originalMaxWidthPageSize;
     private final Size originalMaxHeightPageSize;
     private final Size viewSize;
-    private FitPolicy fitPolicy;
+    private final FitPolicy fitPolicy;
     private SizeF optimalMaxWidthPageSize;
     private SizeF optimalMaxHeightPageSize;
     private float widthRatio;
     private float heightRatio;
-    private boolean fitEachPage;
+    private final boolean fitEachPage;
 
     public PageSizeCalculator(FitPolicy fitPolicy, Size originalMaxWidthPageSize, Size originalMaxHeightPageSize, Size viewSize, boolean fitEachPage) {
         this.fitPolicy = fitPolicy;

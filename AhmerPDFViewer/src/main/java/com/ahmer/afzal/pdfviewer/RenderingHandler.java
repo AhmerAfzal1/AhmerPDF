@@ -23,10 +23,10 @@ class RenderingHandler extends Handler {
      */
     static final int MSG_RENDER_TASK = 1;
     private static final String TAG = RenderingHandler.class.getName();
-    private PDFView pdfView;
-    private RectF renderBounds = new RectF();
-    private Rect roundedRenderBounds = new Rect();
-    private Matrix renderMatrix = new Matrix();
+    private final PDFView pdfView;
+    private final RectF renderBounds = new RectF();
+    private final Rect roundedRenderBounds = new Rect();
+    private final Matrix renderMatrix = new Matrix();
     private boolean running = false;
 
     RenderingHandler(Looper looper, PDFView pdfView) {
@@ -106,13 +106,14 @@ class RenderingHandler extends Handler {
 
     private static class RenderingTask {
 
-        float width, height;
-        RectF bounds;
-        int page;
-        boolean thumbnail;
-        int cacheOrder;
-        boolean bestQuality;
-        boolean annotationRendering;
+        final float width;
+        final float height;
+        final RectF bounds;
+        final int page;
+        final boolean thumbnail;
+        final int cacheOrder;
+        final boolean bestQuality;
+        final boolean annotationRendering;
 
         RenderingTask(float width, float height, RectF bounds, int page, boolean thumbnail, int cacheOrder, boolean bestQuality, boolean annotationRendering) {
             this.page = page;

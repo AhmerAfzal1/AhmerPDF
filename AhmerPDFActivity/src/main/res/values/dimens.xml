@@ -1,0 +1,21 @@
+<resources>
+    <!-- Whole app values -->
+    <dimen name="margins_or_padding_10">10dp</dimen>
+    <dimen name="margins_or_padding_05">5dp</dimen>
+    <dimen name="toolbar_image_view_size">48dp</dimen>
+    <dimen name="progressbar_width_height">80dp</dimen>
+
+    <!-- About app & toolbar values -->
+    <dimen name="about_app_card_view_elevation">5dp</dimen>
+
+    <!-- For Main activity content layout -->
+
+    <!-- For Ahmer layout -->
+
+    <!-- PDF layout -->
+    <dimen name="pdf_image_view_cancel_size">24dp</dimen>
+    <dimen name="pdf_image_view_cancel_padding_size">4dp</dimen>
+
+    <!-- SDCardPDF Icon layout -->
+
+</resources>

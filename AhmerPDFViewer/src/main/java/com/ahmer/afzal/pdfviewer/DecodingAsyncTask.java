@@ -6,12 +6,10 @@ import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfviewer.source.DocumentSource;
 import com.ahmer.afzal.utils.async.AsyncTask;
 
-import java.lang.ref.WeakReference;
-
 class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     private boolean cancelled;
-    private WeakReference<PDFView> pdfViewReference;
+    private PDFView pdfView;
     private PdfiumCore pdfiumCore;
     private String password;
     private DocumentSource docSource;
@@ -22,7 +20,7 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
         this.docSource = docSource;
         this.userPages = userPages;
         this.cancelled = false;
-        this.pdfViewReference = new WeakReference<>(pdfView);
+        this.pdfView = pdfView;
         this.password = password;
         this.pdfiumCore = pdfiumCore;
     }
@@ -34,7 +32,6 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     @Override
     protected Throwable doInBackground(Void aVoid) throws Exception {
-        PDFView pdfView = pdfViewReference.get();
         if (pdfView != null) {
             PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
             pdfFile = new PdfFile(pdfiumCore, pdfDocument, pdfView.getPageFitPolicy(), getViewSize(pdfView),
@@ -48,7 +45,6 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     @Override
     protected void onPostExecute(Throwable t) {
-        PDFView pdfView = pdfViewReference.get();
         if (pdfView != null) {
             if (t != null) {
                 pdfView.loadError(t);

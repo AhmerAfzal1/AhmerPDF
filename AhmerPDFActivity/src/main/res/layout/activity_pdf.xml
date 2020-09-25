@@ -4,166 +4,88 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBgMainLayout"
     tools:context=".PdfActivity">
 
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/colorPrimary">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/im_back"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerVertical="true"
-                android:background="@drawable/background_icon_selector"
-                android:contentDescription="@string/imageDescription"
-                android:padding="5dp"
-                android:src="@drawable/ic_back" />
-
-            <TextView
-                android:id="@+id/tv_file_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_toStartOf="@+id/layout_icon"
-                android:layout_toLeftOf="@+id/layout_icon"
-                android:layout_toEndOf="@id/im_back"
-                android:layout_toRightOf="@id/im_back"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@android:color/white"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:id="@+id/layout_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/im_search"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/background_icon_selector"
-                    android:contentDescription="@string/imageDescription"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_search" />
-
-                <ImageView
-                    android:id="@+id/nightModeIV"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/background_icon_selector"
-                    android:contentDescription="@string/imageDescription"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_night_mode" />
-
-                <ImageView
-                    android:id="@+id/im_switch_view"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/background_icon_selector"
-                    android:contentDescription="@string/imageDescription"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_switch_view" />
-
-                <ImageView
-                    android:id="@+id/im_jump"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/background_icon_selector"
-                    android:contentDescription="@string/imageDescription"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_jump_to_white" />
-
-                <ImageView
-                    android:id="@+id/info_detail"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/background_icon_selector"
-                    android:contentDescription="@string/imageDescription"
-                    android:padding="5dp"
-                    app:srcCompat="@drawable/ic_information" />
-            </LinearLayout>
-        </RelativeLayout>
-    </androidx.appcompat.widget.Toolbar>
+        android:layout_height="?attr/actionBarSize"
+        android:elevation="10dp"
+        android:theme="@style/Rose.Toolbar.Style"
+        app:contentInsetEnd="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetStart="0dp"
+        app:contentInsetStartWithNavigation="0dp"
+        app:menu="@menu/pdf"
+        app:navigationIcon="@drawable/ic_toolbar_arrow_back"
+        app:title="@string/empty_description"
+        app:titleMarginStart="0dp" />
 
     <RelativeLayout
-        android:id="@+id/layout_search"
+        android:id="@+id/layoutSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:layout_below="@id/toolbar"
+        android:layout_marginTop="@dimen/margins_or_padding_05"
+        android:background="@drawable/bg_rounded_card"
+        android:paddingStart="@dimen/margins_or_padding_05"
+        android:paddingLeft="@dimen/margins_or_padding_05"
+        android:paddingEnd="@dimen/margins_or_padding_05"
+        android:paddingRight="@dimen/margins_or_padding_05"
         android:visibility="gone">
 
         <EditText
-            android:id="@+id/search"
+            android:id="@+id/etSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/background_edit_text"
             android:ellipsize="start"
             android:gravity="center_vertical"
-            android:hint="@string/search_file_name"
+            android:hint="@string/searching"
             android:importantForAutofill="no"
             android:inputType="textAutoComplete"
-            android:paddingStart="10dp"
-            android:paddingLeft="10dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="30dp"
-            android:paddingRight="30dp"
-            android:paddingBottom="5dp"
+            android:paddingStart="@dimen/margins_or_padding_10"
+            android:paddingLeft="@dimen/margins_or_padding_10"
+            android:paddingTop="@dimen/margins_or_padding_05"
+            android:paddingEnd="@dimen/margins_or_padding_10"
+            android:paddingRight="@dimen/margins_or_padding_10"
+            android:paddingBottom="@dimen/margins_or_padding_05"
             android:singleLine="true"
-            android:textColor="@android:color/black"
-            android:textSize="14sp" />
+            android:textAppearance="@style/Rose.TextAppearance.Normal"
+            android:textColor="@android:color/white" />
 
         <ImageView
-            android:id="@+id/im_cancel_search"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:id="@+id/ivCancelSearch"
+            android:layout_width="@dimen/pdf_image_view_cancel_size"
+            android:layout_height="@dimen/pdf_image_view_cancel_size"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
-            android:contentDescription="@string/imageDescription"
-            android:padding="5dp"
-            android:src="@drawable/ic_cancel_black" />
+            android:layout_marginEnd="@dimen/margins_or_padding_05"
+            android:contentDescription="@string/empty_description"
+            android:padding="@dimen/pdf_image_view_cancel_padding_size"
+            android:tint="@color/colorBlack"
+            app:srcCompat="@drawable/ic_pdf_cancel" />
     </RelativeLayout>
 
     <com.ahmer.afzal.pdfviewer.PDFView
         android:id="@+id/pdfView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/toolbar">
+        android:layout_below="@id/layoutSearch">
 
-        <ProgressBar
-            android:id="@+id/pdfProgressBar"
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/progressBarPdfView"
+            style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
+            android:indeterminate="true"
+            android:maxWidth="@dimen/progressbar_width_height"
+            android:maxHeight="@dimen/progressbar_width_height"
+            android:minWidth="@dimen/progressbar_width_height"
+            android:minHeight="@dimen/progressbar_width_height"
+            android:visibility="visible" />
     </com.ahmer.afzal.pdfviewer.PDFView>
-
-
-    <!--
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="5dp"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/banner_ad_unit_id" />-->
 </RelativeLayout>

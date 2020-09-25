@@ -19,7 +19,7 @@ class PagesLoader {
 
     private final RectF thumbnailRect = new RectF(0, 0, 1, 1);
     private final int preloadOffset;
-    private PDFView pdfView;
+    private final PDFView pdfView;
     private int cacheOrder;
     private float xOffset;
     private float yOffset;
@@ -265,10 +265,10 @@ class PagesLoader {
     }
 
     private static class RenderRange {
+        final GridSize gridSize;
+        final Holder leftTop;
+        final Holder rightBottom;
         int page;
-        GridSize gridSize;
-        Holder leftTop;
-        Holder rightBottom;
 
         RenderRange() {
             this.page = 0;

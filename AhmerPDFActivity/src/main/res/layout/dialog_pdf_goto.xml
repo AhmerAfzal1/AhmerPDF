@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="@dimen/margins_or_padding_05"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/margins_or_padding_05">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margins_or_padding_10"
+        android:layout_marginLeft="@dimen/margins_or_padding_10"
+        android:layout_marginTop="@dimen/margins_or_padding_10"
+        android:layout_marginEnd="@dimen/margins_or_padding_10"
+        android:layout_marginRight="@dimen/margins_or_padding_10"
+        android:layout_marginBottom="@dimen/margins_or_padding_10"
+        app:cardBackgroundColor="@color/colorBgDialog"
+        app:cardPreventCornerOverlap="true"
+        app:cardUseCompatPadding="true"
+        card_view:cardCornerRadius="@dimen/about_app_card_view_elevation"
+        card_view:cardElevation="@dimen/about_app_card_view_elevation"
+        card_view:cardMaxElevation="@dimen/about_app_card_view_elevation">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/margins_or_padding_05"
+            android:paddingTop="@dimen/margins_or_padding_05"
+            android:paddingEnd="@dimen/margins_or_padding_05"
+            android:paddingBottom="@dimen/margins_or_padding_05">
+
+            <RelativeLayout
+                android:id="@+id/main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/margins_or_padding_10"
+                android:paddingTop="@dimen/margins_or_padding_10"
+                android:paddingRight="@dimen/margins_or_padding_10"
+                android:paddingBottom="@dimen/margins_or_padding_10">
+
+                <ImageView
+                    android:id="@+id/logo"
+                    android:layout_width="@dimen/toolbar_image_view_size"
+                    android:layout_height="@dimen/toolbar_image_view_size"
+                    android:contentDescription="@string/empty_description"
+                    android:padding="@dimen/margins_or_padding_05"
+                    android:tint="@color/colorBlack"
+                    app:srcCompat="@drawable/ic_menu_pdf_goto" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="@dimen/margins_or_padding_10"
+                    android:layout_toEndOf="@+id/logo"
+                    android:gravity="start"
+                    android:text="@string/heading_goto_page"
+                    android:textAppearance="@style/Rose.TextAppearance.Normal"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/main2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/main"
+                android:paddingLeft="@dimen/margins_or_padding_10"
+                android:paddingTop="@dimen/margins_or_padding_10"
+                android:paddingRight="@dimen/margins_or_padding_10"
+                android:paddingBottom="@dimen/margins_or_padding_10">
+
+                <EditText
+                    android:id="@+id/etPageNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_edit_text"
+                    android:hint="@string/enter_number"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:textAppearance="@style/Rose.TextAppearance.Normal"
+                    android:textColor="@color/colorAccent"
+                    android:textColorHint="@color/colorWhite"
+                    app:backgroundTint="@color/colorBlack" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/main2"
+                android:gravity="end"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/margins_or_padding_10"
+                android:paddingTop="@dimen/margins_or_padding_10"
+                android:paddingRight="@dimen/margins_or_padding_10"
+                android:paddingBottom="@dimen/margins_or_padding_10">
+
+                <TextView
+                    android:id="@+id/tvGoTo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="@dimen/margins_or_padding_10"
+                    android:text="@string/button_go_to"
+                    android:textAllCaps="false"
+                    android:textAppearance="@style/Rose.TextAppearance.Normal"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/tvGoTo"
+                    android:text="@android:string/cancel"
+                    android:textAllCaps="false"
+                    android:textAppearance="@style/Rose.TextAppearance.Normal"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

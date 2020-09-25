@@ -5,10 +5,10 @@ import android.graphics.RectF;
 
 public class PagePart {
 
-    private int page;
-    private Bitmap renderedBitmap;
-    private RectF pageRelativeBounds;
-    private boolean thumbnail;
+    private final int page;
+    private final Bitmap renderedBitmap;
+    private final RectF pageRelativeBounds;
+    private final boolean thumbnail;
     private int cacheOrder;
 
     public PagePart(int page, Bitmap renderedBitmap, RectF pageRelativeBounds, boolean thumbnail, int cacheOrder) {

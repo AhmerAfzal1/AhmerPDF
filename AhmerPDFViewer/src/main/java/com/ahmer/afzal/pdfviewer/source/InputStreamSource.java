@@ -11,7 +11,7 @@ import java.io.InputStream;
 
 public class InputStreamSource implements DocumentSource {
 
-    private InputStream inputStream;
+    private final InputStream inputStream;
 
     public InputStreamSource(InputStream inputStream) {
         this.inputStream = inputStream;
