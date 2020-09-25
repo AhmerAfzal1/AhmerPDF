@@ -46,7 +46,7 @@ public class PdfDocument {
         String modDate;
         int totalPages;
 
-        public int getTotalPages(){
+        public int getTotalPages() {
             return totalPages;
         }
 

@@ -517,20 +517,20 @@ public class PdfiumCore {
 
     /**
      * Convert the screen coordinates of a point to page coordinates.
-     *
+     * <p>
      * The page coordinate system has its origin at the left-bottom corner
      * of the page, with the X-axis on the bottom going to the right, and
      * the Y-axis on the left side going up.
-     *
+     * <p>
      * NOTE: this coordinate system can be altered when you zoom, scroll,
      * or rotate a page, however, a point on the page should always have
      * the same coordinate values in the page coordinate system.
-     *
+     * <p>
      * The device coordinate system is device dependent. For screen device,
      * its origin is at the left-top corner of the window. However this
      * origin can be altered by the Windows coordinate transformation
      * utilities.
-     *
+     * <p>
      * You must make sure the start_x, start_y, size_x, size_y
      * and rotate parameters have exactly same values as you used in
      * the FPDF_RenderPage() function call.
@@ -542,10 +542,10 @@ public class PdfiumCore {
      * @param sizeX     Horizontal size (in pixels) for displaying the page.
      * @param sizeY     Vertical size (in pixels) for displaying the page.
      * @param rotate    Page orientation:
-     *                      0 (normal)
-     *                      1 (rotated 90 degrees clockwise)
-     *                      2 (rotated 180 degrees)
-     *                      3 (rotated 90 degrees counter-clockwise)
+     *                  0 (normal)
+     *                  1 (rotated 90 degrees clockwise)
+     *                  2 (rotated 180 degrees)
+     *                  3 (rotated 90 degrees counter-clockwise)
      * @param deviceX   X value in device coordinates to be converted.
      * @param deviceY   Y value in device coordinates to be converted.
      * @return
