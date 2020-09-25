@@ -436,6 +436,7 @@ public class PdfiumCore {
             meta.producer = nativeGetDocumentMetaText(doc.mNativeDocPtr, "Producer");
             meta.creationDate = nativeGetDocumentMetaText(doc.mNativeDocPtr, "CreationDate");
             meta.modDate = nativeGetDocumentMetaText(doc.mNativeDocPtr, "ModDate");
+            meta.totalPages = getPageCount(doc);
             return meta;
         }
     }

@@ -44,6 +44,11 @@ public class PdfDocument {
         String producer;
         String creationDate;
         String modDate;
+        int totalPages;
+
+        public int getTotalPages(){
+            return totalPages;
+        }
 
         public String getTitle() {
             return title;
