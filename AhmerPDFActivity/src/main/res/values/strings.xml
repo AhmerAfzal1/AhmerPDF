@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AhmerPDF</string>
+    <string name="app_name">PDF Viewer</string>
 
     <!-- Miscellaneous strings -->
     <string name="error_loading_pdf">Error loading PDF document</string>

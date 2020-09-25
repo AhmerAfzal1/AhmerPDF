@@ -718,7 +718,7 @@ public class PDFView extends RelativeLayout {
             }
             dragPinchManager.enable();
             SizeF size = pdfFile.getPageSize(defaultPage);
-            callbacks.callOnLoadComplete(pdfFile.getPagesCount(), size.getWidth(), size.getHeight());
+            callbacks.callOnLoadComplete(pdfFile.getPagesCount());
             jumpTo(defaultPage, false);
         }
 

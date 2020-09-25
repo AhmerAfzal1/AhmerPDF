@@ -1,6 +1,7 @@
 package com.ahmer.ahmerpdf;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -11,6 +12,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -26,11 +28,9 @@ import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.utils.SharedPreferencesUtil;
-import com.ahmer.afzal.utils.utilcode.KeyboardUtils;
 import com.ahmer.afzal.utils.utilcode.StringUtils;
 import com.ahmer.afzal.utils.utilcode.ThrowableUtils;
 import com.ahmer.afzal.utils.utilcode.ToastUtils;
-import com.ahmer.afzal.utils.utilcode.Utils;
 import com.ahmer.ahmerpdf.databinding.ActivityPdfBinding;
 
 import java.io.File;
@@ -230,7 +230,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     }
 
     private void showPasswordDialog() {
-        final Dialog dialog = new Dialog(Utils.getApp());
+        final Dialog dialog = new Dialog(this);
         try {
             Objects.requireNonNull(dialog.getWindow()).requestFeature(Window.FEATURE_NO_TITLE);
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -239,7 +239,11 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
             dialog.getWindow().setLayout(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
             EditText inputPass = dialog.findViewById(R.id.inputPassword);
             inputPass.requestFocus();
-            inputPass.postDelayed(KeyboardUtils::showSoftInput, 100);
+            inputPass.postDelayed(() -> {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                assert imm != null;
+                imm.showSoftInput(inputPass, InputMethodManager.SHOW_IMPLICIT);
+            }, 100);
             TextView open = dialog.findViewById(R.id.tvOpen);
             open.setClickable(false);
             open.setOnClickListener(v -> {
@@ -255,7 +259,10 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
             });
             TextView cancel = dialog.findViewById(R.id.tvCancel);
             cancel.setOnClickListener(v -> {
-                KeyboardUtils.hideSoftInput(this);
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                assert imm != null;
+                dialog.dismiss();
+                imm.hideSoftInputFromInputMethod(inputPass.getWindowToken(), 0);
                 dialog.dismiss();
                 PdfActivity.super.onBackPressed();
             });
@@ -292,7 +299,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     }
 
     @Override
-    public void loadComplete(int nbPages, float pageWidth, float pageHeight) {
+    public void loadComplete(int nbPages) {
         printBookmarksTree(binding.pdfView.getTableOfContents(), "-");
         binding.progressBarPdfView.setVisibility(View.GONE);
         totalPages = nbPages;

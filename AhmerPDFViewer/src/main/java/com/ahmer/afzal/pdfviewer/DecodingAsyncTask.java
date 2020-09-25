@@ -3,8 +3,8 @@ package com.ahmer.afzal.pdfviewer;
 import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 import com.ahmer.afzal.pdfium.util.Size;
+import com.ahmer.afzal.pdfviewer.async.AsyncTask;
 import com.ahmer.afzal.pdfviewer.source.DocumentSource;
-import com.ahmer.afzal.utils.async.AsyncTask;
 
 class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
@@ -31,15 +31,19 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
     }
 
     @Override
-    protected Throwable doInBackground(Void aVoid) throws Exception {
-        if (pdfView != null) {
-            PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
-            pdfFile = new PdfFile(pdfiumCore, pdfDocument, pdfView.getPageFitPolicy(), getViewSize(pdfView),
-                    userPages, pdfView.isOnDualPageMode(), pdfView.isSwipeVertical(), pdfView.getSpacingPx(),
-                    pdfView.isAutoSpacingEnabled(), pdfView.isFitEachPage(), pdfView.isOnLandscapeOrientation());
-            return null;
-        } else {
-            return new NullPointerException("pdfView == null");
+    protected Throwable doInBackground(Void aVoid) {
+        try {
+            if (pdfView != null) {
+                PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
+                pdfFile = new PdfFile(pdfiumCore, pdfDocument, pdfView.getPageFitPolicy(), getViewSize(pdfView),
+                        userPages, pdfView.isOnDualPageMode(), pdfView.isSwipeVertical(), pdfView.getSpacingPx(),
+                        pdfView.isAutoSpacingEnabled(), pdfView.isFitEachPage(), pdfView.isOnLandscapeOrientation());
+                return null;
+            } else {
+                return new NullPointerException("pdfView == null");
+            }
+        } catch (Throwable t) {
+            return t;
         }
     }
 
@@ -57,13 +61,8 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
     }
 
     @Override
-    protected void onBackgroundError(Exception e) {
-        e.printStackTrace();
-    }
-
-    @Override
     protected void onCancelled() {
-        cancelled = true;
+        this.cancelled = true;
     }
 
     private Size getViewSize(PDFView pdfView) {
