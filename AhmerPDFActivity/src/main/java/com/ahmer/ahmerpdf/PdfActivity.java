@@ -192,7 +192,6 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                         + page + " PositionOffset: " + positionOffset))
                 .onError(t -> {
                     if (Objects.requireNonNull(t.getMessage()).contains("Password required or incorrect password.")) {
-                        ToastUtils.showLong("Run PdfPasswordException");
                         showPasswordDialog();
                     } else {
                         ToastUtils.showLong(getResources().getString(R.string.error_loading_pdf));
