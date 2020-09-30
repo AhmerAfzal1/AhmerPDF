@@ -27,7 +27,7 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     @Override
     protected void onPreExecute() {
-
+        super.onPreExecute();
     }
 
     @Override
@@ -49,6 +49,7 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     @Override
     protected void onPostExecute(Throwable t) {
+        super.onPostExecute(t);
         if (pdfView != null) {
             if (t != null) {
                 pdfView.loadError(t);
@@ -62,6 +63,7 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     @Override
     protected void onCancelled() {
+        super.onCancelled();
         this.cancelled = true;
     }
 

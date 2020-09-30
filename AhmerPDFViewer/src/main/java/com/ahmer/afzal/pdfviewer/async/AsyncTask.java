@@ -1,7 +1,5 @@
 package com.ahmer.afzal.pdfviewer.async;
 
-import com.ahmer.afzal.utils.async.AsyncWorker;
-
 import java.util.concurrent.ExecutorService;
 
 public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
@@ -18,23 +16,23 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
      *
      * @param input Data you want to work with in the background
      */
-    public void execute(final INPUT input) {
+    public AsyncTask<INPUT, PROGRESS, OUTPUT> execute(final INPUT input) {
         onPreExecute();
 
         ExecutorService executorService = AsyncWorker.getInstance().getExecutorService();
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-
-                final OUTPUT output = doInBackground(input);
+                final OUTPUT output = AsyncTask.this.doInBackground(input);
                 AsyncWorker.getInstance().getHandler().post(new Runnable() {
                     @Override
                     public void run() {
-                        onPostExecute(output);
+                        AsyncTask.this.onPostExecute(output);
                     }
                 });
             }
         });
+        return this;
     }
 
     /**
@@ -84,7 +82,9 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
     /**
      * Work which you want to be done on UI thread before {@link #doInBackground(Object)}
      */
-    protected abstract void onPreExecute();
+    protected void onPreExecute() {
+
+    }
 
     /**
      * Work on background
@@ -99,8 +99,9 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
      *
      * @param output Output data from {@link #doInBackground(Object)}
      */
-    protected abstract void onPostExecute(OUTPUT output);
+    protected void onPostExecute(OUTPUT output) {
 
+    }
 
     public void setOnProgressListener(OnProgressListener<PROGRESS> onProgressListener) {
         this.onProgressListener = onProgressListener;

@@ -39,6 +39,6 @@ android {
 
 dependencies {
     implementation project(path: ':AhmerPdfium')
-    implementation 'com.github.ahmerafzal1:AhmerUtils:4.1.0'
+    implementation 'com.github.ahmerafzal1:AhmerUtils:4.1.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
 }
