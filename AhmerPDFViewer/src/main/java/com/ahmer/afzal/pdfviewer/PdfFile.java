@@ -5,7 +5,9 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.SparseBooleanArray;
 
-import com.ahmer.afzal.pdfium.PdfDocument;
+import com.ahmer.afzal.pdfium.Bookmark;
+import com.ahmer.afzal.pdfium.Link;
+import com.ahmer.afzal.pdfium.Meta;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfium.util.SizeF;
@@ -26,7 +28,6 @@ class PdfFile {
      */
     private final boolean fitEachPage;
     private final boolean isLandscape;
-    private PdfDocument pdfDocument;
     private PdfiumCore pdfiumCore;
     private int pagesCount = 0;
     /**
@@ -91,11 +92,11 @@ class PdfFile {
      */
     private int[] originalUserPages;
 
-    PdfFile(PdfiumCore pdfiumCore, PdfDocument pdfDocument, FitPolicy pageFitPolicy, Size viewSize, int[] originalUserPages,
-            boolean showTwoPages, boolean isVertical, int spacing, boolean autoSpacing, boolean fitEachPage, boolean isLandscape) {
+    PdfFile(PdfiumCore pdfiumCore, FitPolicy pageFitPolicy, Size viewSize, int[] originalUserPages,
+            boolean showTwoPages, boolean isVertical, int spacing, boolean autoSpacing,
+            boolean fitEachPage, boolean isLandscape) {
         this.showTwoPages = showTwoPages;
         this.pdfiumCore = pdfiumCore;
-        this.pdfDocument = pdfDocument;
         this.pageFitPolicy = pageFitPolicy;
         this.originalUserPages = originalUserPages;
         this.isVertical = isVertical;
@@ -110,10 +111,10 @@ class PdfFile {
         if (originalUserPages != null) {
             pagesCount = originalUserPages.length;
         } else {
-            pagesCount = pdfiumCore.getPageCount(pdfDocument);
+            pagesCount = pdfiumCore.getPageCount();
         }
         for (int i = 0; i < pagesCount; i++) {
-            Size pageSize = pdfiumCore.getPageSize(pdfDocument, documentPage(i));
+            Size pageSize = pdfiumCore.getPageSize(documentPage(i));
             if (pageSize.getWidth() > originalMaxWidthPageSize.getWidth()) {
                 originalMaxWidthPageSize = pageSize;
             }
@@ -300,7 +301,7 @@ class PdfFile {
         synchronized (lock) {
             if (openedPages.indexOfKey(docPage) < 0) {
                 try {
-                    pdfiumCore.openPage(pdfDocument, docPage);
+                    pdfiumCore.openPage(docPage);
                     openedPages.put(docPage, true);
                     return true;
                 } catch (Exception e) {
@@ -319,38 +320,37 @@ class PdfFile {
 
     public void renderPageBitmap(Bitmap bitmap, int pageIndex, Rect bounds, boolean annotationRendering) {
         int docPage = documentPage(pageIndex);
-        pdfiumCore.renderPageBitmap(pdfDocument, bitmap, docPage, bounds.left, bounds.top, bounds.width(), bounds.height(), annotationRendering);
+        pdfiumCore.renderPageBitmap(bitmap, docPage, bounds.left, bounds.top, bounds.width(), bounds.height(), annotationRendering);
     }
 
-    public PdfDocument.Meta getMetaData() {
-        if (pdfDocument == null) {
+    public Meta getMetaData() {
+        if (pdfiumCore == null) {
             return null;
         }
-        return pdfiumCore.getDocumentMeta(pdfDocument);
+        return pdfiumCore.getDocumentMeta();
     }
 
-    public List<PdfDocument.Bookmark> getBookmarks() {
-        if (pdfDocument == null) {
+    public List<Bookmark> getBookmarks() {
+        if (pdfiumCore == null) {
             return new ArrayList<>();
         }
-        return pdfiumCore.getTableOfContents(pdfDocument);
+        return pdfiumCore.getTableOfContents();
     }
 
-    public List<PdfDocument.Link> getPageLinks(int pageIndex) {
+    public List<Link> getPageLinks(int pageIndex) {
         int docPage = documentPage(pageIndex);
-        return pdfiumCore.getPageLinks(pdfDocument, docPage);
+        return pdfiumCore.getPageLinks(docPage);
     }
 
     public RectF mapRectToDevice(int pageIndex, int startX, int startY, int sizeX, int sizeY, RectF rect) {
         int docPage = documentPage(pageIndex);
-        return pdfiumCore.mapRectToDevice(pdfDocument, docPage, startX, startY, sizeX, sizeY, 0, rect);
+        return pdfiumCore.mapRectToDevice(docPage, startX, startY, sizeX, sizeY, 0, rect);
     }
 
     public void dispose() {
-        if (pdfiumCore != null && pdfDocument != null) {
-            pdfiumCore.closeDocument(pdfDocument);
+        if (pdfiumCore != null) {
+            pdfiumCore.closeDocument();
         }
-        pdfDocument = null;
         originalUserPages = null;
     }
 

@@ -30,7 +30,7 @@ public class PageSizeCalculator {
         }
         float maxWidth = 0;
         if (showTwoPages && !isLandscape) {
-            maxWidth = fitEachPage ? viewSize.getWidth() : pageSize.getWidth() / 2 * widthRatio;
+            maxWidth = fitEachPage ? viewSize.getWidth() : pageSize.getWidth() / 2f * widthRatio;
         } else {
             maxWidth = fitEachPage ? viewSize.getWidth() : pageSize.getWidth() * widthRatio;
         }

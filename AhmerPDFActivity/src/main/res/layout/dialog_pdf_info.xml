@@ -20,7 +20,7 @@
         android:layout_marginEnd="@dimen/margins_or_padding_10"
         android:layout_marginRight="@dimen/margins_or_padding_10"
         android:layout_marginBottom="@dimen/margins_or_padding_10"
-        app:cardBackgroundColor="@color/colorBgDialog"
+        app:cardBackgroundColor="@android:color/white"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="true"
         card_view:cardCornerRadius="@dimen/about_app_card_view_elevation"
@@ -47,7 +47,7 @@
                 android:paddingBottom="@dimen/margins_or_padding_10"
                 android:text="@string/heading_document_info"
                 android:textAppearance="@style/Rose.TextAppearance.Heading"
-                android:textColor="@color/colorAccent"
+                android:textColor="@android:color/black"
                 android:textStyle="bold" />
 
             <TableRow
@@ -60,7 +60,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_title"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -72,7 +72,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -85,7 +85,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_author"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -97,7 +97,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -110,7 +110,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_total_pages"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -122,7 +122,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -135,7 +135,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_subject"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -147,7 +147,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -160,7 +160,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_keywords"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -172,7 +172,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -185,7 +185,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_creation_date"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -197,7 +197,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -210,7 +210,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_modify_date"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -222,7 +222,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -235,7 +235,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_creator_of"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -248,7 +248,7 @@
                     android:singleLine="false"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -261,7 +261,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_producer_of"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -273,7 +273,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -286,7 +286,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_pdf_file_size"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -298,7 +298,7 @@
                     android:maxLines="2"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
             <TableRow
@@ -312,7 +312,7 @@
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:text="@string/title_pdf_file_path"
                     android:textAppearance="@style/Rose.TextAppearance.Normal"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
@@ -321,25 +321,30 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/margins_or_padding_05"
                     android:layout_weight="1"
-                    android:maxLines="5"
+                    android:maxLines="3"
                     android:text="@string/empty_description"
                     android:textAppearance="@style/Rose.TextAppearance.Caption"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@android:color/black" />
             </TableRow>
 
-            <TextView
-                android:id="@+id/tvOk"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="end"
-                android:paddingLeft="@dimen/margins_or_padding_10"
-                android:paddingTop="@dimen/margins_or_padding_10"
-                android:paddingRight="@dimen/margins_or_padding_10"
-                android:paddingBottom="@dimen/margins_or_padding_10"
-                android:text="@android:string/ok"
-                android:textAppearance="@style/Rose.TextAppearance.Normal"
-                android:textColor="@color/colorAccent"
-                android:textStyle="bold" />
+                android:layout_marginTop="@dimen/margins_or_padding_05"
+                android:gravity="end">
+
+                <Button
+                    android:id="@+id/tvOk"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/colorAccent"
+                    android:text="@android:string/ok"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/Rose.TextAppearance.Normal"
+                    android:textColor="@color/colorWhite"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </TableLayout>
     </androidx.cardview.widget.CardView>
 </RelativeLayout>

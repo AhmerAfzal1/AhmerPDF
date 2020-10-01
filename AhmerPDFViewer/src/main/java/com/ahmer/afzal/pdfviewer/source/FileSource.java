@@ -3,7 +3,6 @@ package com.ahmer.afzal.pdfviewer.source;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 
-import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 
 import java.io.File;
@@ -18,8 +17,8 @@ public class FileSource implements DocumentSource {
     }
 
     @Override
-    public PdfDocument createDocument(Context context, PdfiumCore core, String password) throws IOException {
+    public void createDocument(Context context, PdfiumCore core, String password) throws IOException {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        return core.newDocument(pfd, password);
+        core.newDocument(pfd, password);
     }
 }

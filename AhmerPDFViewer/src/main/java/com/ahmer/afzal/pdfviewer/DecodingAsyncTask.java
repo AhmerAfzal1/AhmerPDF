@@ -1,6 +1,5 @@
 package com.ahmer.afzal.pdfviewer;
 
-import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfviewer.async.AsyncTask;
@@ -34,8 +33,8 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
     protected Throwable doInBackground(Void aVoid) {
         try {
             if (pdfView != null) {
-                PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
-                pdfFile = new PdfFile(pdfiumCore, pdfDocument, pdfView.getPageFitPolicy(), getViewSize(pdfView),
+                docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
+                pdfFile = new PdfFile(pdfiumCore, pdfView.getPageFitPolicy(), getViewSize(pdfView),
                         userPages, pdfView.isOnDualPageMode(), pdfView.isSwipeVertical(), pdfView.getSpacingPx(),
                         pdfView.isAutoSpacingEnabled(), pdfView.isFitEachPage(), pdfView.isOnLandscapeOrientation());
                 return null;

@@ -7,7 +7,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-import com.ahmer.afzal.pdfium.PdfDocument;
+import com.ahmer.afzal.pdfium.Link;
 import com.ahmer.afzal.pdfium.util.SizeF;
 import com.ahmer.afzal.pdfviewer.model.LinkTapEvent;
 import com.ahmer.afzal.pdfviewer.scroll.ScrollHandle;
@@ -86,7 +86,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
             pageY = (int) pdfFile.getSecondaryPageOffset(page, pdfView.getZoom());
             pageX = (int) pdfFile.getPageOffset(page, pdfView.getZoom());
         }
-        for (PdfDocument.Link link : pdfFile.getPageLinks(page)) {
+        for (Link link : pdfFile.getPageLinks(page)) {
             RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(), (int) pageSize.getHeight(), link.getBounds());
             mapped.sort();
             if (mapped.contains(mappedX, mappedY)) {

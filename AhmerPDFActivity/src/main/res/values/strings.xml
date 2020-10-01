@@ -37,10 +37,11 @@
     <string name="title_title">Title:</string>
     <string name="title_total_pages">Total Pages:</string>
 
-    <!-- DialogPDFGoto strings -->
+    <!-- DialogPDFJumpTo strings -->
     <string name="button_go_to">Go To</string>
     <string name="enter_number">Enter a page number</string>
-    <string name="heading_goto_page">Go To Page Number</string>
+    <string name="heading_jump_to_page">Jump to a specific page</string>
+    <string name="desc_jump_to_page">Enter the page number to which you want to move</string>
     <string name="no_page">No page found in this document</string>
     <string name="please_enter_number">Please enter a number page</string>
 
@@ -50,5 +51,5 @@
     <string name="heading_pdf_protected">This file is password protected</string>
     <string name="password_not_empty">Password should not be empty</string>
     <string name="password_not_space">Password should not be only space(s)</string>
-    <string name="subheading_pdf_protected">Please enter the password \nto open PDF file</string>
+    <string name="desc_pdf_protected">Please enter the password to open PDF file</string>
 </resources>

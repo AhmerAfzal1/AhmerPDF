@@ -13,8 +13,6 @@
     <color name="colorBgRoundedLayout">#252525</color>
     <color name="colorBgRoundedStrokeLayout">#000000</color>
 
-    <color name="colorBgDialog">#1E1E1E</color>
-    <color name="colorBgTextInputEditText">#FFFFFF</color>
     <color name="colorBlack">#FFFFFF</color>
     <color name="colorWhite">#000000</color>
 </resources>

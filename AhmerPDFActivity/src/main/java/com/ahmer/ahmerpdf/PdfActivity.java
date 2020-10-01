@@ -21,23 +21,21 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.ahmer.afzal.pdfium.PdfDocument;
+import com.ahmer.afzal.pdfium.Bookmark;
+import com.ahmer.afzal.pdfium.PdfPasswordException;
 import com.ahmer.afzal.pdfviewer.link.DefaultLinkHandler;
 import com.ahmer.afzal.pdfviewer.listener.OnLoadCompleteListener;
 import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
+import com.ahmer.afzal.pdfviewer.util.FileUtils;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
-import com.ahmer.afzal.utils.SharedPreferencesUtil;
+import com.ahmer.afzal.utils.utilcode.SPUtils;
 import com.ahmer.afzal.utils.utilcode.StringUtils;
 import com.ahmer.afzal.utils.utilcode.ThrowableUtils;
 import com.ahmer.afzal.utils.utilcode.ToastUtils;
 import com.ahmer.ahmerpdf.databinding.ActivityPdfBinding;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -49,8 +47,8 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     private boolean isNightMode = false;
     private String pdfFile = null;
     private int totalPages = 0;
-    private SharedPreferencesUtil prefPage = null;
-    private SharedPreferencesUtil prefSwab = null;
+    private SPUtils prefPage = null;
+    private SPUtils prefSwab = null;
     private ActivityPdfBinding binding;
 
     @Override
@@ -58,8 +56,8 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         super.onCreate(savedInstanceState);
         binding = ActivityPdfBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        prefPage = new SharedPreferencesUtil(getApplicationContext(), "page");
-        prefSwab = new SharedPreferencesUtil(getApplicationContext(), "swab");
+        prefPage = SPUtils.getInstance("page");
+        prefSwab = SPUtils.getInstance("swab");
         binding.toolbar.setOnClickListener(v -> {
             finish();
             overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
@@ -68,35 +66,39 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
             switch (item.getItemId()) {
                 case R.id.menuPdfInfo:
                     try {
-                        DialogInfo dialogInfo = new DialogInfo(PdfActivity.this, getMyAssets(), password[0]);
-                        dialogInfo.showPDFInfo();
+                        DialogMoreInfo dialogMoreInfo = new DialogMoreInfo(PdfActivity.this,
+                                binding.pdfView, FileUtils.fileFromAsset(PdfActivity.this, pdfFile));
+                        Window dialogMoreInfoWindow = dialogMoreInfo.getWindow();
+                        Objects.requireNonNull(dialogMoreInfoWindow).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialogMoreInfo.show();
+                        dialogMoreInfoWindow.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
 
                 case R.id.menuPdfJumpTo:
-                    DialogGoTo dialogGoTo = new DialogGoTo(PdfActivity.this, numPage -> {
+                    DialogJumpTo dialogJumpTo = new DialogJumpTo(PdfActivity.this, numPage -> {
                         if (numPage > totalPages) {
                             ToastUtils.showShort(getString(R.string.no_page));
                         } else {
                             binding.pdfView.jumpTo(numPage - 1, true);
                         }
                     });
-                    Window window = dialogGoTo.getWindow();
+                    Window window = dialogJumpTo.getWindow();
                     Objects.requireNonNull(window).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    dialogGoTo.show();
+                    dialogJumpTo.show();
                     window.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
                     break;
 
                 case R.id.menuPdfSwitchView:
                     if (!isHorizontal) {
                         isHorizontal = true;
-                        prefSwab.saveSharedPreferences("rememberSwipe", true);
+                        prefSwab.put("rememberSwipe", true);
                         binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setIcon(R.drawable.ic_menu_pdf_vertical);
                     } else {
                         isHorizontal = false;
-                        prefSwab.saveSharedPreferences("rememberSwipe", false);
+                        prefSwab.put("rememberSwipe", false);
                         binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setIcon(R.drawable.ic_menu_pdf_horizontal);
                     }
                     displayFromAsset();
@@ -159,25 +161,6 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-    private File getMyAssets() throws IOException {
-        InputStream in = getAssets().open(pdfFile);
-        File outFile = new File(getCacheDir(), pdfFile);
-        OutputStream out = new FileOutputStream(outFile);
-        try {
-            int len;
-            byte[] buff = new byte[1024];
-            while ((len = in.read(buff)) > 0) {
-                out.write(buff, 0, len);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            in.close();
-            out.close();
-        }
-        return outFile;
-    }
-
     private void displayFromAsset() {
         binding.toolbar.getMenu().findItem(R.id.menuPdfInfo).setEnabled(false);
         binding.toolbar.getMenu().findItem(R.id.menuPdfJumpTo).setEnabled(false);
@@ -185,13 +168,13 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setEnabled(false);
         binding.pdfView.setBackgroundColor(Color.GRAY);
         binding.pdfView.fromAsset(pdfFile)
-                .defaultPage(prefPage.loadIntSharedPreference(pdfFile))
+                .defaultPage(prefPage.getInt(pdfFile))
                 .onLoad(this)
                 .onPageChange(this)
                 .onPageScroll((page, positionOffset) -> Log.v(MainActivity.TAG, "onPageScrolled: Page "
                         + page + " PositionOffset: " + positionOffset))
                 .onError(t -> {
-                    if (Objects.requireNonNull(t.getMessage()).contains("Password required or incorrect password.")) {
+                    if (t instanceof PdfPasswordException) {
                         showPasswordDialog();
                     } else {
                         ToastUtils.showLong(getResources().getString(R.string.error_loading_pdf));
@@ -204,12 +187,12 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                     ToastUtils.showLong("onPageError");
                     Log.v(MainActivity.TAG, "onPageError while Loading: " + t + "\nonPageError cannot load page: " + page);
                 })
-                .onRender(nbPages -> binding.pdfView.fitToWidth(prefPage.loadIntSharedPreference(pdfFile)))
+                .onRender(nbPages -> binding.pdfView.fitToWidth(prefPage.getInt(pdfFile)))
                 .onTap(e -> true)
                 .fitEachPage(true)
                 .nightMode(isNightMode)
                 .enableSwipe(true)
-                .swipeHorizontal(prefSwab.loadBooleanSharedPreference("rememberSwipe"))
+                .swipeHorizontal(prefSwab.getBoolean("rememberSwipe"))
                 .pageSnap(true) // snap pages to screen boundaries
                 .autoSpacing(true) // add dynamic spacing to fit each page on its own on the screen
                 .pageFling(false) // make a fling change only a single page like ViewPager
@@ -293,7 +276,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
 
     @Override
     public void onPageChanged(int page, int pageCount) {
-        prefPage.saveSharedPreferences(pdfFile, page);
+        prefPage.put(pdfFile, page);
         binding.toolbar.setTitle(String.format(Locale.getDefault(), "%s %s of %s", "Page", page + 1, pageCount));
     }
 
@@ -308,8 +291,8 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setEnabled(true);
     }
 
-    private void printBookmarksTree(List<PdfDocument.Bookmark> tree, String sep) {
-        for (PdfDocument.Bookmark bookmark : tree) {
+    private void printBookmarksTree(List<Bookmark> tree, String sep) {
+        for (Bookmark bookmark : tree) {
             Log.v(MainActivity.TAG, String.format(Locale.getDefault(), "%s %s, Page %d", sep,
                     bookmark.getTitle(), bookmark.getPageIdx()));
             if (bookmark.hasChildren()) {

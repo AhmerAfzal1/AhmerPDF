@@ -1,9 +1,6 @@
 package com.ahmer.afzal.pdfium.search;
 
-import com.ahmer.afzal.pdfium.PdfDocument;
-
 public abstract class FPDFTextSearchContext implements TextSearchContext {
-    protected final PdfDocument document;
     protected final int pageIndex;
     protected final String query;
     protected final boolean matchCase;
@@ -11,8 +8,7 @@ public abstract class FPDFTextSearchContext implements TextSearchContext {
     protected boolean mHasNext = true;
     protected boolean mHasPrev = false;
 
-    protected FPDFTextSearchContext(PdfDocument doc, int pageIndex, String query, boolean matchCase, boolean matchWholeWord) {
-        this.document = doc;
+    protected FPDFTextSearchContext(int pageIndex, String query, boolean matchCase, boolean matchWholeWord) {
         this.pageIndex = pageIndex;
         this.query = query;
         this.matchCase = matchCase;

@@ -2,7 +2,7 @@ package com.ahmer.afzal.pdfviewer.model;
 
 import android.graphics.RectF;
 
-import com.ahmer.afzal.pdfium.PdfDocument;
+import com.ahmer.afzal.pdfium.Link;
 
 public class LinkTapEvent {
 
@@ -11,9 +11,9 @@ public class LinkTapEvent {
     private final float documentX;
     private final float documentY;
     private final RectF mappedLinkRect;
-    private final PdfDocument.Link link;
+    private final Link link;
 
-    public LinkTapEvent(float originalX, float originalY, float documentX, float documentY, RectF mappedLinkRect, PdfDocument.Link link) {
+    public LinkTapEvent(float originalX, float originalY, float documentX, float documentY, RectF mappedLinkRect, Link link) {
         this.originalX = originalX;
         this.originalY = originalY;
         this.documentX = documentX;
@@ -42,7 +42,7 @@ public class LinkTapEvent {
         return mappedLinkRect;
     }
 
-    public PdfDocument.Link getLink() {
+    public Link getLink() {
         return link;
     }
 }

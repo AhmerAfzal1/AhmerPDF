@@ -1,7 +1,7 @@
 [ ![Download](https://api.bintray.com/packages/ahmerafzal/maven/AhmerPDFViewer/images/download.svg) ](https://bintray.com/ahmerafzal/maven/AhmerPDFViewer/_latestVersion)
 
 # AhmerPdfViewer
-Android view for displaying PDFs rendered with PdfiumAndroid
+Android view for displaying PDFs rendered with PdfiumAndroid from API 19
 
 ## Installation
 
