@@ -12,8 +12,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import static com.ahmer.afzal.pdfviewer.util.Constants.Cache.CACHE_SIZE;
-import static com.ahmer.afzal.pdfviewer.util.Constants.Cache.THUMBNAILS_CACHE_SIZE;
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.CACHE_SIZE;
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.THUMBNAILS_CACHE_SIZE;
 
 class CacheManager {
 
@@ -87,7 +87,8 @@ class CacheManager {
     }
 
     public boolean upPartIfContained(int page, RectF pageRelativeBounds, int toOrder) {
-        PagePart fakePart = new PagePart(page, null, pageRelativeBounds, false, 0);
+        PagePart fakePart = new PagePart(page, null, pageRelativeBounds,
+                false, 0);
         PagePart found;
         synchronized (passiveActiveLock) {
             if ((found = find(passiveCache, fakePart)) != null) {
@@ -104,7 +105,8 @@ class CacheManager {
      * Return true if already contains the described PagePart
      */
     public boolean containsThumbnail(int page, RectF pageRelativeBounds) {
-        PagePart fakePart = new PagePart(page, null, pageRelativeBounds, true, 0);
+        PagePart fakePart = new PagePart(page, null, pageRelativeBounds,
+                true, 0);
         synchronized (thumbnails) {
             for (PagePart part : thumbnails) {
                 if (part.equals(fakePart)) {

@@ -9,13 +9,14 @@ public class PageSizeCalculator {
     private final Size originalMaxHeightPageSize;
     private final Size viewSize;
     private final FitPolicy fitPolicy;
+    private final boolean fitEachPage;
     private SizeF optimalMaxWidthPageSize;
     private SizeF optimalMaxHeightPageSize;
     private float widthRatio;
     private float heightRatio;
-    private final boolean fitEachPage;
 
-    public PageSizeCalculator(FitPolicy fitPolicy, Size originalMaxWidthPageSize, Size originalMaxHeightPageSize, Size viewSize, boolean fitEachPage) {
+    public PageSizeCalculator(FitPolicy fitPolicy, Size originalMaxWidthPageSize,
+                              Size originalMaxHeightPageSize, Size viewSize, boolean fitEachPage) {
         this.fitPolicy = fitPolicy;
         this.originalMaxWidthPageSize = originalMaxWidthPageSize;
         this.originalMaxHeightPageSize = originalMaxHeightPageSize;
@@ -58,20 +59,24 @@ public class PageSizeCalculator {
             case HEIGHT:
                 optimalMaxHeightPageSize = fitHeight(originalMaxHeightPageSize, viewSize.getHeight());
                 heightRatio = optimalMaxHeightPageSize.getHeight() / originalMaxHeightPageSize.getHeight();
-                optimalMaxWidthPageSize = fitHeight(originalMaxWidthPageSize, originalMaxWidthPageSize.getHeight() * heightRatio);
+                optimalMaxWidthPageSize = fitHeight(originalMaxWidthPageSize,
+                        originalMaxWidthPageSize.getHeight() * heightRatio);
                 break;
             case BOTH:
                 SizeF localOptimalMaxWidth = fitBoth(originalMaxWidthPageSize, viewSize.getWidth(), viewSize.getHeight());
                 float localWidthRatio = localOptimalMaxWidth.getWidth() / originalMaxWidthPageSize.getWidth();
-                this.optimalMaxHeightPageSize = fitBoth(originalMaxHeightPageSize, originalMaxHeightPageSize.getWidth() * localWidthRatio, viewSize.getHeight());
+                this.optimalMaxHeightPageSize = fitBoth(originalMaxHeightPageSize,
+                        originalMaxHeightPageSize.getWidth() * localWidthRatio, viewSize.getHeight());
                 heightRatio = optimalMaxHeightPageSize.getHeight() / originalMaxHeightPageSize.getHeight();
-                optimalMaxWidthPageSize = fitBoth(originalMaxWidthPageSize, viewSize.getWidth(), originalMaxWidthPageSize.getHeight() * heightRatio);
+                optimalMaxWidthPageSize = fitBoth(originalMaxWidthPageSize, viewSize.getWidth(),
+                        originalMaxWidthPageSize.getHeight() * heightRatio);
                 widthRatio = optimalMaxWidthPageSize.getWidth() / originalMaxWidthPageSize.getWidth();
                 break;
             default:
                 optimalMaxWidthPageSize = fitWidth(originalMaxWidthPageSize, viewSize.getWidth());
                 widthRatio = optimalMaxWidthPageSize.getWidth() / originalMaxWidthPageSize.getWidth();
-                optimalMaxHeightPageSize = fitWidth(originalMaxHeightPageSize, originalMaxHeightPageSize.getWidth() * widthRatio);
+                optimalMaxHeightPageSize = fitWidth(originalMaxHeightPageSize,
+                        originalMaxHeightPageSize.getWidth() * widthRatio);
                 break;
         }
     }

@@ -7,12 +7,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Util {
+public class PdfUtils {
 
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
     public static int getDP(Context context, int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
+                context.getResources().getDisplayMetrics());
     }
 
     public static byte[] toByteArray(InputStream inputStream) throws IOException {

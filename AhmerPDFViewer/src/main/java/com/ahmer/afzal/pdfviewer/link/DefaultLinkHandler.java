@@ -32,6 +32,7 @@ public class DefaultLinkHandler implements LinkHandler {
     private void handleUri(String uri) {
         Uri parsedUri = Uri.parse(uri);
         Intent intent = new Intent(Intent.ACTION_VIEW, parsedUri);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }

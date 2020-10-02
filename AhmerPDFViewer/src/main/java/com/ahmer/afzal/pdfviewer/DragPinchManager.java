@@ -13,8 +13,8 @@ import com.ahmer.afzal.pdfviewer.model.LinkTapEvent;
 import com.ahmer.afzal.pdfviewer.scroll.ScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.SnapEdge;
 
-import static com.ahmer.afzal.pdfviewer.util.Constants.Pinch.MAXIMUM_ZOOM;
-import static com.ahmer.afzal.pdfviewer.util.Constants.Pinch.MINIMUM_ZOOM;
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Pinch.MAXIMUM_ZOOM;
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Pinch.MINIMUM_ZOOM;
 
 /**
  * This Manager takes care of moving the PDFView,
@@ -87,7 +87,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
             pageX = (int) pdfFile.getPageOffset(page, pdfView.getZoom());
         }
         for (Link link : pdfFile.getPageLinks(page)) {
-            RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(), (int) pageSize.getHeight(), link.getBounds());
+            RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(),
+                    (int) pageSize.getHeight(), link.getBounds());
             mapped.sort();
             if (mapped.contains(mappedX, mappedY)) {
                 pdfView.callbacks.callLinkHandler(new LinkTapEvent(x, y, mappedX, mappedY, mapped, link));
@@ -202,9 +203,11 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
             minY = -(pdfFile.getDocLen(pdfView.getZoom()) - pdfView.getHeight());
         } else {
             minX = -(pdfFile.getDocLen(pdfView.getZoom()) - pdfView.getWidth());
-            minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight(pdfView.getCurrentPage())) - pdfView.getHeight());
+            minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight(pdfView.getCurrentPage())) -
+                    pdfView.getHeight());
         }
-        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY), (int) minX, 0, (int) minY, 0);
+        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY),
+                (int) minX, 0, (int) minY, 0);
         return true;
     }
 
@@ -222,12 +225,14 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
             maxY = pageStart;
         } else {
             minX = pageEnd + pdfView.getWidth();
-            minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight(pdfView.getCurrentPage())) - pdfView.getHeight());
+            minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight(pdfView.getCurrentPage())) -
+                    pdfView.getHeight());
             maxX = pageStart;
             maxY = 0;
         }
 
-        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY), (int) minX, (int) maxX, (int) minY, (int) maxY);
+        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY),
+                (int) minX, (int) maxX, (int) minY, (int) maxY);
     }
 
     @Override

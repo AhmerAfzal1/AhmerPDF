@@ -3,7 +3,7 @@ package com.ahmer.afzal.pdfviewer.source;
 import android.content.Context;
 
 import com.ahmer.afzal.pdfium.PdfiumCore;
-import com.ahmer.afzal.pdfviewer.util.Util;
+import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +18,6 @@ public class InputStreamSource implements DocumentSource {
 
     @Override
     public void createDocument(Context context, PdfiumCore core, String password) throws IOException {
-        core.newDocument(Util.toByteArray(inputStream), password);
+        core.newDocument(PdfUtils.toByteArray(inputStream), password);
     }
 }

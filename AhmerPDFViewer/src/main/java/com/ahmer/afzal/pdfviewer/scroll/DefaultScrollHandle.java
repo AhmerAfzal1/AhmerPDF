@@ -15,7 +15,7 @@ import androidx.core.content.ContextCompat;
 
 import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.afzal.pdfviewer.R;
-import com.ahmer.afzal.pdfviewer.util.Util;
+import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 
 public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle {
 
@@ -78,7 +78,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             }
         }
         setBackground(background);
-        LayoutParams lp = new LayoutParams(Util.getDP(context, width), Util.getDP(context, height));
+        LayoutParams lp = new LayoutParams(PdfUtils.getDP(context, width), PdfUtils.getDP(context, height));
         lp.setMargins(0, 0, 0, 0);
         LayoutParams tvlp = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         tvlp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
@@ -118,8 +118,8 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         pos -= relativeHandlerMiddle;
         if (pos < 0) {
             pos = 0;
-        } else if (pos > pdfViewSize - Util.getDP(context, HANDLE_SHORT)) {
-            pos = pdfViewSize - Util.getDP(context, HANDLE_SHORT);
+        } else if (pos > pdfViewSize - PdfUtils.getDP(context, HANDLE_SHORT)) {
+            pos = pdfViewSize - PdfUtils.getDP(context, HANDLE_SHORT);
         }
         if (pdfView.isSwipeVertical()) {
             setY(pos);

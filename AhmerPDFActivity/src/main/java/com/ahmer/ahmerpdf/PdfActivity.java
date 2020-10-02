@@ -27,7 +27,7 @@ import com.ahmer.afzal.pdfviewer.link.DefaultLinkHandler;
 import com.ahmer.afzal.pdfviewer.listener.OnLoadCompleteListener;
 import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
-import com.ahmer.afzal.pdfviewer.util.FileUtils;
+import com.ahmer.afzal.pdfviewer.util.PdfFileUtils;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.utils.utilcode.SPUtils;
 import com.ahmer.afzal.utils.utilcode.StringUtils;
@@ -67,7 +67,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 case R.id.menuPdfInfo:
                     try {
                         DialogMoreInfo dialogMoreInfo = new DialogMoreInfo(PdfActivity.this,
-                                binding.pdfView, FileUtils.fileFromAsset(PdfActivity.this, pdfFile));
+                                binding.pdfView, PdfFileUtils.fileFromAsset(PdfActivity.this, pdfFile));
                         Window dialogMoreInfoWindow = dialogMoreInfo.getWindow();
                         Objects.requireNonNull(dialogMoreInfoWindow).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                         dialogMoreInfo.show();

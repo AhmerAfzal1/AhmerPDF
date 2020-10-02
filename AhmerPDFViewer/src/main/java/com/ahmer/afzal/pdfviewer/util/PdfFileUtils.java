@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class FileUtils {
+public class PdfFileUtils {
 
-    private FileUtils() {
+    private PdfFileUtils() {
         // Prevents instantiation
     }
 

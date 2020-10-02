@@ -48,11 +48,11 @@ import com.ahmer.afzal.pdfviewer.source.DocumentSource;
 import com.ahmer.afzal.pdfviewer.source.FileSource;
 import com.ahmer.afzal.pdfviewer.source.InputStreamSource;
 import com.ahmer.afzal.pdfviewer.source.UriSource;
-import com.ahmer.afzal.pdfviewer.util.Constants;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.pdfviewer.util.MathUtils;
+import com.ahmer.afzal.pdfviewer.util.PdfConstants;
+import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 import com.ahmer.afzal.pdfviewer.util.SnapEdge;
-import com.ahmer.afzal.pdfviewer.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
@@ -195,7 +195,8 @@ public class PDFView extends RelativeLayout {
      * Antialiasing and bitmap filtering
      */
     private boolean enableAntialiasing = true;
-    private PaintFlagsDrawFilter antialiasFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+    private PaintFlagsDrawFilter antialiasFilter = new PaintFlagsDrawFilter(0,
+            Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     /**
      * Spacing between pages, in px
      */
@@ -383,11 +384,10 @@ public class PDFView extends RelativeLayout {
                             0, -1, 0, 0, 255,
                             0, 0, -1, 0, 255,
                             0, 0, 0, 1, 0});
-
             ColorMatrixColorFilter filter = new ColorMatrixColorFilter(colorMatrixInverted);
-            paint.setColorFilter(filter);
+            setColorFilter(filter);
         } else {
-            paint.setColorFilter(null);
+            setColorFilter(null);
         }
     }
 
@@ -477,7 +477,7 @@ public class PDFView extends RelativeLayout {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
         hasSize = true;
         if (waitingDocumentConfigurator != null) {
             waitingDocumentConfigurator.load();
@@ -486,8 +486,8 @@ public class PDFView extends RelativeLayout {
             return;
         }
         // Calculates the position of the point which in the center of view relative to big strip
-        float centerPointInStripXOffset = -currentXOffset + oldw * 0.5f;
-        float centerPointInStripYOffset = -currentYOffset + oldh * 0.5f;
+        float centerPointInStripXOffset = -currentXOffset + oldW * 0.5f;
+        float centerPointInStripYOffset = -currentYOffset + oldH * 0.5f;
         float relativeCenterPointInStripXOffset = 0;
         float relativeCenterPointInStripYOffset = 0;
         if (swipeVertical) {
@@ -673,12 +673,13 @@ public class PDFView extends RelativeLayout {
         // Check if bitmap is in the screen
         float translationX = currentXOffset + localTranslationX;
         float translationY = currentYOffset + localTranslationY;
-        if (translationX + dstRect.left >= getWidth() || translationX + dstRect.right <= 0 || translationY + dstRect.top >= getHeight() || translationY + dstRect.bottom <= 0) {
+        if (translationX + dstRect.left >= getWidth() || translationX + dstRect.right <= 0 ||
+                translationY + dstRect.top >= getHeight() || translationY + dstRect.bottom <= 0) {
             canvas.translate(-localTranslationX, -localTranslationY);
             return;
         }
         canvas.drawBitmap(renderedBitmap, srcRect, dstRect, paint);
-        if (Constants.DEBUG_MODE) {
+        if (PdfConstants.DEBUG_MODE) {
             debugPaint.setColor(part.getPage() % 2 == 0 ? Color.RED : Color.BLUE);
             canvas.drawRect(dstRect, debugPaint);
         }
@@ -1167,7 +1168,7 @@ public class PDFView extends RelativeLayout {
     }
 
     private void setSpacing(int spacingDp) {
-        this.spacingPx = Util.getDP(getContext(), spacingDp);
+        this.spacingPx = PdfUtils.getDP(getContext(), spacingDp);
     }
 
     private void setAutoSpacing(boolean autoSpacing) {

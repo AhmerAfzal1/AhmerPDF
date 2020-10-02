@@ -1,6 +1,6 @@
 package com.ahmer.afzal.pdfviewer.util;
 
-public class Constants {
+public class PdfConstants {
 
     public static final boolean DEBUG_MODE = false;
 

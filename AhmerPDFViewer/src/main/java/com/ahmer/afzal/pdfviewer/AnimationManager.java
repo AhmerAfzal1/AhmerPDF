@@ -62,7 +62,8 @@ class AnimationManager {
         animation.start();
     }
 
-    public void startFlingAnimation(int startX, int startY, int velocityX, int velocityY, int minX, int maxX, int minY, int maxY) {
+    public void startFlingAnimation(int startX, int startY, int velocityX, int velocityY,
+                                    int minX, int maxX, int minY, int maxY) {
         stopAll();
         flinging = true;
         scroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY);

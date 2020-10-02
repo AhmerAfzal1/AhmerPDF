@@ -5,15 +5,15 @@ import android.graphics.RectF;
 import androidx.annotation.NonNull;
 
 import com.ahmer.afzal.pdfium.util.SizeF;
-import com.ahmer.afzal.pdfviewer.util.Constants;
 import com.ahmer.afzal.pdfviewer.util.MathUtils;
-import com.ahmer.afzal.pdfviewer.util.Util;
+import com.ahmer.afzal.pdfviewer.util.PdfConstants;
+import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.ahmer.afzal.pdfviewer.util.Constants.Cache.CACHE_SIZE;
-import static com.ahmer.afzal.pdfviewer.util.Constants.PRELOAD_OFFSET;
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.CACHE_SIZE;
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.PRELOAD_OFFSET;
 
 class PagesLoader {
 
@@ -30,15 +30,15 @@ class PagesLoader {
 
     PagesLoader(PDFView pdfView) {
         this.pdfView = pdfView;
-        this.preloadOffset = Util.getDP(pdfView.getContext(), PRELOAD_OFFSET);
+        this.preloadOffset = PdfUtils.getDP(pdfView.getContext(), PRELOAD_OFFSET);
     }
 
     private void getPageColsRows(GridSize grid, int pageIndex) {
         SizeF size = pdfView.pdfFile.getPageSize(pageIndex);
         float ratioX = 1f / size.getWidth();
         float ratioY = 1f / size.getHeight();
-        final float partHeight = (Constants.PART_SIZE * ratioY) / pdfView.getZoom();
-        final float partWidth = (Constants.PART_SIZE * ratioX) / pdfView.getZoom();
+        final float partHeight = (PdfConstants.PART_SIZE * ratioY) / pdfView.getZoom();
+        final float partWidth = (PdfConstants.PART_SIZE * ratioX) / pdfView.getZoom();
         grid.rows = MathUtils.ceil(1f / partHeight);
         grid.cols = MathUtils.ceil(1f / partWidth);
     }
@@ -46,14 +46,15 @@ class PagesLoader {
     private void calculatePartSize(GridSize grid) {
         pageRelativePartWidth = 1f / (float) grid.cols;
         pageRelativePartHeight = 1f / (float) grid.rows;
-        partRenderWidth = Constants.PART_SIZE / pageRelativePartWidth;
-        partRenderHeight = Constants.PART_SIZE / pageRelativePartHeight;
+        partRenderWidth = PdfConstants.PART_SIZE / pageRelativePartWidth;
+        partRenderHeight = PdfConstants.PART_SIZE / pageRelativePartHeight;
     }
 
     /**
      * calculate the render range of each page
      */
-    private List<RenderRange> getRenderRangeList(float firstXOffset, float firstYOffset, float lastXOffset, float lastYOffset) {
+    private List<RenderRange> getRenderRangeList(float firstXOffset, float firstYOffset,
+                                                 float lastXOffset, float lastYOffset) {
 
         float fixedFirstXOffset = -MathUtils.max(firstXOffset, 0);
         float fixedFirstYOffset = -MathUtils.max(firstYOffset, 0);
@@ -136,17 +137,25 @@ class PagesLoader {
 
             // calculate the row,col of the point in the leftTop and rightBottom
             if (pdfView.isSwipeVertical()) {
-                range.leftTop.row = MathUtils.floor(Math.abs(pageFirstYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / rowHeight);
-                range.leftTop.col = MathUtils.floor(MathUtils.min(pageFirstXOffset - secondaryOffset, 0) / colWidth);
+                range.leftTop.row = MathUtils.floor(Math.abs(pageFirstYOffset -
+                        pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / rowHeight);
+                range.leftTop.col = MathUtils.floor(MathUtils.min(pageFirstXOffset -
+                        secondaryOffset, 0) / colWidth);
 
-                range.rightBottom.row = MathUtils.ceil(Math.abs(pageLastYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / rowHeight);
-                range.rightBottom.col = MathUtils.floor(MathUtils.min(pageLastXOffset - secondaryOffset, 0) / colWidth);
+                range.rightBottom.row = MathUtils.ceil(Math.abs(pageLastYOffset -
+                        pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / rowHeight);
+                range.rightBottom.col = MathUtils.floor(MathUtils.min(pageLastXOffset -
+                        secondaryOffset, 0) / colWidth);
             } else {
-                range.leftTop.col = MathUtils.floor(Math.abs(pageFirstXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
-                range.leftTop.row = MathUtils.floor(MathUtils.min(pageFirstYOffset - Math.abs(secondaryOffset), 0) / rowHeight);
+                range.leftTop.col = MathUtils.floor(Math.abs(pageFirstXOffset -
+                        pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
+                range.leftTop.row = MathUtils.floor(MathUtils.min(pageFirstYOffset -
+                        Math.abs(secondaryOffset), 0) / rowHeight);
 
-                range.rightBottom.col = MathUtils.floor(Math.abs(pageLastXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
-                range.rightBottom.row = MathUtils.floor(MathUtils.min(pageLastYOffset - secondaryOffset, 0) / rowHeight);
+                range.rightBottom.col = MathUtils.floor(Math.abs(pageLastXOffset -
+                        pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
+                range.rightBottom.row = MathUtils.floor(MathUtils.min(pageLastYOffset -
+                        secondaryOffset, 0) / rowHeight);
             }
             renderRanges.add(range);
         }
@@ -168,14 +177,16 @@ class PagesLoader {
 
         for (RenderRange range : rangeList) {
             calculatePartSize(range.gridSize);
-            parts += loadPage(range.page, range.leftTop.row, range.rightBottom.row, range.leftTop.col, range.rightBottom.col, CACHE_SIZE - parts);
+            parts += loadPage(range.page, range.leftTop.row, range.rightBottom.row, range.leftTop.col,
+                    range.rightBottom.col, CACHE_SIZE - parts);
             if (parts >= CACHE_SIZE) {
                 break;
             }
         }
     }
 
-    private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol, int nbOfPartsLoadable) {
+    private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol,
+                         int nbOfPartsLoadable) {
         int loaded = 0;
         for (int row = firstRow; row <= lastRow; row++) {
             for (int col = firstCol; col <= lastCol; col++) {
@@ -190,7 +201,8 @@ class PagesLoader {
         return loaded;
     }
 
-    private boolean loadCell(int page, int row, int col, float pageRelativePartWidth, float pageRelativePartHeight) {
+    private boolean loadCell(int page, int row, int col, float pageRelativePartWidth,
+                             float pageRelativePartHeight) {
 
         float relX = pageRelativePartWidth * col;
         float relY = pageRelativePartHeight * row;
@@ -221,8 +233,8 @@ class PagesLoader {
 
     private void loadThumbnail(int page) {
         SizeF pageSize = pdfView.pdfFile.getPageSize(page);
-        float thumbnailWidth = pageSize.getWidth() * Constants.THUMBNAIL_RATIO;
-        float thumbnailHeight = pageSize.getHeight() * Constants.THUMBNAIL_RATIO;
+        float thumbnailWidth = pageSize.getWidth() * PdfConstants.THUMBNAIL_RATIO;
+        float thumbnailHeight = pageSize.getHeight() * PdfConstants.THUMBNAIL_RATIO;
         if (!pdfView.cacheManager.containsThumbnail(page, thumbnailRect)) {
             pdfView.renderingHandler.addRenderingTask(page, thumbnailWidth, thumbnailHeight, thumbnailRect,
                     true, 0, pdfView.isBestQuality(), pdfView.isAnnotationRendering());

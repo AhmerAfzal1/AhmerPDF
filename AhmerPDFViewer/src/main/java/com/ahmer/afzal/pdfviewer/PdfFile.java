@@ -134,7 +134,8 @@ class PdfFile {
      */
     public void recalculatePageSizes(Size viewSize) {
         pageSizes.clear();
-        PageSizeCalculator calculator = new PageSizeCalculator(pageFitPolicy, originalMaxWidthPageSize, originalMaxHeightPageSize, viewSize, fitEachPage);
+        PageSizeCalculator calculator = new PageSizeCalculator(pageFitPolicy,
+                originalMaxWidthPageSize, originalMaxHeightPageSize, viewSize, fitEachPage);
         maxWidthPageSize = calculator.getOptimalMaxWidthPageSize();
         maxHeightPageSize = calculator.getOptimalMaxHeightPageSize();
         for (Size size : originalPageSizes) {
@@ -320,7 +321,8 @@ class PdfFile {
 
     public void renderPageBitmap(Bitmap bitmap, int pageIndex, Rect bounds, boolean annotationRendering) {
         int docPage = documentPage(pageIndex);
-        pdfiumCore.renderPageBitmap(bitmap, docPage, bounds.left, bounds.top, bounds.width(), bounds.height(), annotationRendering);
+        pdfiumCore.renderPageBitmap(bitmap, docPage, bounds.left, bounds.top, bounds.width(),
+                bounds.height(), annotationRendering);
     }
 
     public Meta getMetaData() {
