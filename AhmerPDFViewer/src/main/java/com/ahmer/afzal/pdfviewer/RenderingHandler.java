@@ -1,7 +1,11 @@
 package com.ahmer.afzal.pdfviewer;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
@@ -88,6 +92,9 @@ class RenderingHandler extends Handler {
         calculateBounds(w, h, renderingTask.bounds);
         pdfFile.renderPageBitmap(render, renderingTask.page,
                 roundedRenderBounds, renderingTask.annotationRendering);
+        if (pdfView.isNightMode()) {
+            render = toNightMode(render, renderingTask.bestQuality);
+        }
         return new PagePart(renderingTask.page, render, renderingTask.bounds,
                 renderingTask.thumbnail, renderingTask.cacheOrder);
     }
@@ -107,6 +114,29 @@ class RenderingHandler extends Handler {
 
     void start() {
         running = true;
+    }
+
+    private Bitmap toNightMode(Bitmap bmpOriginal, boolean bestQuality) {
+        int width, height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+        Bitmap nightModeBitmap = Bitmap.createBitmap(width, height, bestQuality ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+        Canvas c = new Canvas(nightModeBitmap);
+        Paint paint = new Paint();
+        ColorMatrix grayScaleMatrix = new ColorMatrix();
+        grayScaleMatrix.setSaturation(0);
+        ColorMatrix invertMatrix =
+                new ColorMatrix(new float[]{
+                        -1, 0, 0, 0, 255,
+                        0, -1, 0, 0, 255,
+                        0, 0, -1, 0, 255,
+                        0, 0, 0, 1, 0});
+        ColorMatrix nightModeMatrix = new ColorMatrix();
+        nightModeMatrix.postConcat(grayScaleMatrix);
+        nightModeMatrix.postConcat(invertMatrix);
+        paint.setColorFilter(new ColorMatrixColorFilter(nightModeMatrix));
+        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        return nightModeBitmap;
     }
 
     private static class RenderingTask {

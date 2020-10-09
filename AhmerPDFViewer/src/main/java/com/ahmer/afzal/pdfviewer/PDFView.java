@@ -5,8 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.PaintFlagsDrawFilter;
@@ -374,20 +372,12 @@ public class PDFView extends RelativeLayout {
         return pdfFile.getPagesCount();
     }
 
+    public boolean isNightMode() {
+        return nightMode;
+    }
+
     public void setNightMode(boolean nightMode) {
         this.nightMode = nightMode;
-        if (nightMode) {
-            ColorMatrix colorMatrixInverted =
-                    new ColorMatrix(new float[]{
-                            -1, 0, 0, 0, 255,
-                            0, -1, 0, 0, 255,
-                            0, 0, -1, 0, 255,
-                            0, 0, 0, 1, 0});
-            ColorMatrixColorFilter filter = new ColorMatrixColorFilter(colorMatrixInverted);
-            setColorFilter(filter);
-        } else {
-            setColorFilter(null);
-        }
     }
 
     public void setColorFilter(ColorFilter colorFilter) {
@@ -404,7 +394,7 @@ public class PDFView extends RelativeLayout {
 
     void onPageError(PageRenderingException ex) {
         if (!callbacks.callOnPageError(ex.getPage(), ex.getCause())) {
-            Log.e(TAG, "Cannot open page: " + ex.getPage() + "\nCannot open page: " + ex.getCause());
+            Log.e(TAG, "Cannot open page: " + ex.getPage() + " due to: " + ex.getCause());
         }
     }
 
@@ -526,11 +516,12 @@ public class PDFView extends RelativeLayout {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
             } else
-                return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth(currentPageJumpTo)) > getWidth();
+                return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth(currentPageJumpTo)) - getWidth() > 1;
         } else {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else return direction > 0 && currentXOffset + pdfFile.getDocLen(zoom) > getWidth();
+            } else
+                return direction > 0 && currentXOffset + pdfFile.getDocLen(zoom) - getWidth() > 1;
         }
     }
 
@@ -590,11 +581,7 @@ public class PDFView extends RelativeLayout {
             canvas.setDrawFilter(antialiasFilter);
         }
         Drawable bg = getBackground();
-        if (bg == null) {
-            canvas.drawColor(nightMode ? Color.BLACK : Color.WHITE);
-        } else {
-            bg.draw(canvas);
-        }
+        bg.draw(canvas);
         if (recycled) {
             return;
         }

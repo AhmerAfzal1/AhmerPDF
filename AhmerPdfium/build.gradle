@@ -43,5 +43,5 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core:1.5.0-alpha03'
+    implementation 'androidx.core:core:1.5.0-alpha04'
 }

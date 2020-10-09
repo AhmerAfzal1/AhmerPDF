@@ -2,7 +2,12 @@ package com.ahmer.ahmerpdf;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,11 +29,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.ahmer.afzal.pdfium.Bookmark;
 import com.ahmer.afzal.pdfium.PdfPasswordException;
 import com.ahmer.afzal.pdfviewer.link.DefaultLinkHandler;
+import com.ahmer.afzal.pdfviewer.listener.OnDrawListener;
 import com.ahmer.afzal.pdfviewer.listener.OnLoadCompleteListener;
 import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
-import com.ahmer.afzal.pdfviewer.util.PdfFileUtils;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
+import com.ahmer.afzal.pdfviewer.util.PdfFileUtils;
 import com.ahmer.afzal.utils.utilcode.SPUtils;
 import com.ahmer.afzal.utils.utilcode.StringUtils;
 import com.ahmer.afzal.utils.utilcode.ThrowableUtils;
@@ -43,7 +49,7 @@ import java.util.Objects;
 public class PdfActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener {
 
     private static boolean isHorizontal = false;
-    private final String[] password = new String[1];
+    private String password = null;
     private boolean isNightMode = false;
     private String pdfFile = null;
     private int totalPages = 0;
@@ -149,10 +155,10 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         try {
             if (getIntent().hasExtra("pdfNormal")) {
                 pdfFile = "grammar.pdf";
-                password[0] = "5632";
+                password = "5632";
             } else if (getIntent().hasExtra("pdfProtected")) {
                 pdfFile = "grammar.pdf";
-                password[0] = null;
+                password = null;
             }
             displayFromAsset();
         } catch (Exception e) {
@@ -166,7 +172,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         binding.toolbar.getMenu().findItem(R.id.menuPdfJumpTo).setEnabled(false);
         binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setEnabled(false);
         binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setEnabled(false);
-        binding.pdfView.setBackgroundColor(Color.GRAY);
+        binding.pdfView.setBackgroundColor(Color.LTGRAY);
         binding.pdfView.fromAsset(pdfFile)
                 .defaultPage(prefPage.getInt(pdfFile))
                 .onLoad(this)
@@ -178,14 +184,14 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                         showPasswordDialog();
                     } else {
                         ToastUtils.showLong(getResources().getString(R.string.error_loading_pdf));
+                        t.printStackTrace();
+                        Log.v(MainActivity.TAG, " onError: " + t);
                     }
-                    t.printStackTrace();
-                    Log.v(MainActivity.TAG, " onError while Loading: " + t);
                 })
                 .onPageError((page, t) -> {
                     t.printStackTrace();
                     ToastUtils.showLong("onPageError");
-                    Log.v(MainActivity.TAG, "onPageError while Loading: " + t + "\nonPageError cannot load page: " + page);
+                    Log.v(MainActivity.TAG, "onPageError: " + t + " on page: " + page);
                 })
                 .onRender(nbPages -> binding.pdfView.fitToWidth(prefPage.getInt(pdfFile)))
                 .onTap(e -> true)
@@ -198,7 +204,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 .pageFling(false) // make a fling change only a single page like ViewPager
                 .enableDoubletap(true)
                 .enableAnnotationRendering(true)
-                .password(password[0])
+                .password(password)
                 .scrollHandle(new DefaultScrollHandle(getApplicationContext()))
                 .enableAntialiasing(true)
                 .spacing(0)
@@ -234,7 +240,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 } else if (StringUtils.isSpace(inputPass.getText().toString())) {
                     ToastUtils.showShort(v.getContext().getString(R.string.password_not_space));
                 } else {
-                    password[0] = inputPass.getText().toString();
+                    password = inputPass.getText().toString();
                     displayFromAsset();
                     dialog.dismiss();
                 }
