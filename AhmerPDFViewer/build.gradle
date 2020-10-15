@@ -1,9 +1,11 @@
 apply plugin: 'com.android.library'
-apply from: 'installviewer.gradle'
-apply from: 'bintrayviewer.gradle'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+version = project.pdfViewerVersion
+group = 'com.github.ahmerafzal1'
 
 android {
-    
     compileSdkVersion 30
     buildToolsVersion '30.0.2'
 
@@ -35,6 +37,84 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier.set("sources")
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set("javadoc")
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                groupId 'com.github.ahmerafzal1'
+                artifactId 'AhmerPDFViewer'
+
+                name 'AhmerPDFViewer'
+                description 'Android view for displaying PDFs rendered with PdfiumAndroid'
+                url 'https://github.com/AhmerAfzal1/AhmerPDF'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'ahmerafzal'
+                        name 'Ahmer Afzal'
+                        email 'ahmerafzal@yahoo.com'
+                    }
+                }
+
+                scm {
+                    connection 'https://github.com/AhmerAfzal1/AhmerPDF.git'
+                    developerConnection 'https://github.com/AhmerAfzal1/AhmerPDF.git'
+                    url 'https://github.com/AhmerAfzal1/AhmerPDF'
+                }
+            }
+        }
+    }
+}
+
+Properties properties = new Properties()
+properties.load(new FileInputStream("local.properties"))
+
+// Bintray
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    pkg {
+        repo = 'maven'
+        name = 'AhmerPDFViewer'
+        configurations = ['archives']
+        desc = 'Android view for displaying PDFs rendered with PdfiumAndroid'
+        websiteUrl = 'https://github.com/AhmerAfzal1/AhmerPDF'
+        vcsUrl = 'https://github.com/AhmerAfzal1/AhmerPDF.git'
+        licenses = ["Apache-2.0"]
+        publish = true
+        publicDownloadNumbers = true
+    }
 }
 
 dependencies {
