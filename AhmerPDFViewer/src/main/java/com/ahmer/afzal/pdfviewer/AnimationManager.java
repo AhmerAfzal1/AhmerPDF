@@ -9,6 +9,8 @@ import android.graphics.PointF;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.OverScroller;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * This manager is used by the PDFView to launch animations.
  * It uses the ValueAnimator appeared in API 11 to start
@@ -17,14 +19,14 @@ import android.widget.OverScroller;
  */
 class AnimationManager {
 
-    private PDFView pdfView;
+    private final PDFView pdfView;
+    private final OverScroller scroller;
     private ValueAnimator animation;
-    private OverScroller scroller;
     private boolean flinging = false;
     private boolean pageFlinging = false;
     private long animationDuration = 400;
 
-    public AnimationManager(PDFView pdfView) {
+    public AnimationManager(@NotNull PDFView pdfView) {
         this.pdfView = pdfView;
         scroller = new OverScroller(pdfView.getContext());
     }
@@ -193,7 +195,7 @@ class AnimationManager {
         }
 
         @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
+        public void onAnimationUpdate(@NotNull ValueAnimator animation) {
             float zoom = (Float) animation.getAnimatedValue();
             pdfView.zoomCenteredTo(zoom, new PointF(centerX, centerY));
         }

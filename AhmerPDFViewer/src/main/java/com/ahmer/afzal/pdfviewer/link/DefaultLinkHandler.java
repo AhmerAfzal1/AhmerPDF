@@ -9,6 +9,8 @@ import android.util.Log;
 import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.afzal.pdfviewer.model.LinkTapEvent;
 
+import org.jetbrains.annotations.NotNull;
+
 public class DefaultLinkHandler implements LinkHandler {
 
     private static final String TAG = DefaultLinkHandler.class.getSimpleName();
@@ -19,7 +21,7 @@ public class DefaultLinkHandler implements LinkHandler {
     }
 
     @Override
-    public void handleLinkEvent(LinkTapEvent event) {
+    public void handleLinkEvent(@NotNull LinkTapEvent event) {
         String uri = event.getLink().getUri();
         Integer page = event.getLink().getDestPageIdx();
         if (uri != null && !uri.isEmpty()) {

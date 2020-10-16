@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 public class AsyncWorker {
     private static final AsyncWorker instance = new AsyncWorker();
     private static final int NUMBER_OF_THREADS = 4;
-    protected Handler handler;
-    private ExecutorService executorService;
+    protected final Handler handler;
+    private final ExecutorService executorService;
 
     private AsyncWorker() {
         executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);

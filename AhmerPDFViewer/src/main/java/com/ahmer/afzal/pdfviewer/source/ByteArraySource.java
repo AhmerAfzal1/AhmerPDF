@@ -4,9 +4,12 @@ import android.content.Context;
 
 import com.ahmer.afzal.pdfium.PdfiumCore;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 
-public class ByteArraySource implements DocumentSource {
+public class
+ByteArraySource implements DocumentSource {
 
     private final byte[] data;
 
@@ -15,7 +18,7 @@ public class ByteArraySource implements DocumentSource {
     }
 
     @Override
-    public void createDocument(Context context, PdfiumCore core, String password) throws IOException {
+    public void createDocument(Context context, @NotNull PdfiumCore core, String password) throws IOException {
         core.newDocument(data, password);
     }
 }

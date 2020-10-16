@@ -42,8 +42,8 @@
                 android:layout_height="@dimen/dialog_image_width_height"
                 android:layout_centerHorizontal="true"
                 android:contentDescription="@string/empty_description"
-                android:tint="@android:color/black"
-                app:srcCompat="@drawable/ic_menu_pdf_goto" />
+                app:srcCompat="@drawable/ic_menu_pdf_goto"
+                app:tint="@android:color/black" />
 
             <TextView
                 android:id="@+id/tvHeading"

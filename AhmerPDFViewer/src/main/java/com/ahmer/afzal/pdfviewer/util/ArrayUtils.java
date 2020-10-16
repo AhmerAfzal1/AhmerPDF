@@ -1,5 +1,8 @@
 package com.ahmer.afzal.pdfviewer.util;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +15,7 @@ public class ArrayUtils {
     /**
      * Transforms (0,1,2,2,3) to (0,1,2,3)
      */
-    public static int[] deleteDuplicatedPages(int[] pages) {
+    public static int @NotNull [] deleteDuplicatedPages(int @NotNull [] pages) {
         List<Integer> result = new ArrayList<>();
         int lastInt = -1;
         for (Integer currentInt : pages) {
@@ -31,7 +34,8 @@ public class ArrayUtils {
     /**
      * Transforms (0, 4, 4, 6, 6, 6, 3) into (0, 1, 1, 2, 2, 2, 3)
      */
-    public static int[] calculateIndexesInDuplicateArray(int[] originalUserPages) {
+    @Contract(pure = true)
+    public static int @NotNull [] calculateIndexesInDuplicateArray(int @NotNull [] originalUserPages) {
         int[] result = new int[originalUserPages.length];
         if (originalUserPages.length == 0) {
             return result;
@@ -47,7 +51,7 @@ public class ArrayUtils {
         return result;
     }
 
-    public static String arrayToString(int[] array) {
+    public static @NotNull String arrayToString(int @NotNull [] array) {
         StringBuilder builder = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
             builder.append(array[i]);

@@ -11,7 +11,6 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:elevation="10dp"
         android:theme="@style/Rose.Toolbar.Style"
         app:contentInsetEnd="0dp"
         app:contentInsetLeft="0dp"
@@ -64,8 +63,8 @@
             android:layout_marginEnd="@dimen/margins_or_padding_05"
             android:contentDescription="@string/empty_description"
             android:padding="@dimen/pdf_image_view_cancel_padding_size"
-            android:tint="@color/colorBlack"
-            app:srcCompat="@drawable/ic_pdf_cancel" />
+            app:srcCompat="@drawable/ic_pdf_cancel"
+            app:tint="@color/colorBlack" />
     </RelativeLayout>
 
     <com.ahmer.afzal.pdfviewer.PDFView

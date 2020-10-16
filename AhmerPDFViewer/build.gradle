@@ -2,18 +2,19 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-version = project.pdfViewerVersion
-group = 'com.github.ahmerafzal1'
+version = project.idPdfViewerVersion
+group = project.idGroup
 
 android {
     compileSdkVersion 30
     buildToolsVersion '30.0.2'
+    ndkVersion '21.3.6528147'
 
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
-        versionName project.pdfViewerVersion
+        versionName project.idPdfViewerVersion
         consumerProguardFiles 'consumer-rules.pro'
     }
 
@@ -64,12 +65,12 @@ install {
         pom {
             project {
                 packaging 'aar'
-                groupId 'com.github.ahmerafzal1'
-                artifactId 'AhmerPDFViewer'
+                groupId project.idGroup
+                artifactId project.idArtifactPdfViewer
 
-                name 'AhmerPDFViewer'
-                description 'Android view for displaying PDFs rendered with PdfiumAndroid'
-                url 'https://github.com/AhmerAfzal1/AhmerPDF'
+                name project.idArtifactPdfViewer
+                description project.idDescriptionPdfViewer
+                url project.idUrl
 
                 licenses {
                     license {
@@ -80,37 +81,33 @@ install {
 
                 developers {
                     developer {
-                        id 'ahmerafzal'
-                        name 'Ahmer Afzal'
-                        email 'ahmerafzal@yahoo.com'
+                        id project.idDeveloperID
+                        name project.idDeveloperName
+                        email project.idDeveloperEmail
                     }
                 }
 
                 scm {
-                    connection 'https://github.com/AhmerAfzal1/AhmerPDF.git'
-                    developerConnection 'https://github.com/AhmerAfzal1/AhmerPDF.git'
-                    url 'https://github.com/AhmerAfzal1/AhmerPDF'
+                    connection project.idVcsUrl
+                    developerConnection project.idVcsUrl
+                    url project.idUrl
                 }
             }
         }
     }
 }
 
-Properties properties = new Properties()
-properties.load(new FileInputStream("local.properties"))
-
-// Bintray
 bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
+    user = project.idUser
+    key = project.idPass
 
     pkg {
-        repo = 'maven'
-        name = 'AhmerPDFViewer'
+        repo = project.idRepo
+        name = project.idArtifactPdfViewer
         configurations = ['archives']
-        desc = 'Android view for displaying PDFs rendered with PdfiumAndroid'
-        websiteUrl = 'https://github.com/AhmerAfzal1/AhmerPDF'
-        vcsUrl = 'https://github.com/AhmerAfzal1/AhmerPDF.git'
+        desc = project.idDescriptionPdfViewer
+        websiteUrl = project.idUrl
+        vcsUrl = project.idVcsUrl
         licenses = ["Apache-2.0"]
         publish = true
         publicDownloadNumbers = true
@@ -121,4 +118,5 @@ dependencies {
     implementation project(path: ':AhmerPdfium')
     implementation 'com.github.ahmerafzal1:AhmerUtils:4.1.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'org.jetbrains:annotations:15.0'
 }

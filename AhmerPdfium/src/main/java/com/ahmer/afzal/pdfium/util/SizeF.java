@@ -21,7 +21,7 @@ public class SizeF {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -29,7 +29,7 @@ public class SizeF {
             return true;
         }
         if (obj instanceof SizeF) {
-            final SizeF other = (SizeF) obj;
+            SizeF other = (SizeF) obj;
             return width == other.width && height == other.height;
         }
         return false;

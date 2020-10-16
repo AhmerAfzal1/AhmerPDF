@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -17,25 +18,26 @@ import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.afzal.pdfviewer.R;
 import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 
+import org.jetbrains.annotations.NotNull;
+
 public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle {
 
     private final static int HANDLE_LONG = 65;
     private final static int HANDLE_SHORT = 40;
     private final static int DEFAULT_TEXT_SIZE = 16;
-    protected TextView textView;
-    protected Context context;
-    private float relativeHandlerMiddle = 0f;
-    private boolean inverted;
-    private PDFView pdfView;
-    private float currentPos;
-    private Handler handler = new Handler(Looper.getMainLooper());
-
-    private Runnable hidePageScrollerRunnable = new Runnable() {
+    protected final TextView textView;
+    protected final Context context;
+    private final boolean inverted;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Runnable hidePageScrollerRunnable = new Runnable() {
         @Override
         public void run() {
             hide();
         }
     };
+    private float relativeHandlerMiddle = 0f;
+    private PDFView pdfView;
+    private float currentPos;
 
     public DefaultScrollHandle(Context context) {
         this(context, false);
@@ -46,34 +48,36 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         this.context = context;
         this.inverted = inverted;
         textView = new TextView(context);
-        setVisibility(INVISIBLE);
+        setVisibility(View.INVISIBLE);
         setTextColor(Color.BLACK);
         setTextSize(DEFAULT_TEXT_SIZE);
     }
 
     @Override
-    public void setupLayout(PDFView pdfView) {
-        int align, width, height;
+    public void setupLayout(@NotNull PDFView pdfView) {
+        int align;
+        int width;
+        int height;
         Drawable background;
         // determine handler position, default is right (when scrolling vertically) or bottom (when scrolling horizontally)
         if (pdfView.isSwipeVertical()) {
             width = HANDLE_LONG;
             height = HANDLE_SHORT;
             if (inverted) { // left
-                align = ALIGN_PARENT_LEFT;
+                align = RelativeLayout.ALIGN_PARENT_LEFT;
                 background = ContextCompat.getDrawable(context, R.drawable.default_scroll_handle_left);
             } else { // right
-                align = ALIGN_PARENT_RIGHT;
+                align = RelativeLayout.ALIGN_PARENT_RIGHT;
                 background = ContextCompat.getDrawable(context, R.drawable.default_scroll_handle_right);
             }
         } else {
             width = HANDLE_SHORT;
             height = HANDLE_LONG;
             if (inverted) { // top
-                align = ALIGN_PARENT_TOP;
+                align = RelativeLayout.ALIGN_PARENT_TOP;
                 background = ContextCompat.getDrawable(context, R.drawable.default_scroll_handle_top);
             } else { // bottom
-                align = ALIGN_PARENT_BOTTOM;
+                align = RelativeLayout.ALIGN_PARENT_BOTTOM;
                 background = ContextCompat.getDrawable(context, R.drawable.default_scroll_handle_bottom);
             }
         }
@@ -131,7 +135,9 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private void calculateMiddle() {
-        float pos, viewSize, pdfViewSize;
+        float pos;
+        float viewSize;
+        float pdfViewSize;
         if (pdfView.isSwipeVertical()) {
             pos = getY();
             viewSize = getHeight();
@@ -163,17 +169,17 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     @Override
     public boolean shown() {
-        return getVisibility() == VISIBLE;
+        return getVisibility() == View.VISIBLE;
     }
 
     @Override
     public void show() {
-        setVisibility(VISIBLE);
+        setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hide() {
-        setVisibility(INVISIBLE);
+        setVisibility(View.INVISIBLE);
     }
 
     public void setTextColor(int color) {

@@ -2,12 +2,7 @@ package com.ahmer.ahmerpdf;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,7 +24,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.ahmer.afzal.pdfium.Bookmark;
 import com.ahmer.afzal.pdfium.PdfPasswordException;
 import com.ahmer.afzal.pdfviewer.link.DefaultLinkHandler;
-import com.ahmer.afzal.pdfviewer.listener.OnDrawListener;
 import com.ahmer.afzal.pdfviewer.listener.OnLoadCompleteListener;
 import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
@@ -57,6 +51,16 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     private SPUtils prefSwab = null;
     private ActivityPdfBinding binding;
 
+    private static void printBookmarksTree(List<Bookmark> tree, String sep) {
+        for (Bookmark bookmark : tree) {
+            Log.v(MainActivity.TAG, String.format(Locale.getDefault(), "%s %s, Page %d", sep,
+                    bookmark.getTitle(), bookmark.getPageIdx()));
+            if (bookmark.hasChildren()) {
+                printBookmarksTree(bookmark.getChildren(), sep + "-");
+            }
+        }
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,70 +73,60 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
             overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
         });
         binding.toolbar.setOnMenuItemClickListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.menuPdfInfo:
-                    try {
-                        DialogMoreInfo dialogMoreInfo = new DialogMoreInfo(PdfActivity.this,
-                                binding.pdfView, PdfFileUtils.fileFromAsset(PdfActivity.this, pdfFile));
-                        Window dialogMoreInfoWindow = dialogMoreInfo.getWindow();
-                        Objects.requireNonNull(dialogMoreInfoWindow).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                        dialogMoreInfo.show();
-                        dialogMoreInfoWindow.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-
-                case R.id.menuPdfJumpTo:
-                    DialogJumpTo dialogJumpTo = new DialogJumpTo(PdfActivity.this, numPage -> {
-                        if (numPage > totalPages) {
-                            ToastUtils.showShort(getString(R.string.no_page));
-                        } else {
-                            binding.pdfView.jumpTo(numPage - 1, true);
-                        }
-                    });
-                    Window window = dialogJumpTo.getWindow();
-                    Objects.requireNonNull(window).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    dialogJumpTo.show();
-                    window.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    break;
-
-                case R.id.menuPdfSwitchView:
-                    if (!isHorizontal) {
-                        isHorizontal = true;
-                        prefSwab.put("rememberSwipe", true);
-                        binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setIcon(R.drawable.ic_menu_pdf_vertical);
+            if (item.getItemId() == R.id.menuPdfInfo) {
+                try {
+                    DialogMoreInfo dialogMoreInfo = new DialogMoreInfo(PdfActivity.this,
+                            binding.pdfView, PdfFileUtils.fileFromAsset(PdfActivity.this, pdfFile));
+                    Window dialogMoreInfoWindow = dialogMoreInfo.getWindow();
+                    Objects.requireNonNull(dialogMoreInfoWindow).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialogMoreInfo.show();
+                    dialogMoreInfoWindow.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (item.getItemId() == R.id.menuPdfJumpTo) {
+                DialogJumpTo dialogJumpTo = new DialogJumpTo(PdfActivity.this, numPage -> {
+                    if (numPage > totalPages) {
+                        ToastUtils.showShort(getString(R.string.no_page));
                     } else {
-                        isHorizontal = false;
-                        prefSwab.put("rememberSwipe", false);
-                        binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setIcon(R.drawable.ic_menu_pdf_horizontal);
+                        binding.pdfView.jumpTo(numPage - 1, true);
                     }
-                    displayFromAsset();
-                    break;
+                });
+                Window window = dialogJumpTo.getWindow();
+                Objects.requireNonNull(window).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialogJumpTo.show();
+                window.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            } else if (item.getItemId() == R.id.menuPdfSwitchView) {
+                if (!isHorizontal) {
+                    isHorizontal = true;
+                    prefSwab.put("rememberSwipe", true);
+                    binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setIcon(R.drawable.ic_menu_pdf_vertical);
+                } else {
+                    isHorizontal = false;
+                    prefSwab.put("rememberSwipe", false);
+                    binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setIcon(R.drawable.ic_menu_pdf_horizontal);
+                }
+                displayFromAsset();
+            } else if (item.getItemId() == R.id.menuPdfNightMode) {
 
-                case R.id.menuPdfNightMode:
-                    if (!isNightMode) {
-                        isNightMode = true;
-                        binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setIcon(R.drawable.ic_menu_pdf_sun);
-                    } else {
-                        isNightMode = false;
-                        binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setIcon(R.drawable.ic_menu_pdf_moon);
-                    }
-                    displayFromAsset();
-                    break;
-
-                case R.id.menuPdfSearch:
-                    /*if (binding.layoutSearch.getVisibility() != View.VISIBLE) {
-                        binding.layoutSearch.setVisibility(View.VISIBLE);
-                    } else {
-                        binding.etSearch.setText("");
-                        binding.layoutSearch.setVisibility(View.GONE);
-                    }*/
-                    ToastUtils.showLong(getString(R.string.under_progress));
-                    break;
-
-                default:
-                    break;
+                if (!isNightMode) {
+                    isNightMode = true;
+                    binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setIcon(R.drawable.ic_menu_pdf_sun);
+                } else {
+                    isNightMode = false;
+                    binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setIcon(R.drawable.ic_menu_pdf_moon);
+                }
+                displayFromAsset();
+            } else if (item.getItemId() == R.id.menuPdfSearch) {
+                /*
+                if (binding.layoutSearch.getVisibility() != View.VISIBLE) {
+                    binding.layoutSearch.setVisibility(View.VISIBLE);
+                } else {
+                    binding.etSearch.setText("");
+                    binding.layoutSearch.setVisibility(View.GONE);
+                }
+                */
+                ToastUtils.showLong(getString(R.string.under_progress));
             }
             return false;
         });
@@ -218,7 +212,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     }
 
     private void showPasswordDialog() {
-        final Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(this);
         try {
             Objects.requireNonNull(dialog.getWindow()).requestFeature(Window.FEATURE_NO_TITLE);
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -295,16 +289,6 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         binding.toolbar.getMenu().findItem(R.id.menuPdfJumpTo).setEnabled(true);
         binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setEnabled(true);
         binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setEnabled(true);
-    }
-
-    private void printBookmarksTree(List<Bookmark> tree, String sep) {
-        for (Bookmark bookmark : tree) {
-            Log.v(MainActivity.TAG, String.format(Locale.getDefault(), "%s %s, Page %d", sep,
-                    bookmark.getTitle(), bookmark.getPageIdx()));
-            if (bookmark.hasChildren()) {
-                printBookmarksTree(bookmark.getChildren(), sep + "-");
-            }
-        }
     }
 
     @Override

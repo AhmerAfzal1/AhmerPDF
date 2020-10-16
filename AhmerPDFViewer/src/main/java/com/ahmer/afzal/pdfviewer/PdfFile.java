@@ -15,6 +15,8 @@ import com.ahmer.afzal.pdfviewer.exception.PageRenderingException;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.pdfviewer.util.PageSizeCalculator;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,20 +30,44 @@ class PdfFile {
      */
     private final boolean fitEachPage;
     private final boolean isLandscape;
-    private PdfiumCore pdfiumCore;
-    private int pagesCount = 0;
+    private final PdfiumCore pdfiumCore;
     /**
      * Original page sizes
      */
-    private List<Size> originalPageSizes = new ArrayList<>();
+    private final List<Size> originalPageSizes = new ArrayList<>();
     /**
      * Scaled page sizes
      */
-    private List<SizeF> pageSizes = new ArrayList<>();
+    private final List<SizeF> pageSizes = new ArrayList<>();
     /**
      * Opened pages with indicator whether opening was successful
      */
-    private SparseBooleanArray openedPages = new SparseBooleanArray();
+    private final SparseBooleanArray openedPages = new SparseBooleanArray();
+    /**
+     * True if dualPageMode is on
+     */
+    private final boolean showTwoPages;
+    /**
+     * True if scrolling is vertical, else it's horizontal
+     */
+    private final boolean isVertical;
+    /**
+     * Fixed spacing between pages in pixels
+     */
+    private final int spacingPx;
+    /**
+     * Calculate spacing automatically so each page fits on it's own in the center of the view
+     */
+    private final boolean autoSpacing;
+    /**
+     * Calculated offsets for pages
+     */
+    private final List<Float> pageOffsets = new ArrayList<>();
+    /**
+     * Calculated auto spacing for pages
+     */
+    private final List<Float> pageSpacing = new ArrayList<>();
+    private int pagesCount = 0;
     /**
      * Page with maximum width
      */
@@ -58,30 +84,6 @@ class PdfFile {
      * Scaled page with maximum width
      */
     private SizeF maxWidthPageSize = new SizeF(0, 0);
-    /**
-     * True if dualPageMode is on
-     */
-    private boolean showTwoPages;
-    /**
-     * True if scrolling is vertical, else it's horizontal
-     */
-    private boolean isVertical;
-    /**
-     * Fixed spacing between pages in pixels
-     */
-    private int spacingPx;
-    /**
-     * Calculate spacing automatically so each page fits on it's own in the center of the view
-     */
-    private boolean autoSpacing;
-    /**
-     * Calculated offsets for pages
-     */
-    private List<Float> pageOffsets = new ArrayList<>();
-    /**
-     * Calculated auto spacing for pages
-     */
-    private List<Float> pageSpacing = new ArrayList<>();
     /**
      * Calculated document length (width or height, depending on swipe mode)
      */
@@ -100,7 +102,7 @@ class PdfFile {
         this.pageFitPolicy = pageFitPolicy;
         this.originalUserPages = originalUserPages;
         this.isVertical = isVertical;
-        this.spacingPx = spacing;
+        spacingPx = spacing;
         this.autoSpacing = autoSpacing;
         this.fitEachPage = fitEachPage;
         this.isLandscape = isLandscape;
@@ -319,7 +321,7 @@ class PdfFile {
         return !openedPages.get(docPage, false);
     }
 
-    public void renderPageBitmap(Bitmap bitmap, int pageIndex, Rect bounds, boolean annotationRendering) {
+    public void renderPageBitmap(Bitmap bitmap, int pageIndex, @NotNull Rect bounds, boolean annotationRendering) {
         int docPage = documentPage(pageIndex);
         pdfiumCore.renderPageBitmap(bitmap, docPage, bounds.left, bounds.top, bounds.width(),
                 bounds.height(), annotationRendering);

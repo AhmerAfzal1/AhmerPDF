@@ -22,5 +22,23 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-project.ext.set("pdfViewerVersion", '2.7.4')
-project.ext.set("pdfiumVersion", '7.6.5')
+Properties properties = new Properties()
+properties.load(new FileInputStream("local.properties"))
+
+project.ext {
+    set("idPdfViewerVersion", '2.8.0')
+    set("idPdfiumVersion", '7.7.0')
+    set("idUser", properties.getProperty("bintray.user"))
+    set("idPass", properties.getProperty("bintray.apikey"))
+    set("idDeveloperID", 'ahmerafzal')
+    set("idDeveloperName", 'Ahmer Afzal')
+    set("idDeveloperEmail", 'ahmerafzal@yahoo.com')
+    set("idGroup", 'com.github.ahmerafzal1')
+    set("idRepo", 'maven')
+    set("idUrl", 'https://github.com/AhmerAfzal1/AhmerPDF')
+    set("idVcsUrl", 'https://github.com/AhmerAfzal1/AhmerPDF.git')
+    set("idArtifactPdfium", 'AhmerPdfium')
+    set("idDescriptionPdfium", 'Ahmer Pdfium Library for Android (API 16) binding')
+    set("idArtifactPdfViewer", 'AhmerPDFViewer')
+    set("idDescriptionPdfViewer", 'Android view for displaying PDFs rendered with PdfiumAndroid')
+}

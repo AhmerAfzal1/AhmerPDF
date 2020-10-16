@@ -13,6 +13,8 @@ import com.ahmer.afzal.pdfviewer.model.LinkTapEvent;
 import com.ahmer.afzal.pdfviewer.scroll.ScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.SnapEdge;
 
+import org.jetbrains.annotations.NotNull;
+
 import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Pinch.MAXIMUM_ZOOM;
 import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Pinch.MINIMUM_ZOOM;
 
@@ -23,15 +25,15 @@ import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Pinch.MINIMUM_ZOOM;
 class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener,
         ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
 
-    private PDFView pdfView;
-    private AnimationManager animationManager;
-    private GestureDetector gestureDetector;
-    private ScaleGestureDetector scaleGestureDetector;
+    private final PDFView pdfView;
+    private final AnimationManager animationManager;
+    private final GestureDetector gestureDetector;
+    private final ScaleGestureDetector scaleGestureDetector;
     private boolean scrolling = false;
     private boolean scaling = false;
     private boolean enabled = false;
 
-    DragPinchManager(PDFView pdfView, AnimationManager animationManager) {
+    DragPinchManager(@NotNull PDFView pdfView, AnimationManager animationManager) {
         this.pdfView = pdfView;
         this.animationManager = animationManager;
         gestureDetector = new GestureDetector(pdfView.getContext(), this);
@@ -78,7 +80,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         float mappedY = -pdfView.getCurrentYOffset() + y;
         int page = pdfFile.getPageAtOffset(pdfView.isSwipeVertical() ? mappedY : mappedX, pdfView.getZoom());
         SizeF pageSize = pdfFile.getScaledPageSize(page, pdfView.getZoom());
-        int pageX, pageY;
+        int pageX;
+        int pageY;
         if (pdfView.isSwipeVertical()) {
             pageX = (int) pdfFile.getSecondaryPageOffset(page, pdfView.getZoom());
             pageY = (int) pdfFile.getPageOffset(page, pdfView.getZoom());
@@ -196,7 +199,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         }
         int xOffset = (int) pdfView.getCurrentXOffset();
         int yOffset = (int) pdfView.getCurrentYOffset();
-        float minX, minY;
+        float minX;
+        float minY;
         PdfFile pdfFile = pdfView.pdfFile;
         if (pdfView.isSwipeVertical()) {
             minX = -(pdfView.toCurrentScale(pdfFile.getMaxPageWidth()) - pdfView.getWidth());
@@ -217,7 +221,10 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         PdfFile pdfFile = pdfView.pdfFile;
         float pageStart = -pdfFile.getPageOffset(pdfView.getCurrentPage(), pdfView.getZoom());
         float pageEnd = pageStart - pdfFile.getPageLength(pdfView.getCurrentPage(), pdfView.getZoom());
-        float minX, minY, maxX, maxY;
+        float minX;
+        float minY;
+        float maxX;
+        float maxY;
         if (pdfView.isSwipeVertical()) {
             minX = -(pdfView.toCurrentScale(pdfFile.getMaxPageWidth()) - pdfView.getWidth());
             minY = pageEnd + pdfView.getHeight();
@@ -236,7 +243,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     }
 
     @Override
-    public boolean onScale(ScaleGestureDetector detector) {
+    public boolean onScale(@NotNull ScaleGestureDetector detector) {
         float dr = detector.getScaleFactor();
         float wantedZoom = pdfView.getZoom() * dr;
         float minZoom = Math.min(MINIMUM_ZOOM, pdfView.getMinZoom());

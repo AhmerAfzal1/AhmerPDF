@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 
 import com.ahmer.afzal.pdfviewer.model.PagePart;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -30,13 +32,26 @@ class CacheManager {
     }
 
     @Nullable
-    private static PagePart find(PriorityQueue<PagePart> vector, PagePart fakePart) {
+    private static PagePart find(@NotNull PriorityQueue<PagePart> vector, PagePart fakePart) {
         for (PagePart part : vector) {
             if (part.equals(fakePart)) {
                 return part;
             }
         }
         return null;
+    }
+
+    /**
+     * Add part if it doesn't exist, recycle bitmap otherwise
+     */
+    private static void addWithoutDuplicates(@NotNull Collection<PagePart> collection, PagePart newPart) {
+        for (PagePart part : collection) {
+            if (part.equals(newPart)) {
+                newPart.getRenderedBitmap().recycle();
+                return;
+            }
+        }
+        collection.add(newPart);
     }
 
     public void cachePart(PagePart part) {
@@ -117,19 +132,6 @@ class CacheManager {
         }
     }
 
-    /**
-     * Add part if it doesn't exist, recycle bitmap otherwise
-     */
-    private void addWithoutDuplicates(Collection<PagePart> collection, PagePart newPart) {
-        for (PagePart part : collection) {
-            if (part.equals(newPart)) {
-                newPart.getRenderedBitmap().recycle();
-                return;
-            }
-        }
-        collection.add(newPart);
-    }
-
     public List<PagePart> getPageParts() {
         synchronized (passiveActiveLock) {
             List<PagePart> parts = new ArrayList<>(passiveCache);
@@ -165,7 +167,7 @@ class CacheManager {
 
     static class PagePartComparator implements Comparator<PagePart> {
         @Override
-        public int compare(PagePart part1, PagePart part2) {
+        public int compare(@NotNull PagePart part1, @NotNull PagePart part2) {
             if (part1.getCacheOrder() == part2.getCacheOrder()) {
                 return 0;
             }

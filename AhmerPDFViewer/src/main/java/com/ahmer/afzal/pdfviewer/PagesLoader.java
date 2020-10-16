@@ -9,6 +9,8 @@ import com.ahmer.afzal.pdfviewer.util.MathUtils;
 import com.ahmer.afzal.pdfviewer.util.PdfConstants;
 import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,22 +30,22 @@ class PagesLoader {
     private float partRenderWidth;
     private float partRenderHeight;
 
-    PagesLoader(PDFView pdfView) {
+    PagesLoader(@NotNull PDFView pdfView) {
         this.pdfView = pdfView;
-        this.preloadOffset = PdfUtils.getDP(pdfView.getContext(), PRELOAD_OFFSET);
+        preloadOffset = PdfUtils.getDP(pdfView.getContext(), PRELOAD_OFFSET);
     }
 
-    private void getPageColsRows(GridSize grid, int pageIndex) {
+    private void getPageColsRows(@NotNull GridSize grid, int pageIndex) {
         SizeF size = pdfView.pdfFile.getPageSize(pageIndex);
         float ratioX = 1f / size.getWidth();
         float ratioY = 1f / size.getHeight();
-        final float partHeight = (PdfConstants.PART_SIZE * ratioY) / pdfView.getZoom();
-        final float partWidth = (PdfConstants.PART_SIZE * ratioX) / pdfView.getZoom();
+        float partHeight = (PdfConstants.PART_SIZE * ratioY) / pdfView.getZoom();
+        float partWidth = (PdfConstants.PART_SIZE * ratioX) / pdfView.getZoom();
         grid.rows = MathUtils.ceil(1f / partHeight);
         grid.cols = MathUtils.ceil(1f / partWidth);
     }
 
-    private void calculatePartSize(GridSize grid) {
+    private void calculatePartSize(@NotNull GridSize grid) {
         pageRelativePartWidth = 1f / (float) grid.cols;
         pageRelativePartHeight = 1f / (float) grid.rows;
         partRenderWidth = PdfConstants.PART_SIZE / pageRelativePartWidth;
@@ -53,8 +55,8 @@ class PagesLoader {
     /**
      * calculate the render range of each page
      */
-    private List<RenderRange> getRenderRangeList(float firstXOffset, float firstYOffset,
-                                                 float lastXOffset, float lastYOffset) {
+    private @NotNull List<RenderRange> getRenderRangeList(float firstXOffset, float firstYOffset,
+                                                          float lastXOffset, float lastYOffset) {
 
         float fixedFirstXOffset = -MathUtils.max(firstXOffset, 0);
         float fixedFirstYOffset = -MathUtils.max(firstYOffset, 0);
@@ -71,7 +73,10 @@ class PagesLoader {
             RenderRange range = new RenderRange();
             range.page = page;
 
-            float pageFirstXOffset, pageFirstYOffset, pageLastXOffset, pageLastYOffset;
+            float pageFirstXOffset;
+            float pageFirstYOffset;
+            float pageLastXOffset;
+            float pageLastYOffset;
             if (page == firstPage) {
                 pageFirstXOffset = fixedFirstXOffset;
                 pageFirstYOffset = fixedFirstYOffset;
@@ -283,10 +288,10 @@ class PagesLoader {
         int page;
 
         RenderRange() {
-            this.page = 0;
-            this.gridSize = new GridSize();
-            this.leftTop = new Holder();
-            this.rightBottom = new Holder();
+            page = 0;
+            gridSize = new GridSize();
+            leftTop = new Holder();
+            rightBottom = new Holder();
         }
 
         @NonNull

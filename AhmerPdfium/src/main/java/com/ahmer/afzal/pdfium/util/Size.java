@@ -21,7 +21,7 @@ public class Size {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -43,7 +43,7 @@ public class Size {
 
     @Override
     public int hashCode() {
-        // assuming most sizes are <2^16, doing a rotate will give us perfect hashing
+        // Assuming most sizes are <2^16, doing a rotate will give us perfect hashing
         return height ^ ((width << (Integer.SIZE / 2)) | (width >>> (Integer.SIZE / 2)));
     }
 }

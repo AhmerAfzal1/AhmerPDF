@@ -16,6 +16,8 @@ import android.util.Log;
 import com.ahmer.afzal.pdfviewer.exception.PageRenderingException;
 import com.ahmer.afzal.pdfviewer.model.PagePart;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A {@link Handler} that will process incoming {@link RenderingTask} messages
  * and alert {@link PDFView#onBitmapRendered(PagePart)} when the portion of the
@@ -38,6 +40,31 @@ class RenderingHandler extends Handler {
         this.pdfView = pdfView;
     }
 
+    private static Bitmap toNightMode(Bitmap bmpOriginal, boolean bestQuality) {
+        int width;
+        int height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+        Bitmap nightModeBitmap = Bitmap.createBitmap(width, height,
+                bestQuality ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+        Canvas c = new Canvas(nightModeBitmap);
+        Paint paint = new Paint();
+        ColorMatrix grayScaleMatrix = new ColorMatrix();
+        grayScaleMatrix.setSaturation(0);
+        ColorMatrix invertMatrix =
+                new ColorMatrix(new float[]{
+                        -1, 0, 0, 0, 255,
+                        0, -1, 0, 0, 255,
+                        0, 0, -1, 0, 255,
+                        0, 0, 0, 1, 0});
+        ColorMatrix nightModeMatrix = new ColorMatrix();
+        nightModeMatrix.postConcat(grayScaleMatrix);
+        nightModeMatrix.postConcat(invertMatrix);
+        paint.setColorFilter(new ColorMatrixColorFilter(nightModeMatrix));
+        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        return nightModeBitmap;
+    }
+
     void addRenderingTask(int page, float width, float height, RectF bounds, boolean thumbnail,
                           int cacheOrder, boolean bestQuality, boolean annotationRendering) {
         RenderingTask task = new RenderingTask(width, height, bounds, page, thumbnail, cacheOrder,
@@ -50,7 +77,7 @@ class RenderingHandler extends Handler {
     public void handleMessage(Message message) {
         RenderingTask task = (RenderingTask) message.obj;
         try {
-            final PagePart part = proceed(task);
+            PagePart part = proceed(task);
             if (part != null) {
                 if (running) {
                     pdfView.post(new Runnable() {
@@ -63,7 +90,7 @@ class RenderingHandler extends Handler {
                     part.getRenderedBitmap().recycle();
                 }
             }
-        } catch (final PageRenderingException ex) {
+        } catch (PageRenderingException ex) {
             pdfView.post(new Runnable() {
                 @Override
                 public void run() {
@@ -73,7 +100,7 @@ class RenderingHandler extends Handler {
         }
     }
 
-    private PagePart proceed(RenderingTask renderingTask) throws PageRenderingException {
+    private PagePart proceed(@NotNull RenderingTask renderingTask) throws PageRenderingException {
         PdfFile pdfFile = pdfView.pdfFile;
         pdfFile.openPage(renderingTask.page);
         int w = Math.round(renderingTask.width);
@@ -99,7 +126,7 @@ class RenderingHandler extends Handler {
                 renderingTask.thumbnail, renderingTask.cacheOrder);
     }
 
-    private void calculateBounds(int width, int height, RectF pageSliceBounds) {
+    private void calculateBounds(int width, int height, @NotNull RectF pageSliceBounds) {
         renderMatrix.reset();
         renderMatrix.postTranslate(-pageSliceBounds.left * width, -pageSliceBounds.top * height);
         renderMatrix.postScale(1 / pageSliceBounds.width(), 1 / pageSliceBounds.height());
@@ -114,29 +141,6 @@ class RenderingHandler extends Handler {
 
     void start() {
         running = true;
-    }
-
-    private Bitmap toNightMode(Bitmap bmpOriginal, boolean bestQuality) {
-        int width, height;
-        height = bmpOriginal.getHeight();
-        width = bmpOriginal.getWidth();
-        Bitmap nightModeBitmap = Bitmap.createBitmap(width, height, bestQuality ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
-        Canvas c = new Canvas(nightModeBitmap);
-        Paint paint = new Paint();
-        ColorMatrix grayScaleMatrix = new ColorMatrix();
-        grayScaleMatrix.setSaturation(0);
-        ColorMatrix invertMatrix =
-                new ColorMatrix(new float[]{
-                        -1, 0, 0, 0, 255,
-                        0, -1, 0, 0, 255,
-                        0, 0, -1, 0, 255,
-                        0, 0, 0, 1, 0});
-        ColorMatrix nightModeMatrix = new ColorMatrix();
-        nightModeMatrix.postConcat(grayScaleMatrix);
-        nightModeMatrix.postConcat(invertMatrix);
-        paint.setColorFilter(new ColorMatrixColorFilter(nightModeMatrix));
-        c.drawBitmap(bmpOriginal, 0, 0, paint);
-        return nightModeBitmap;
     }
 
     private static class RenderingTask {

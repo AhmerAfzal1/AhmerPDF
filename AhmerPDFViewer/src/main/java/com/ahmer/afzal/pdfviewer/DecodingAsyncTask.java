@@ -5,24 +5,30 @@ import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfviewer.async.AsyncTask;
 import com.ahmer.afzal.pdfviewer.source.DocumentSource;
 
+import org.jetbrains.annotations.NotNull;
+
 class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
+    private final PDFView pdfView;
+    private final PdfiumCore pdfiumCore;
+    private final String password;
+    private final DocumentSource docSource;
+    private final int[] userPages;
     private boolean cancelled;
-    private PDFView pdfView;
-    private PdfiumCore pdfiumCore;
-    private String password;
-    private DocumentSource docSource;
-    private int[] userPages;
     private PdfFile pdfFile;
 
     DecodingAsyncTask(DocumentSource docSource, String password, int[] userPages, PDFView pdfView,
                       PdfiumCore pdfiumCore) {
         this.docSource = docSource;
         this.userPages = userPages;
-        this.cancelled = false;
         this.pdfView = pdfView;
         this.password = password;
         this.pdfiumCore = pdfiumCore;
+        cancelled = false;
+    }
+
+    private static Size getViewSize(@NotNull PDFView pdfView) {
+        return new Size(pdfView.getWidth(), pdfView.getHeight());
     }
 
     @Override
@@ -65,11 +71,6 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        this.cancelled = true;
+        cancelled = true;
     }
-
-    private Size getViewSize(PDFView pdfView) {
-        return new Size(pdfView.getWidth(), pdfView.getHeight());
-    }
-
 }
