@@ -35,6 +35,8 @@ import com.ahmer.afzal.utils.utilcode.ThrowableUtils;
 import com.ahmer.afzal.utils.utilcode.ToastUtils;
 import com.ahmer.ahmerpdf.databinding.ActivityPdfBinding;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -50,16 +52,6 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     private SPUtils prefPage = null;
     private SPUtils prefSwab = null;
     private ActivityPdfBinding binding;
-
-    private static void printBookmarksTree(List<Bookmark> tree, String sep) {
-        for (Bookmark bookmark : tree) {
-            Log.v(MainActivity.TAG, String.format(Locale.getDefault(), "%s %s, Page %d", sep,
-                    bookmark.getTitle(), bookmark.getPageIdx()));
-            if (bookmark.hasChildren()) {
-                printBookmarksTree(bookmark.getChildren(), sep + "-");
-            }
-        }
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -261,11 +253,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    if (TextUtils.isEmpty(s)) {
-                        open.setClickable(false);
-                    } else {
-                        open.setClickable(true);
-                    }
+                    open.setClickable(!TextUtils.isEmpty(s));
                 }
             });
             dialog.show();
@@ -289,6 +277,16 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         binding.toolbar.getMenu().findItem(R.id.menuPdfJumpTo).setEnabled(true);
         binding.toolbar.getMenu().findItem(R.id.menuPdfSwitchView).setEnabled(true);
         binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setEnabled(true);
+    }
+
+    private void printBookmarksTree(@NotNull List<Bookmark> tree, String sep) {
+        for (Bookmark bookmark : tree) {
+            Log.v(MainActivity.TAG, String.format(Locale.getDefault(), "%s %s, Page %d", sep,
+                    bookmark.getTitle(), bookmark.getPageIdx()));
+            if (bookmark.hasChildren()) {
+                printBookmarksTree(bookmark.getChildren(), sep + "-");
+            }
+        }
     }
 
     @Override

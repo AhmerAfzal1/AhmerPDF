@@ -17,6 +17,7 @@ import com.ahmer.afzal.pdfviewer.exception.PageRenderingException;
 import com.ahmer.afzal.pdfviewer.model.PagePart;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A {@link Handler} that will process incoming {@link RenderingTask} messages
@@ -40,7 +41,7 @@ class RenderingHandler extends Handler {
         this.pdfView = pdfView;
     }
 
-    private static Bitmap toNightMode(Bitmap bmpOriginal, boolean bestQuality) {
+    private static Bitmap toNightMode(@NotNull Bitmap bmpOriginal, boolean bestQuality) {
         int width;
         int height;
         height = bmpOriginal.getHeight();
@@ -74,7 +75,7 @@ class RenderingHandler extends Handler {
     }
 
     @Override
-    public void handleMessage(Message message) {
+    public void handleMessage(@NotNull Message message) {
         RenderingTask task = (RenderingTask) message.obj;
         try {
             PagePart part = proceed(task);
@@ -100,7 +101,7 @@ class RenderingHandler extends Handler {
         }
     }
 
-    private PagePart proceed(@NotNull RenderingTask renderingTask) throws PageRenderingException {
+    private @Nullable PagePart proceed(@NotNull RenderingTask renderingTask) throws PageRenderingException {
         PdfFile pdfFile = pdfView.pdfFile;
         pdfFile.openPage(renderingTask.page);
         int w = Math.round(renderingTask.width);
