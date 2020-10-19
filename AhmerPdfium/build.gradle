@@ -121,6 +121,6 @@ bintray {
 }
 
 dependencies {
-    implementation 'androidx.core:core:1.5.0-alpha04'
+    implementation 'androidx.collection:collection:1.1.0'
     implementation 'org.jetbrains:annotations:15.0'
 }
