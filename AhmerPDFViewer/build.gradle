@@ -116,7 +116,7 @@ bintray {
 
 dependencies {
     implementation project(path: ':AhmerPdfium')
-    implementation 'com.github.ahmerafzal1:AhmerUtils:4.1.2'
+    implementation 'com.github.ahmerafzal1:AhmerUtils:4.2.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'org.jetbrains:annotations:15.0'
+    implementation 'org.jetbrains:annotations:20.1.0'
 }

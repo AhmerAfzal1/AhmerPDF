@@ -122,5 +122,5 @@ bintray {
 
 dependencies {
     implementation 'androidx.collection:collection:1.1.0'
-    implementation 'org.jetbrains:annotations:15.0'
+    implementation 'org.jetbrains:annotations:20.1.0'
 }
