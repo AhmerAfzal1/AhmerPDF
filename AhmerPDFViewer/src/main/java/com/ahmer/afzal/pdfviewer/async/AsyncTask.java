@@ -118,7 +118,7 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
      * @throws Exception Any uncought exception which occurred while working in background. If
      *                   any occurs, {@link #onBackgroundError(Exception)} will be executed (on the UI thread)
      */
-    protected abstract OUTPUT doInBackground(INPUT input) throws Exception;
+    protected abstract OUTPUT doInBackground(INPUT input);
 
     /**
      * Work which you want to be done on UI thread after {@link #doInBackground(Object)}
