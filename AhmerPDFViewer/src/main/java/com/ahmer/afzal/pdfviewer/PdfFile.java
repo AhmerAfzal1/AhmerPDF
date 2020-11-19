@@ -14,11 +14,14 @@ import com.ahmer.afzal.pdfium.util.SizeF;
 import com.ahmer.afzal.pdfviewer.exception.PageRenderingException;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.pdfviewer.util.PageSizeCalculator;
+import com.ahmer.afzal.pdfviewer.util.PdfConstants;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 class PdfFile {
 
@@ -30,6 +33,7 @@ class PdfFile {
      */
     private final boolean fitEachPage;
     private final boolean isLandscape;
+    private final Queue<Integer> openedPageQueue;
     private final PdfiumCore pdfiumCore;
     /**
      * Original page sizes
@@ -106,6 +110,7 @@ class PdfFile {
         this.autoSpacing = autoSpacing;
         this.fitEachPage = fitEachPage;
         this.isLandscape = isLandscape;
+        this.openedPageQueue = new LinkedList<>();
         setup(viewSize);
     }
 
@@ -306,6 +311,18 @@ class PdfFile {
                 try {
                     pdfiumCore.openPage(docPage);
                     openedPages.put(docPage, true);
+                    /*
+                     *Memory management
+                     *Fix memory leak https://github.com/barteksc/AndroidPdfViewer/issues/495
+                     */
+                    openedPageQueue.add(pageIndex);
+                    if (openedPageQueue != null) {
+                        if (openedPageQueue.size() > PdfConstants.MAX_PAGES) {
+                            int oldPage = openedPageQueue.poll();
+                            pdfiumCore.closePage(oldPage);
+                            openedPages.delete(oldPage);
+                        }
+                    }
                     return true;
                 } catch (Exception e) {
                     openedPages.put(docPage, false);

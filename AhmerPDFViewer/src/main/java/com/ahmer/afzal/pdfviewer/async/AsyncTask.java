@@ -12,6 +12,13 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
     }
 
     /**
+     * @see #execute(Object)
+     */
+    public AsyncTask<INPUT, PROGRESS, OUTPUT> execute() {
+        return execute(null);
+    }
+
+    /**
      * Starts is all
      *
      * @param input Data you want to work with in the background
@@ -23,15 +30,27 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                final OUTPUT output = AsyncTask.this.doInBackground(input);
-                AsyncWorker.getInstance().getHandler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        AsyncTask.this.onPostExecute(output);
-                    }
-                });
+                try {
+                    final OUTPUT output = AsyncTask.this.doInBackground(input);
+                    AsyncWorker.getInstance().getHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            AsyncTask.this.onPostExecute(output);
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+
+                    AsyncWorker.getInstance().getHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            AsyncTask.this.onBackgroundError(e);
+                        }
+                    });
+                }
             }
         });
+
         return this;
     }
 
@@ -44,11 +63,16 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
         AsyncWorker.getInstance().getHandler().post(new Runnable() {
             @Override
             public void run() {
+                onProgress(progress);
                 if (onProgressListener != null) {
                     onProgressListener.onProgress(progress);
                 }
             }
         });
+    }
+
+    protected void onProgress(final PROGRESS progress) {
+
     }
 
     /**
@@ -91,8 +115,10 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
      *
      * @param input Input data
      * @return Output data
+     * @throws Exception Any uncought exception which occurred while working in background. If
+     *                   any occurs, {@link #onBackgroundError(Exception)} will be executed (on the UI thread)
      */
-    protected abstract OUTPUT doInBackground(INPUT input);
+    protected abstract OUTPUT doInBackground(INPUT input) throws Exception;
 
     /**
      * Work which you want to be done on UI thread after {@link #doInBackground(Object)}
@@ -102,6 +128,14 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
     protected void onPostExecute(OUTPUT output) {
 
     }
+
+    /**
+     * Triggered on UI thread if any uncought exception occurred while working in background
+     *
+     * @param e Exception
+     * @see #doInBackground(Object)
+     */
+    protected abstract void onBackgroundError(Exception e);
 
     public void setOnProgressListener(OnProgressListener<PROGRESS> onProgressListener) {
         this.onProgressListener = onProgressListener;

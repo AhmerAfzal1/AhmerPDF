@@ -21,6 +21,11 @@ public class PdfConstants {
      */
     public static final int PRELOAD_OFFSET = 30; // Default 20
 
+    /**
+     * Max pages to load at the time, others are in queue
+     */
+    public static final int MAX_PAGES = 15;
+
     public static class Cache {
 
         /**
