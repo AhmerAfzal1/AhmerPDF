@@ -129,14 +129,6 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
 
     }
 
-    /**
-     * Triggered on UI thread if any uncought exception occurred while working in background
-     *
-     * @param e Exception
-     * @see #doInBackground(Object)
-     */
-    protected abstract void onBackgroundError(Exception e);
-
     public void setOnProgressListener(OnProgressListener<PROGRESS> onProgressListener) {
         this.onProgressListener = onProgressListener;
     }
