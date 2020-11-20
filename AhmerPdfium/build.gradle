@@ -16,12 +16,24 @@ android {
         versionCode 1
         versionName project.idPdfiumVersion
         consumerProguardFiles 'consumer-rules.pro'
+
+        ndk {
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_static',
+                        '-DANDROID_PLATFORM=android-19',
+                        '-DANDROID_ARM_NEON=TRUE'
+                cppFlags '-std=c++17 -frtti -fexceptions'
+            }
+        }
     }
 
-    sourceSets {
-        main {
-            jni.srcDirs = []
-            jniLibs.srcDir 'src/main/libs'
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
         }
     }
 
@@ -48,7 +60,7 @@ android {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set("sources")
+    archiveClassifier.set('sources')
 }
 
 task javadoc(type: Javadoc) {
@@ -57,7 +69,7 @@ task javadoc(type: Javadoc) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set("javadoc")
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
@@ -114,13 +126,14 @@ bintray {
         desc = project.idDescriptionPdfium
         websiteUrl = project.idUrl
         vcsUrl = project.idVcsUrl
-        licenses = ["Apache-2.0"]
+        licenses = ['Apache-2.0']
         publish = true
         publicDownloadNumbers = true
     }
 }
 
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.collection:collection:1.1.0'
     implementation 'org.jetbrains:annotations:20.1.0'
 }

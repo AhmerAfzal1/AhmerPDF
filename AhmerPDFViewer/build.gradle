@@ -42,7 +42,7 @@ android {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set("sources")
+    archiveClassifier.set('sources')
 }
 
 task javadoc(type: Javadoc) {
@@ -51,7 +51,7 @@ task javadoc(type: Javadoc) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set("javadoc")
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
@@ -108,7 +108,7 @@ bintray {
         desc = project.idDescriptionPdfViewer
         websiteUrl = project.idUrl
         vcsUrl = project.idVcsUrl
-        licenses = ["Apache-2.0"]
+        licenses = ['Apache-2.0']
         publish = true
         publicDownloadNumbers = true
     }
@@ -116,7 +116,7 @@ bintray {
 
 dependencies {
     implementation project(path: ':AhmerPdfium')
-    implementation 'com.github.ahmerafzal1:AhmerUtils:4.2.2'
+    implementation 'com.github.ahmerafzal1:AhmerUtils:4.2.3'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'org.jetbrains:annotations:20.1.0'
 }

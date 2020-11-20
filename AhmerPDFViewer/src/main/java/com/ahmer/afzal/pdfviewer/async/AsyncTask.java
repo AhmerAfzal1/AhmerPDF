@@ -25,32 +25,19 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
      */
     public AsyncTask<INPUT, PROGRESS, OUTPUT> execute(final INPUT input) {
         onPreExecute();
-
         ExecutorService executorService = AsyncWorker.getInstance().getExecutorService();
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    final OUTPUT output = AsyncTask.this.doInBackground(input);
-                    AsyncWorker.getInstance().getHandler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            AsyncTask.this.onPostExecute(output);
-                        }
-                    });
-                } catch (final Exception e) {
-                    e.printStackTrace();
-
-                    AsyncWorker.getInstance().getHandler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            AsyncTask.this.onBackgroundError(e);
-                        }
-                    });
-                }
+                final OUTPUT output = AsyncTask.this.doInBackground(input);
+                AsyncWorker.getInstance().getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AsyncTask.this.onPostExecute(output);
+                    }
+                });
             }
         });
-
         return this;
     }
 
@@ -115,8 +102,6 @@ public abstract class AsyncTask<INPUT, PROGRESS, OUTPUT> {
      *
      * @param input Input data
      * @return Output data
-     * @throws Exception Any uncought exception which occurred while working in background. If
-     *                   any occurs, {@link #onBackgroundError(Exception)} will be executed (on the UI thread)
      */
     protected abstract OUTPUT doInBackground(INPUT input);
 

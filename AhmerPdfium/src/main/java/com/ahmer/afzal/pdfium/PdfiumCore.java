@@ -43,15 +43,8 @@ public class PdfiumCore {
     private static int mCurrentDpi = 0;
 
     static {
-        try {
-            System.loadLibrary("c++_shared");
-            System.loadLibrary("modpng");
-            System.loadLibrary("modft2");
-            System.loadLibrary("modpdfium");
-            System.loadLibrary("jniPdfium");
-        } catch (UnsatisfiedLinkError e) {
-            Log.e(TAG, "Native libraries failed to load - " + e);
-        }
+        System.loadLibrary("pdfium");
+        System.loadLibrary("jniPdfium");
     }
 
     /**
@@ -174,18 +167,6 @@ public class PdfiumCore {
     private native Point nativePageCoordsToDevice(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY);
 
     private native PointF nativeDeviceCoordsToPage(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, int deviceX, int deviceY);
-
-    private native long nativeFindStart(long pagePtr, String findWhat, boolean matchCase, boolean matchWholeWord);
-
-    private native boolean nativeFindNext(long searchHandlePtr);
-
-    private native boolean nativeFindPrevious(long searchHandlePtr);
-
-    private native int nativeFindResultIndex(long searchHandlePtr);
-
-    private native int nativeFindCount(long searchHandlePtr);
-
-    private native void nativeFindClose(long searchHandlePtr);
 
     private native long nativeLoadTextPage(long docPtr, int pageIndex);
 
