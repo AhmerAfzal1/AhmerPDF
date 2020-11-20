@@ -2,6 +2,7 @@
 #define _UTIL_HPP_
 
 #include <jni.h>
+
 extern "C" {
 #include <stdlib.h>
 }

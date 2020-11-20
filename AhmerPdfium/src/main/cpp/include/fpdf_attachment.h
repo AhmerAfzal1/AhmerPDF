@@ -70,7 +70,7 @@ FPDFDoc_DeleteAttachment(FPDF_DOCUMENT document, int index);
 // Returns the length of the file name in bytes.
 FPDF_EXPORT unsigned long FPDF_CALLCONV
 FPDFAttachment_GetName(FPDF_ATTACHMENT attachment,
-                       FPDF_WCHAR* buffer,
+                       FPDF_WCHAR *buffer,
                        unsigned long buflen);
 
 // Experimental API.
@@ -128,7 +128,7 @@ FPDFAttachment_SetStringValue(FPDF_ATTACHMENT attachment,
 FPDF_EXPORT unsigned long FPDF_CALLCONV
 FPDFAttachment_GetStringValue(FPDF_ATTACHMENT attachment,
                               FPDF_BYTESTRING key,
-                              FPDF_WCHAR* buffer,
+                              FPDF_WCHAR *buffer,
                               unsigned long buflen);
 
 // Experimental API.
@@ -145,7 +145,7 @@ FPDFAttachment_GetStringValue(FPDF_ATTACHMENT attachment,
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
 FPDFAttachment_SetFile(FPDF_ATTACHMENT attachment,
                        FPDF_DOCUMENT document,
-                       const void* contents,
+                       const void *contents,
                        const unsigned long len);
 
 // Experimental API.
@@ -160,7 +160,7 @@ FPDFAttachment_SetFile(FPDF_ATTACHMENT attachment,
 // Returns the length of the file.
 FPDF_EXPORT unsigned long FPDF_CALLCONV
 FPDFAttachment_GetFile(FPDF_ATTACHMENT attachment,
-                       void* buffer,
+                       void *buffer,
                        unsigned long buflen);
 
 #ifdef __cplusplus

@@ -83,8 +83,8 @@ extern "C" {
 #define FPDF_FORMFLAG_CHOICE_EDIT (1 << 18)
 
 typedef enum FPDFANNOT_COLORTYPE {
-  FPDFANNOT_COLORTYPE_Color = 0,
-  FPDFANNOT_COLORTYPE_InteriorColor
+    FPDFANNOT_COLORTYPE_Color = 0,
+    FPDFANNOT_COLORTYPE_InteriorColor
 } FPDFANNOT_COLORTYPE;
 
 // Experimental API.
@@ -268,10 +268,10 @@ FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FPDFAnnot_SetColor(FPDF_ANNOTATION annot,
 // Returns true if successful.
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FPDFAnnot_GetColor(FPDF_ANNOTATION annot,
                                                        FPDFANNOT_COLORTYPE type,
-                                                       unsigned int* R,
-                                                       unsigned int* G,
-                                                       unsigned int* B,
-                                                       unsigned int* A);
+                                                       unsigned int *R,
+                                                       unsigned int *G,
+                                                       unsigned int *B,
+                                                       unsigned int *A);
 
 // Experimental API.
 // Check if the annotation is of a type that has attachment points
@@ -304,7 +304,7 @@ FPDFAnnot_HasAttachmentPoints(FPDF_ANNOTATION annot);
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
 FPDFAnnot_SetAttachmentPoints(FPDF_ANNOTATION annot,
                               size_t quad_index,
-                              const FS_QUADPOINTSF* quad_points);
+                              const FS_QUADPOINTSF *quad_points);
 
 // Experimental API.
 // Append to the list of attachment points (i.e. quadpoints) of an annotation.
@@ -318,7 +318,7 @@ FPDFAnnot_SetAttachmentPoints(FPDF_ANNOTATION annot,
 // Returns true if successful.
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
 FPDFAnnot_AppendAttachmentPoints(FPDF_ANNOTATION annot,
-                                 const FS_QUADPOINTSF* quad_points);
+                                 const FS_QUADPOINTSF *quad_points);
 
 // Experimental API.
 // Get the number of sets of quadpoints of an annotation.
@@ -340,7 +340,7 @@ FPDFAnnot_CountAttachmentPoints(FPDF_ANNOTATION annot);
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
 FPDFAnnot_GetAttachmentPoints(FPDF_ANNOTATION annot,
                               size_t quad_index,
-                              FS_QUADPOINTSF* quad_points);
+                              FS_QUADPOINTSF *quad_points);
 
 // Experimental API.
 // Set the annotation rectangle defining the location of the annotation. If the
@@ -353,7 +353,7 @@ FPDFAnnot_GetAttachmentPoints(FPDF_ANNOTATION annot,
 //
 // Returns true if successful.
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FPDFAnnot_SetRect(FPDF_ANNOTATION annot,
-                                                      const FS_RECTF* rect);
+                                                      const FS_RECTF *rect);
 
 // Experimental API.
 // Get the annotation rectangle defining the location of the annotation.
@@ -363,7 +363,7 @@ FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FPDFAnnot_SetRect(FPDF_ANNOTATION annot,
 //
 // Returns true if successful.
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FPDFAnnot_GetRect(FPDF_ANNOTATION annot,
-                                                      FS_RECTF* rect);
+                                                      FS_RECTF *rect);
 
 // Experimental API.
 // Check if |annot|'s dictionary has |key| as a key.
@@ -418,7 +418,7 @@ FPDFAnnot_SetStringValue(FPDF_ANNOTATION annot,
 FPDF_EXPORT unsigned long FPDF_CALLCONV
 FPDFAnnot_GetStringValue(FPDF_ANNOTATION annot,
                          FPDF_BYTESTRING key,
-                         FPDF_WCHAR* buffer,
+                         FPDF_WCHAR *buffer,
                          unsigned long buflen);
 
 // Experimental API.
@@ -435,7 +435,7 @@ FPDFAnnot_GetStringValue(FPDF_ANNOTATION annot,
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
 FPDFAnnot_GetNumberValue(FPDF_ANNOTATION annot,
                          FPDF_BYTESTRING key,
-                         float* value);
+                         float *value);
 
 // Experimental API.
 // Set the AP (appearance string) in |annot|'s dictionary for a given
@@ -474,7 +474,7 @@ FPDFAnnot_SetAP(FPDF_ANNOTATION annot,
 FPDF_EXPORT unsigned long FPDF_CALLCONV
 FPDFAnnot_GetAP(FPDF_ANNOTATION annot,
                 FPDF_ANNOT_APPEARANCEMODE appearanceMode,
-                FPDF_WCHAR* buffer,
+                FPDF_WCHAR *buffer,
                 unsigned long buflen);
 
 // Experimental API.
@@ -536,7 +536,7 @@ FPDFAnnot_GetFormFieldFlags(FPDF_FORMHANDLE handle,
 FPDF_EXPORT FPDF_ANNOTATION FPDF_CALLCONV
 FPDFAnnot_GetFormFieldAtPoint(FPDF_FORMHANDLE hHandle,
                               FPDF_PAGE page,
-                              const FS_POINTF* point);
+                              const FS_POINTF *point);
 
 // Experimental API.
 // Gets the name of |annot|, which is an interactive form annotation.
@@ -554,7 +554,7 @@ FPDFAnnot_GetFormFieldAtPoint(FPDF_FORMHANDLE hHandle,
 FPDF_EXPORT unsigned long FPDF_CALLCONV
 FPDFAnnot_GetFormFieldName(FPDF_FORMHANDLE hHandle,
                            FPDF_ANNOTATION annot,
-                           FPDF_WCHAR* buffer,
+                           FPDF_WCHAR *buffer,
                            unsigned long buflen);
 
 // Experimental API.
@@ -586,7 +586,7 @@ FPDFAnnot_GetFormFieldType(FPDF_FORMHANDLE hHandle, FPDF_ANNOTATION annot);
 FPDF_EXPORT unsigned long FPDF_CALLCONV
 FPDFAnnot_GetFormFieldValue(FPDF_FORMHANDLE hHandle,
                             FPDF_ANNOTATION annot,
-                            FPDF_WCHAR* buffer,
+                            FPDF_WCHAR *buffer,
                             unsigned long buflen);
 
 // Experimental API.
@@ -624,7 +624,7 @@ FPDF_EXPORT unsigned long FPDF_CALLCONV
 FPDFAnnot_GetOptionLabel(FPDF_FORMHANDLE hHandle,
                          FPDF_ANNOTATION annot,
                          int index,
-                         FPDF_WCHAR* buffer,
+                         FPDF_WCHAR *buffer,
                          unsigned long buflen);
 
 // Experimental API.
@@ -642,7 +642,7 @@ FPDFAnnot_GetOptionLabel(FPDF_FORMHANDLE hHandle,
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
 FPDFAnnot_GetFontSize(FPDF_FORMHANDLE hHandle,
                       FPDF_ANNOTATION annot,
-                      float* value);
+                      float *value);
 
 // Experimental API.
 // Determine if |annot| is a form widget that is checked. Intended for use with
