@@ -2,8 +2,8 @@
 # documentation: https://d.android.com/studio/projects/add-native-code.html
 
 # Sets the minimum version of CMake required to build the native library.
-
 cmake_minimum_required(VERSION 3.4.1)
+project(AhmerPdfium)
 
 # shared lib will also be tucked into APK and sent to target
 # refer to app/build.gradle, jniLibs section for that purpose.
@@ -11,10 +11,9 @@ cmake_minimum_required(VERSION 3.4.1)
 # the most valuable thing of this sample, the rest are pretty much normal cmake
 add_library(pdfium SHARED IMPORTED)
 set_target_properties(pdfium PROPERTIES IMPORTED_LOCATION
-        D:/Projects/Android/AhmerPDF/AhmerPdfium/src/main/libs/${ANDROID_ABI}/libpdfium.so)
+        ${PROJECT_SOURCE_DIR}/libs/${ANDROID_ABI}/libpdfium.so)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-warn-mismatch")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/libs/${ANDROID_ABI})
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
