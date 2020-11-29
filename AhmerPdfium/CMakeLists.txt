@@ -11,9 +11,9 @@ project(AhmerPdfium)
 # the most valuable thing of this sample, the rest are pretty much normal cmake
 add_library(pdfium SHARED IMPORTED)
 set_target_properties(pdfium PROPERTIES IMPORTED_LOCATION
-        ${PROJECT_SOURCE_DIR}/libs/${ANDROID_ABI}/libpdfium.so)
+        ${CMAKE_SOURCE_DIR}/src/main/libs/${ANDROID_ABI}/libpdfium.so)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/libs/${ANDROID_ABI})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${CMAKE_SOURCE_DIR}/src/main/libs/${ANDROID_ABI})
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -27,12 +27,12 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        mainJNILib.cpp)
+        ${CMAKE_SOURCE_DIR}/src/main/cmake/mainJNILib.cpp)
 
 target_include_directories(jniPdfium PRIVATE
-        ${CMAKE_SOURCE_DIR}/utils
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/include/cpp)
+        ${CMAKE_SOURCE_DIR}/src/main/cmake/utils
+        ${CMAKE_SOURCE_DIR}/src/main/cmake/include
+        ${CMAKE_SOURCE_DIR}/src/main/cmake/include/cpp)
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this

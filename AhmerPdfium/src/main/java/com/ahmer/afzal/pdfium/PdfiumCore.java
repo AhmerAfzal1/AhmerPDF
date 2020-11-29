@@ -92,6 +92,14 @@ public class PdfiumCore {
         return mNativeSearchHandlePtr.containsKey(index);
     }
 
+    public void closeFile() {
+        try {
+            parcelFileDescriptor.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private native long nativeOpenDocument(int fd, String password);
 
     private native long nativeOpenMemDocument(byte[] data, String password);
