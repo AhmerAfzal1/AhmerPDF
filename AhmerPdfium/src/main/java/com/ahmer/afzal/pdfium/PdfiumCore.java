@@ -11,8 +11,6 @@ import android.view.Surface;
 
 import androidx.collection.ArrayMap;
 
-import com.ahmer.afzal.pdfium.search.FPDFTextSearchContext;
-import com.ahmer.afzal.pdfium.search.TextSearchContext;
 import com.ahmer.afzal.pdfium.util.Size;
 
 import org.jetbrains.annotations.NotNull;
@@ -90,14 +88,6 @@ public class PdfiumCore {
 
     public static boolean hasSearchHandle(int index) {
         return mNativeSearchHandlePtr.containsKey(index);
-    }
-
-    public void closeFile() {
-        try {
-            parcelFileDescriptor.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private native long nativeOpenDocument(int fd, String password);
@@ -182,17 +172,18 @@ public class PdfiumCore {
 
     private native int nativeTextGetBoundedTextLength(long textPagePtr, double left, double top, double right, double bottom);
 
-    private native long nativeSearchStart(long textPagePtr, String query, boolean matchCase, boolean matchWholeWord);
+    /*
+     * New add
+     */
+    public native int nativeGetCharIndexAtCoord(long pagePtr, double width, double height, long textPtr, double posX, double posY, double tolX, double tolY);
 
-    private native void nativeSearchStop(long searchHandlePtr);
+    private native int nativeCountAndGetRects(long pagePtr, int offsetY, int offsetX, int width, int height, ArrayList<RectF> arr, long tid, int selSt, int selEd);
 
-    private native boolean nativeSearchNext(long searchHandlePtr);
+    public native String nativeGetText(long textPtr);
 
-    private native boolean nativeSearchPrev(long searchHandlePtr);
+    public native int nativeGetCharPos(long pagePtr, int offsetY, int offsetX, int width, int height, RectF pt, long tid, int index, boolean loose);
 
-    private native int nativeGetCharIndexOfSearchResult(long searchHandlePtr);
-
-    private native int nativeCountSearchResult(long searchHandlePtr);
+    public native int nativeGetMixedLooseCharPos(long pagePtr, int offsetY, int offsetX, int width, int height, RectF pt, long tid, int index, boolean loose);
 
     /**
      * Create new document from file
@@ -251,20 +242,6 @@ public class PdfiumCore {
             }
             return pagePtr;
         }
-
-    }
-
-    /**
-     * Close page
-     */
-    public void closePage(int pageIndex) {
-        synchronized (lock) {
-            Long pagePtr = mNativePagesPtr.get(pageIndex);
-            if (pagePtr != null) {
-                nativeClosePage(pagePtr);
-                mNativePagesPtr.remove(pageIndex);
-            }
-        }
     }
 
     /**
@@ -283,6 +260,19 @@ public class PdfiumCore {
                 pageIndex++;
             }
             return pagesPtr;
+        }
+    }
+
+    /**
+     * Close page
+     */
+    public void closePage(int pageIndex) {
+        synchronized (lock) {
+            Long pagePtr = mNativePagesPtr.get(pageIndex);
+            if (pagePtr != null) {
+                nativeClosePage(pagePtr);
+                mNativePagesPtr.remove(pageIndex);
+            }
         }
     }
 
@@ -462,25 +452,25 @@ public class PdfiumCore {
             List<Bookmark> topLevel = new ArrayList<>();
             Long first = nativeGetFirstChildBookmark(mNativeDocPtr, null);
             if (first != null) {
-                recursiveGetBookmark(topLevel, first, 1);
+                recursiveGetBookmark(topLevel, first);
             }
             return topLevel;
         }
     }
 
-    private void recursiveGetBookmark(@NotNull List<Bookmark> tree, long bookmarkPtr, long level) {
+    private void recursiveGetBookmark(@NotNull List<Bookmark> tree, long bookmarkPtr) {
         Bookmark bookmark = new Bookmark();
         bookmark.mNativePtr = bookmarkPtr;
         bookmark.title = nativeGetBookmarkTitle(bookmarkPtr);
         bookmark.pageIdx = nativeGetBookmarkDestIndex(mNativeDocPtr, bookmarkPtr);
         tree.add(bookmark);
         Long child = nativeGetFirstChildBookmark(mNativeDocPtr, bookmarkPtr);
-        if (child != null && level < 16) {
-            recursiveGetBookmark(bookmark.getChildren(), child, level++);
+        if (child != null) {
+            recursiveGetBookmark(bookmark.getChildren(), child);
         }
         Long sibling = nativeGetSiblingBookmark(mNativeDocPtr, bookmarkPtr);
-        if (sibling != null && level < 16) {
-            recursiveGetBookmark(tree, sibling, level++);
+        if (sibling != null) {
+            recursiveGetBookmark(tree, sibling);
         }
     }
 
@@ -1041,100 +1031,12 @@ public class PdfiumCore {
         }
     }
 
-    /**
-     * A handle class for the search context. stopSearch must be called to release this handle.
-     *
-     * @param pageIndex      index of page.
-     * @param query          A unicode match pattern.
-     * @param matchCase      match case
-     * @param matchWholeWord match the whole word
-     * @return A handle for the search context.
+    /*
+     * New Add
      */
-    public TextSearchContext newPageSearch(int pageIndex, String query, boolean matchCase, boolean matchWholeWord) {
-        return new FPDFTextSearchContext(pageIndex, query, matchCase, matchWholeWord) {
-            private Long mSearchHandlePtr;
-            private int currentPos = -1;
-
-            @Override
-            public void prepareSearch() {
-                long textPage = prepareTextInfo(pageIndex);
-                if (PdfiumCore.hasSearchHandle(pageIndex)) {
-                    long sPtr = PdfiumCore.mNativeSearchHandlePtr.get(pageIndex);
-                    nativeSearchStop(sPtr);
-                }
-                mSearchHandlePtr = nativeSearchStart(textPage, query, matchCase, matchWholeWord);
-            }
-
-            @Override
-            public int countResult() {
-                if (PdfiumCore.validPtr(mSearchHandlePtr)) {
-                    return nativeCountSearchResult(mSearchHandlePtr);
-                }
-                return -1;
-            }
-
-            @Override
-            public int getCurrentPos() {
-                return currentPos;
-            }
-
-            @Override
-            public RectF searchNext() {
-                if (PdfiumCore.validPtr(mSearchHandlePtr)) {
-                    mHasNext = nativeSearchNext(mSearchHandlePtr);
-                    if (mHasNext) {
-                        int index = nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
-                        if (index > -1) {
-                            currentPos = index;
-                            return measureCharacterBox(getPageIndex(), index);
-                        } else {
-                            currentPos = -1;
-                        }
-                    }
-                }
-                currentPos = -1;
-                mHasNext = false;
-                return null;
-            }
-
-
-            @Override
-            public RectF searchPrev() {
-                if (PdfiumCore.validPtr(mSearchHandlePtr)) {
-                    mHasPrev = nativeSearchPrev(mSearchHandlePtr);
-                    if (mHasPrev) {
-                        int index = nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
-                        if (index > -1) {
-                            currentPos = index;
-                            return measureCharacterBox(getPageIndex(), index);
-                        } else {
-                            currentPos = -1;
-                        }
-                    }
-                }
-                currentPos = -1;
-                mHasPrev = false;
-                return null;
-            }
-
-            @Override
-            public void stopSearch() {
-                super.stopSearch();
-                currentPos = -1;
-                if (PdfiumCore.validPtr(mSearchHandlePtr)) {
-                    nativeSearchStop(mSearchHandlePtr);
-                    PdfiumCore.mNativeSearchHandlePtr.remove(getPageIndex());
-                }
-            }
-
-            @Override
-            public int getFirstCharIndex() {
-                if (PdfiumCore.validPtr(mSearchHandlePtr)) {
-                    return nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
-                } else {
-                    return -1;
-                }
-            }
-        };
+    public int getTextRects(long pagePtr, int offsetY, int offsetX, Size size, ArrayList<RectF> arr, long textPtr, int selSt, int selEd) {
+        synchronized (lock) {
+            return nativeCountAndGetRects(pagePtr, offsetY, offsetX, size.getWidth(), size.getHeight(), arr, textPtr, selSt, selEd);
+        }
     }
 }
