@@ -30,10 +30,10 @@ public class PdfiumCore {
     private static final Class FD_CLASS = FileDescriptor.class;
     /* synchronize native methods */
     private static final Object lock = new Object();
+    public static final Object searchLock = new Object();
     private static final String FD_FIELD_NAME = "descriptor";
     private static final String TAG = PdfiumCore.class.getName();
     private static final Map<Integer, Long> mNativePagesPtr = new ArrayMap<>();
-    private static final Map<Integer, Long> mNativeSearchHandlePtr = new ArrayMap<>();
     private static final Map<Integer, Long> mNativeTextPagesPtr = new ArrayMap<>();
     private static Field mFdField = null;
     private static long mNativeDocPtr = 0L;
@@ -84,10 +84,6 @@ public class PdfiumCore {
 
     public static boolean hasTextPage(int index) {
         return mNativeTextPagesPtr.containsKey(index);
-    }
-
-    public static boolean hasSearchHandle(int index) {
-        return mNativeSearchHandlePtr.containsKey(index);
     }
 
     private native long nativeOpenDocument(int fd, String password);
@@ -184,6 +180,12 @@ public class PdfiumCore {
     public native int nativeGetCharPos(long pagePtr, int offsetY, int offsetX, int width, int height, RectF pt, long tid, int index, boolean loose);
 
     public native int nativeGetMixedLooseCharPos(long pagePtr, int offsetY, int offsetX, int width, int height, RectF pt, long tid, int index, boolean loose);
+
+    public native void nativeFindAll(long mNativeDocPtr, int pages, String key, int flag, ArrayList<SearchRecord> arr);
+
+    public native SearchRecord nativeFindPage(long mNativeDocPtr, String key, int pageIdx, int flag);
+
+    public native int nativeFindTextPage(long pagePtr, String key, int flag);
 
     /**
      * Create new document from file

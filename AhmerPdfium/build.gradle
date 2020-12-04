@@ -23,8 +23,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                arguments '-DANDROID_STL=c++_static',
-                        '-DANDROID_PLATFORM=android-19',
+                arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-19',
                         '-DANDROID_ARM_NEON=TRUE'
                 cppFlags '-std=c++17 -frtti -fexceptions'
             }
@@ -33,8 +32,8 @@ android {
 
     externalNativeBuild {
         cmake {
-            version '3.10.2'
             path 'CMakeLists.txt'
+            version '3.10.2'
         }
     }
 

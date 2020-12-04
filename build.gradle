@@ -27,7 +27,7 @@ properties.load(new FileInputStream('local.properties'))
 
 project.ext {
     set('idPdfViewerVersion', '2.8.2')
-    set('idPdfiumVersion', '7.7.2')
+    set('idPdfiumVersion', '7.7.3')
     set('idUser', properties.getProperty('bintray.user'))
     set('idPass', properties.getProperty('bintray.apikey'))
     set('idDeveloperID', 'ahmerafzal')
@@ -38,7 +38,7 @@ project.ext {
     set('idUrl', 'https://github.com/AhmerAfzal1/AhmerPDF')
     set('idVcsUrl', 'https://github.com/AhmerAfzal1/AhmerPDF.git')
     set('idArtifactPdfium', 'AhmerPdfium')
-    set('idDescriptionPdfium', 'Ahmer Pdfium Library for Android (API 16) binding')
+    set('idDescriptionPdfium', 'Ahmer Pdfium Library for Android (API 19) binding')
     set('idArtifactPdfViewer', 'AhmerPDFViewer')
     set('idDescriptionPdfViewer', 'Android view for displaying PDFs rendered with PdfiumAndroid')
 }
