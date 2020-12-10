@@ -374,8 +374,17 @@ typedef struct _FPDF_SYSTEMTIME {
 
 typedef struct _FPDF_FORMFILLINFO {
     /*
-     * Version number of the interface. Currently must be 1 (when PDFium is built
-     *  without the XFA module) or must be 2 (when built with the XFA module).
+     * Version number of the interface.
+     * Version 1 contains stable interfaces. Version 2 has additional
+     * experimental interfaces.
+     * When PDFium is built without the XFA module, version can be 1 or 2.
+     * With version 1, only stable interfaces are called. With version 2,
+     * additional experimental interfaces are also called.
+     * When PDFium is built with the XFA module, version must be 2.
+     * All the XFA related interfaces are experimental. If PDFium is built with
+     * the XFA module and version 1 then none of the XFA related interfaces
+     * would be called. When PDFium is built with XFA module then the version
+     * must be 2.
      */
     int version;
 
@@ -579,15 +588,16 @@ typedef struct _FPDF_FORMFILLINFO {
      * Interface Version:
      *       1
      * Implementation Required:
-     *       yes
+     *       Yes when V8 support is present, otherwise unused.
      * Parameters:
      *       pThis       -   Pointer to the interface structure itself.
      *       document    -   Handle to document. Returned by FPDF_LoadDocument().
      * Return value:
      *       Handle to the page. Returned by FPDF_LoadPage().
      * Comments:
-     *       The implementation is expected to keep track of the current page,
-     *       e.g. the current page can be the one that is most visible on screen.
+     *       PDFium doesn't keep keep track of the "current page" (e.g. the one
+     *       that is most visible on screen), so it must ask the embedder for
+     *       this information.
      */
     FPDF_PAGE (*FFI_GetCurrentPage)(struct _FPDF_FORMFILLINFO *pThis,
                                     FPDF_DOCUMENT document);
@@ -672,6 +682,10 @@ typedef struct _FPDF_FORMFILLINFO {
      * Return value:
      *       None.
      * Comments:
+     *       If the embedder is version 2 or higher and have implementation for
+     *       FFI_DoURIActionWithKeyboardModifier, then
+     *       FFI_DoURIActionWithKeyboardModifier takes precedence over
+     *       FFI_DoURIAction.
      *       See the URI actions description of <<PDF Reference, version 1.7>>
      *       for more details.
      */
@@ -1071,6 +1085,56 @@ typedef struct _FPDF_FORMFILLINFO {
                                    FPDF_WIDESTRING wsURL,
                                    FPDF_WIDESTRING wsData,
                                    FPDF_WIDESTRING wsEncode);
+
+    /*
+     * Method: FFI_OnFocusChange
+     *     Called when the focused annotation is updated.
+     * Interface Version:
+     *     Ignored if |version| < 2.
+     * Implementation Required:
+     *     No
+     * Parameters:
+     *     param           -   Pointer to the interface structure itself.
+     *     annot           -   The focused annotation.
+     *     page_index      -   Index number of the page which contains the
+     *                         focused annotation. 0 for the first page.
+     * Return value:
+     *     None.
+     * Comments:
+     *     This callback function is useful for implementing any view based
+     *     action such as scrolling the annotation rect into view. The
+     *     embedder should not copy and store the annot as its scope is
+     *     limited to this call only.
+     */
+    void (*FFI_OnFocusChange)(struct _FPDF_FORMFILLINFO *param,
+                              FPDF_ANNOTATION annot,
+                              int page_index);
+
+    /**
+     * Method: FFI_DoURIActionWithKeyboardModifier
+     *       Ask the implementation to navigate to a uniform resource identifier
+     *       with the specified modifiers.
+     * Interface Version:
+     *       Ignored if |version| < 2.
+     * Implementation Required:
+     *       No
+     * Parameters:
+     *       param           -   Pointer to the interface structure itself.
+     *       uri             -   A byte string which indicates the uniform
+     *                           resource identifier, terminated by 0.
+     *       modifiers       -   Keyboard modifier that indicates which of
+     *                           the virtual keys are down, if any.
+     * Return value:
+     *       None.
+     * Comments:
+     *       If the embedder who is version 2 and does not implement this API,
+     *       then a call will be redirected to FFI_DoURIAction.
+     *       See the URI actions description of <<PDF Reference, version 1.7>>
+     *       for more details.
+     */
+    void (*FFI_DoURIActionWithKeyboardModifier)(struct _FPDF_FORMFILLINFO *param,
+                                                FPDF_BYTESTRING uri,
+                                                int modifiers);
 } FPDF_FORMFILLINFO;
 
 /*
@@ -1108,7 +1172,7 @@ FPDFDOC_ExitFormFillEnvironment(FPDF_FORMHANDLE hHandle);
  *       functions. Should be invoked after user successfully loaded a
  *       PDF page, and FPDFDOC_InitFormFillEnvironment() has been invoked.
  * Parameters:
- *       hHandle     -   Handle to the form fill module, as eturned by
+ *       hHandle     -   Handle to the form fill module, as returned by
  *                       FPDFDOC_InitFormFillEnvironment().
  * Return Value:
  *       None.
@@ -1241,6 +1305,39 @@ FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FORM_OnMouseMove(FPDF_FORMHANDLE hHandle,
                                                      double page_y);
 
 /*
+ * Experimental API
+ * Function: FORM_OnMouseWheel
+ *       Call this member function when the user scrolls the mouse wheel.
+ * Parameters:
+ *       hHandle     -   Handle to the form fill module, as returned by
+ *                       FPDFDOC_InitFormFillEnvironment().
+ *       page        -   Handle to the page, as returned by FPDF_LoadPage().
+ *       modifier    -   Indicates whether various virtual keys are down.
+ *       page_coord  -   Specifies the coordinates of the cursor in PDF user
+ *                       space.
+ *       delta_x     -   Specifies the amount of wheel movement on the x-axis,
+ *                       in units of platform-agnostic wheel deltas. Negative
+ *                       values mean left.
+ *       delta_y     -   Specifies the amount of wheel movement on the y-axis,
+ *                       in units of platform-agnostic wheel deltas. Negative
+ *                       values mean down.
+ * Return Value:
+ *       True indicates success; otherwise false.
+ * Comments:
+ *       For |delta_x| and |delta_y|, the caller must normalize
+ *       platform-specific wheel deltas. e.g. On Windows, a delta value of 240
+ *       for a WM_MOUSEWHEEL event normalizes to 2, since Windows defines
+ *       WHEEL_DELTA as 120.
+ */
+FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FORM_OnMouseWheel(
+        FPDF_FORMHANDLE hHandle,
+        FPDF_PAGE page,
+        int modifier,
+        const FS_POINTF *page_coord,
+        int delta_x,
+        int delta_y);
+
+/*
  * Function: FORM_OnFocus
  *       This function focuses the form annotation at a given point. If the
  *       annotation at the point already has focus, nothing happens. If there
@@ -1268,7 +1365,7 @@ FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FORM_OnFocus(FPDF_FORMHANDLE hHandle,
  *       Call this member function when the user presses the left
  *       mouse button.
  * Parameters:
- *       hHandle     -   Handle to the form fill module. as returned by
+ *       hHandle     -   Handle to the form fill module, as returned by
  *                       FPDFDOC_InitFormFillEnvironment().
  *       page        -   Handle to the page, as returned by FPDF_LoadPage().
  *       modifier    -   Indicates whether various virtual keys are down.
@@ -1304,7 +1401,7 @@ FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FORM_OnRButtonDown(FPDF_FORMHANDLE hHandle,
  * Parameters:
  *       hHandle     -   Handle to the form fill module, as returned by
  *                       FPDFDOC_InitFormFillEnvironment().
- *       page        -   Handle to the page. as returned by FPDF_LoadPage().
+ *       page        -   Handle to the page, as returned by FPDF_LoadPage().
  *       modifier    -   Indicates whether various virtual keys are down.
  *       page_x      -   Specifies the x-coordinate of the cursor in device.
  *       page_y      -   Specifies the y-coordinate of the cursor in device.
@@ -1436,7 +1533,7 @@ FORM_GetFocusedText(FPDF_FORMHANDLE hHandle,
  *       Call this function to obtain selected text within a form text
  *       field or form combobox text field.
  * Parameters:
- *       hHandle     -   Handle to the form fill module, asr eturned by
+ *       hHandle     -   Handle to the form fill module, as returned by
  *                       FPDFDOC_InitFormFillEnvironment().
  *       page        -   Handle to the page, as returned by FPDF_LoadPage().
  *       buffer      -   Buffer for holding the selected text, encoded in
@@ -1474,6 +1571,21 @@ FPDF_EXPORT void FPDF_CALLCONV FORM_ReplaceSelection(FPDF_FORMHANDLE hHandle,
                                                      FPDF_WIDESTRING wsText);
 
 /*
+ * Experimental API
+ * Function: FORM_SelectAllText
+ *       Call this function to select all the text within the currently focused
+ *       form text field or form combobox text field.
+ * Parameters:
+ *       hHandle     -   Handle to the form fill module, as returned by
+ *                       FPDFDOC_InitFormFillEnvironment().
+ *       page        -   Handle to the page, as returned by FPDF_LoadPage().
+ * Return Value:
+ *       Whether the operation succeeded or not.
+ */
+FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
+FORM_SelectAllText(FPDF_FORMHANDLE hHandle, FPDF_PAGE page);
+
+/*
  * Function: FORM_CanUndo
  *       Find out if it is possible for the current focused widget in a given
  *       form to perform an undo operation.
@@ -1505,7 +1617,7 @@ FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FORM_CanRedo(FPDF_FORMHANDLE hHandle,
  * Function: FORM_Undo
  *       Make the current focussed widget perform an undo operation.
  * Parameters:
- *       hHandle     -   Handle to the form fill module. as returned by
+ *       hHandle     -   Handle to the form fill module, as returned by
  *                       FPDFDOC_InitFormFillEnvironment().
  *       page        -   Handle to the page, as returned by FPDF_LoadPage().
  * Return Value:
@@ -1520,7 +1632,7 @@ FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FORM_Undo(FPDF_FORMHANDLE hHandle,
  * Parameters:
  *       hHandle     -   Handle to the form fill module, as returned by
  *                       FPDFDOC_InitFormFillEnvironment().
- *       page        -   Handle to the page, as eturned by FPDF_LoadPage().
+ *       page        -   Handle to the page, as returned by FPDF_LoadPage().
  * Return Value:
  *       True if the redo operation succeeded.
  */
@@ -1540,6 +1652,50 @@ FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV FORM_Redo(FPDF_FORMHANDLE hHandle,
  */
 FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
 FORM_ForceToKillFocus(FPDF_FORMHANDLE hHandle);
+
+/*
+ * Experimental API.
+ * Function: FORM_GetFocusedAnnot.
+ *       Call this member function to get the currently focused annotation.
+ * Parameters:
+ *       handle      -   Handle to the form fill module, as returned by
+ *                       FPDFDOC_InitFormFillEnvironment().
+ *       page_index  -   Buffer to hold the index number of the page which
+ *                       contains the focused annotation. 0 for the first page.
+ *                       Can't be NULL.
+ *       annot       -   Buffer to hold the focused annotation. Can't be NULL.
+ * Return Value:
+ *       On success, return true and write to the out parameters. Otherwise return
+ *       false and leave the out parameters unmodified.
+ * Comments:
+ *       Not currently supported for XFA forms - will report no focused
+ *       annotation.
+ *       Must call FPDFPage_CloseAnnot() when the annotation returned in |annot|
+ *       by this function is no longer needed.
+ *       This will return true and set |page_index| to -1 and |annot| to NULL, if
+ *       there is no focused annotation.
+ */
+FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
+FORM_GetFocusedAnnot(FPDF_FORMHANDLE handle,
+                     int *page_index,
+                     FPDF_ANNOTATION *annot);
+
+/*
+ * Experimental API.
+ * Function: FORM_SetFocusedAnnot.
+ *       Call this member function to set the currently focused annotation.
+ * Parameters:
+ *       handle      -   Handle to the form fill module, as returned by
+ *                       FPDFDOC_InitFormFillEnvironment().
+ *       annot       -   Handle to an annotation.
+ * Return Value:
+ *       True indicates success; otherwise false.
+ * Comments:
+ *       |annot| can't be NULL. To kill focus, use FORM_ForceToKillFocus()
+ *       instead.
+ */
+FPDF_EXPORT FPDF_BOOL FPDF_CALLCONV
+FORM_SetFocusedAnnot(FPDF_FORMHANDLE handle, FPDF_ANNOTATION annot);
 
 // Form Field Types
 // The names of the defines are stable, but the specific values associated with
@@ -1725,7 +1881,7 @@ FPDF_EXPORT void FPDF_CALLCONV FPDF_FFLDraw(FPDF_FORMHANDLE hHandle,
                                             int rotate,
                                             int flags);
 
-#ifdef _SKIA_SUPPORT_
+#if defined(_SKIA_SUPPORT_)
 FPDF_EXPORT void FPDF_CALLCONV FPDF_FFLRecord(FPDF_FORMHANDLE hHandle,
                                               FPDF_RECORDER recorder,
                                               FPDF_PAGE page,

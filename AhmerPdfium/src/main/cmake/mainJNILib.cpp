@@ -213,12 +213,12 @@ JNI_FUNC(jlong, PdfiumCore, nativeOpenDocument)(JNI_ARGS, jint fd, jstring passw
 
     if (!document) {
         delete docFile;
-        const long errorNum = FPDF_GetLastError();
+        const unsigned long errorNum = FPDF_GetLastError();
         if (errorNum == FPDF_ERR_PASSWORD) {
             jniThrowException(env, "com/ahmer/afzal/pdfium/PdfPasswordException",
                               "Password required or incorrect password.");
         } else {
-            char *error = getErrorDescription(errorNum);
+            char *error = getErrorDescription((long) errorNum);
             jniThrowExceptionFmt(env, "java/io/IOException", "Cannot create document: %s", error);
             free(error);
         }
@@ -249,12 +249,12 @@ JNI_FUNC(jlong, PdfiumCore, nativeOpenMemDocument)(JNI_ARGS, jbyteArray data, js
     }
     if (!document) {
         delete docFile;
-        const long errorNum = FPDF_GetLastError();
+        const unsigned long errorNum = FPDF_GetLastError();
         if (errorNum == FPDF_ERR_PASSWORD) {
             jniThrowException(env, "com/ahmer/afzal/pdfium/PdfPasswordException",
                               "Password required or incorrect password.");
         } else {
-            char *error = getErrorDescription(errorNum);
+            char *error = getErrorDescription((long) errorNum);
             jniThrowExceptionFmt(env, "java/io/IOException", "Cannot create document: %s", error);
             free(error);
         }
@@ -1007,5 +1007,109 @@ JNI_FUNC(jint, PdfiumCore, nativeFindTextPage)(JNI_ARGS, jlong textPtr, jstring 
     }
     env->ReleaseStringChars(key, keyStr);
     return foundIdx;
+}
+
+// Annotations
+JNI_FUNC(jint, PdfiumCore, nativeCountAnnot)(JNI_ARGS, jlong pagePtr) {
+    return FPDFPage_GetAnnotCount((FPDF_PAGE) pagePtr);
+}
+
+JNI_FUNC(jlong, PdfiumCore, nativeOpenAnnot)(JNI_ARGS, jlong pagePtr, jint index) {
+    return (jlong) FPDFPage_GetAnnot((FPDF_PAGE) pagePtr, index);
+}
+
+JNI_FUNC(void, PdfiumCore, nativeCloseAnnot)(JNI_ARGS, jlong annotPtr) {
+    FPDFPage_CloseAnnot((FPDF_ANNOTATION) annotPtr);
+}
+
+JNI_FUNC(jint, PdfiumCore, nativeCountAttachmentPoints)(JNI_ARGS, jlong annotPtr) {
+    return FPDFAnnot_CountAttachmentPoints((FPDF_ANNOTATION) annotPtr);
+}
+
+JNI_FUNC(void, PdfiumCore, nativeSetAnnotColor)(JNI_ARGS, jlong annotPtr, jint R, jint G, jint B,
+                                                jint A) {
+    FPDFAnnot_SetColor((FPDF_ANNOTATION) annotPtr, FPDFANNOT_COLORTYPE_Color, R, G, B, A);
+}
+
+JNI_FUNC(jboolean, PdfiumCore, nativeGetAttachmentPoints)(JNI_ARGS, jlong pagePtr, jlong annotPtr,
+                                                          jint idx, jint width, jint height,
+                                                          jobject p1, jobject p2, jobject p3,
+                                                          jobject p4) {
+    jclass point = env->FindClass("android/graphics/PointF");
+    jmethodID point_set = env->GetMethodID(point, "set", "(FF)V");
+
+    auto page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+    FS_QUADPOINTSF points = {0};
+
+    if (FPDFAnnot_GetAttachmentPoints((FPDF_ANNOTATION) annotPtr, idx, &points)) {
+        int deviceX, deviceY;
+        FPDF_PageToDevice(page, 0, 0, width, height, 0, points.x1, points.y1, &deviceX, &deviceY);
+        env->CallVoidMethod(p1, point_set, (float) deviceX, (float) deviceY);
+
+        FPDF_PageToDevice(page, 0, 0, width, height, 0, points.x2, points.y2, &deviceX, &deviceY);
+        env->CallVoidMethod(p2, point_set, (float) deviceX, (float) deviceY);
+
+        FPDF_PageToDevice(page, 0, 0, width, height, 0, points.x3, points.y3, &deviceX, &deviceY);
+        env->CallVoidMethod(p3, point_set, (float) deviceX, (float) deviceY);
+
+        FPDF_PageToDevice(page, 0, 0, width, height, 0, points.x4, points.y4, &deviceX, &deviceY);
+        env->CallVoidMethod(p4, point_set, (float) deviceX, (float) deviceY);
+
+        //env->CallVoidMethod(p2, point_set, points.x2, points.y2);
+        //env->CallVoidMethod(p3, point_set, points.x3, points.y3);
+        //env->CallVoidMethod(p4, point_set, points.x4, points.y4);
+        return true;
+    }
+    return false;
+}
+
+JNI_FUNC(jobject, PdfiumCore, nativeGetAnnotRect)(JNI_ARGS, jlong pagePtr, jint index, jint width,
+                                                  jint height) {
+    auto page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+    FPDF_ANNOTATION aI = FPDFPage_GetAnnot(page, index);
+    FS_RECTF rect = {0};
+    FPDFAnnot_GetRect(aI, &rect);
+    int deviceX, deviceY;
+    FPDF_PageToDevice(page, 0, 0, width, height, 0, rect.left, rect.top, &deviceX, &deviceY);
+
+    width = rect.right - rect.left;
+    height = rect.top - rect.bottom;
+    rect.left = (float) deviceX;
+    rect.top = (float) deviceY;
+    rect.right = rect.left + width;
+    rect.bottom = rect.top + height;
+
+    jclass clazz = env->FindClass("android/graphics/RectF");
+    jmethodID constructorID = env->GetMethodID(clazz, "<init>", "(FFFF)V");
+    FPDFPage_CloseAnnot(aI);
+    return env->NewObject(clazz, constructorID, rect.left, rect.top, rect.right, rect.bottom);
+}
+
+JNI_FUNC(jlong, PdfiumCore, nativeCreateAnnot)(JNI_ARGS, jlong pagePtr, jint type) {
+    auto ret = FPDFPage_CreateAnnot((FPDF_PAGE) pagePtr, type);
+    FPDFAnnot_SetFlags(ret, 4);
+    return (jlong) ret;
+}
+
+JNI_FUNC(jboolean, PdfiumCore, nativeSetAnnotRect)(JNI_ARGS, jlong pagePtr, jlong annotPtr,
+                                                   jfloat left, jfloat top, jfloat right,
+                                                   jfloat bottom, jdouble width, jdouble height) {
+    double px, py, px1, py1;
+    FPDF_DeviceToPage((FPDF_PAGE) pagePtr, 0, 0, width, height, 0, left, top, &px, &py);
+    FPDF_DeviceToPage((FPDF_PAGE) pagePtr, 0, 0, width, height, 0, right, bottom, &px1, &py1);
+    FS_RECTF rect{(float) px, (float) py, (float) px1, (float) py1};
+    return (jboolean) FPDFAnnot_SetRect((FPDF_ANNOTATION) annotPtr, &rect);
+}
+
+JNI_FUNC(jboolean, PdfiumCore, nativeAppendAnnotPoints)(JNI_ARGS, jlong pagePtr, jlong annotPtr,
+                                                        jdouble left, jdouble top, jdouble right,
+                                                        jdouble bottom, jdouble width,
+                                                        jdouble height) {
+    double px, py, px1, py1;
+    FPDF_DeviceToPage((FPDF_PAGE) pagePtr, 0, 0, width, height, 0, left, top, &px, &py);
+    FPDF_DeviceToPage((FPDF_PAGE) pagePtr, 0, 0, width, height, 0, right, bottom, &px1, &py1);
+    auto x = (float) px, y = (float) py, x1 = (float) px1, y1 = (float) py1;
+    FS_QUADPOINTSF quadpoints{x, y, x1, y, x, y1, x1, y1};
+    return (jboolean) FPDFAnnot_AppendAttachmentPoints((FPDF_ANNOTATION) annotPtr, &quadpoints);
 }
 }//extern C

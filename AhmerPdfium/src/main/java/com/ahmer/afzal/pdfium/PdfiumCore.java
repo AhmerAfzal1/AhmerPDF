@@ -27,10 +27,10 @@ import java.util.Map;
 
 public class PdfiumCore {
 
+    public static final Object searchLock = new Object();
     private static final Class FD_CLASS = FileDescriptor.class;
     /* synchronize native methods */
     private static final Object lock = new Object();
-    public static final Object searchLock = new Object();
     private static final String FD_FIELD_NAME = "descriptor";
     private static final String TAG = PdfiumCore.class.getName();
     private static final Map<Integer, Long> mNativePagesPtr = new ArrayMap<>();
@@ -186,6 +186,26 @@ public class PdfiumCore {
     public native SearchRecord nativeFindPage(long mNativeDocPtr, String key, int pageIdx, int flag);
 
     public native int nativeFindTextPage(long pagePtr, String key, int flag);
+
+    public native RectF nativeGetAnnotRect(long pagePtr, int index, int width, int height);
+
+    public native int nativeCountAnnot(long pagePtr);
+
+    public native long nativeOpenAnnot(long page, int idx);
+
+    public native void nativeCloseAnnot(long annotPtr);
+
+    public native int nativeCountAttachmentPoints(long annotPtr);
+
+    public native long nativeCreateAnnot(long pagePtr, int type);
+
+    public native void nativeSetAnnotRect(long pagePtr, long annotPtr, float left, float top, float right, float bottom, double width, double height);
+
+    public native void nativeAppendAnnotPoints(long pagePtr, long annotPtr, double left, double top, double right, double bottom, double width, double height);
+
+    public native void nativeSetAnnotColor(long annotPtr, int R, int G, int B, int A);
+
+    public native boolean nativeGetAttachmentPoints(long pagePtr, long annotPtr, int idx, int width, int height, PointF p1, PointF p2, PointF p3, PointF p4);
 
     /**
      * Create new document from file

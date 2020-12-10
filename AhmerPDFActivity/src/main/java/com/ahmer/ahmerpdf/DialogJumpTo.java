@@ -12,7 +12,6 @@ import com.ahmer.ahmerpdf.databinding.DialogPdfJumptoBinding;
 
 import java.util.Objects;
 
-
 public class DialogJumpTo extends Dialog {
 
     private final Context context;
