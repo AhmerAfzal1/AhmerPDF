@@ -8,7 +8,7 @@ group = project.idGroup
 android {
     compileSdkVersion 30
     buildToolsVersion '30.0.3'
-    ndkVersion '21.3.6528147'
+    ndkVersion '23.0.7123448 rc1'
 
     defaultConfig {
         minSdkVersion 19
