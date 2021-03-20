@@ -2,14 +2,10 @@ package com.ahmer.afzal.pdfviewer;
 
 import android.graphics.RectF;
 
-import androidx.annotation.NonNull;
-
 import com.ahmer.afzal.pdfium.util.SizeF;
 import com.ahmer.afzal.pdfviewer.util.MathUtils;
 import com.ahmer.afzal.pdfviewer.util.PdfConstants;
 import com.ahmer.afzal.pdfviewer.util.PdfUtils;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +26,12 @@ class PagesLoader {
     private float partRenderWidth;
     private float partRenderHeight;
 
-    PagesLoader(@NotNull PDFView pdfView) {
+    PagesLoader(PDFView pdfView) {
         this.pdfView = pdfView;
         preloadOffset = PdfUtils.getDP(pdfView.getContext(), PRELOAD_OFFSET);
     }
 
-    private void getPageColsRows(@NotNull GridSize grid, int pageIndex) {
+    private void getPageColsRows(GridSize grid, int pageIndex) {
         SizeF size = pdfView.pdfFile.getPageSize(pageIndex);
         float ratioX = 1f / size.getWidth();
         float ratioY = 1f / size.getHeight();
@@ -45,7 +41,7 @@ class PagesLoader {
         grid.cols = MathUtils.ceil(1f / partWidth);
     }
 
-    private void calculatePartSize(@NotNull GridSize grid) {
+    private void calculatePartSize(GridSize grid) {
         pageRelativePartWidth = 1f / (float) grid.cols;
         pageRelativePartHeight = 1f / (float) grid.rows;
         partRenderWidth = PdfConstants.PART_SIZE / pageRelativePartWidth;
@@ -55,8 +51,8 @@ class PagesLoader {
     /**
      * calculate the render range of each page
      */
-    private @NotNull List<RenderRange> getRenderRangeList(float firstXOffset, float firstYOffset,
-                                                          float lastXOffset, float lastYOffset) {
+    private List<RenderRange> getRenderRangeList(float firstXOffset, float firstYOffset,
+                                                 float lastXOffset, float lastYOffset) {
 
         float fixedFirstXOffset = -MathUtils.max(firstXOffset, 0);
         float fixedFirstYOffset = -MathUtils.max(firstYOffset, 0);
@@ -154,9 +150,8 @@ class PagesLoader {
             } else {
                 range.leftTop.col = MathUtils.floor(Math.abs(pageFirstXOffset -
                         pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
-                range.leftTop.row = MathUtils.floor(MathUtils.min(pageFirstYOffset -
-                        Math.abs(secondaryOffset), 0) / rowHeight);
-
+                range.leftTop.row = MathUtils.floor(MathUtils.min(pageFirstYOffset > 0 ?
+                        pageFirstYOffset - secondaryOffset : 0, 0) / rowHeight);
                 range.rightBottom.col = MathUtils.floor(Math.abs(pageLastXOffset -
                         pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
                 range.rightBottom.row = MathUtils.floor(MathUtils.min(pageLastYOffset -
@@ -208,7 +203,6 @@ class PagesLoader {
 
     private boolean loadCell(int page, int row, int col, float pageRelativePartWidth,
                              float pageRelativePartHeight) {
-
         float relX = pageRelativePartWidth * col;
         float relY = pageRelativePartHeight * row;
         float relWidth = pageRelativePartWidth;
@@ -257,7 +251,6 @@ class PagesLoader {
         int row;
         int col;
 
-        @NonNull
         @Override
         public String toString() {
             return "Holder{" +
@@ -267,34 +260,19 @@ class PagesLoader {
         }
     }
 
-    private static class GridSize {
-        int rows;
-        int cols;
-
-        @NonNull
-        @Override
-        public String toString() {
-            return "GridSize{" +
-                    "rows=" + rows +
-                    ", cols=" + cols +
-                    '}';
-        }
-    }
-
-    private static class RenderRange {
-        final GridSize gridSize;
-        final Holder leftTop;
-        final Holder rightBottom;
+    private class RenderRange {
         int page;
+        GridSize gridSize;
+        Holder leftTop;
+        Holder rightBottom;
 
         RenderRange() {
-            page = 0;
-            gridSize = new GridSize();
-            leftTop = new Holder();
-            rightBottom = new Holder();
+            this.page = 0;
+            this.gridSize = new GridSize();
+            this.leftTop = new Holder();
+            this.rightBottom = new Holder();
         }
 
-        @NonNull
         @Override
         public String toString() {
             return "RenderRange{" +
@@ -302,6 +280,19 @@ class PagesLoader {
                     ", gridSize=" + gridSize +
                     ", leftTop=" + leftTop +
                     ", rightBottom=" + rightBottom +
+                    '}';
+        }
+    }
+
+    private class GridSize {
+        int rows;
+        int cols;
+
+        @Override
+        public String toString() {
+            return "GridSize{" +
+                    "rows=" + rows +
+                    ", cols=" + cols +
                     '}';
         }
     }

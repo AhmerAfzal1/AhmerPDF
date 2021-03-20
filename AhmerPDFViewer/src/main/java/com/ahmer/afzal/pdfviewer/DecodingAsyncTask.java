@@ -5,8 +5,6 @@ import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfviewer.async.AsyncTask;
 import com.ahmer.afzal.pdfviewer.source.DocumentSource;
 
-import org.jetbrains.annotations.NotNull;
-
 class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     private final PDFView pdfView;
@@ -27,10 +25,6 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
         cancelled = false;
     }
 
-    private static Size getViewSize(@NotNull PDFView pdfView) {
-        return new Size(pdfView.getWidth(), pdfView.getHeight());
-    }
-
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
@@ -42,9 +36,8 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
             if (pdfView != null) {
                 docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
                 pdfFile = new PdfFile(pdfiumCore, pdfView.getPageFitPolicy(), getViewSize(pdfView),
-                        userPages, pdfView.isOnDualPageMode(), pdfView.isSwipeVertical(),
-                        pdfView.getSpacingPx(), pdfView.isAutoSpacingEnabled(),
-                        pdfView.isFitEachPage(), pdfView.isOnLandscapeOrientation());
+                        userPages, pdfView.isSwipeVertical(), pdfView.getSpacingPx(),
+                        pdfView.isAutoSpacingEnabled(), pdfView.isFitEachPage());
                 return null;
             } else {
                 return new NullPointerException("pdfView == null");
@@ -52,6 +45,10 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
         } catch (Throwable t) {
             return t;
         }
+    }
+
+    private Size getViewSize(PDFView pdfView) {
+        return new Size(pdfView.getWidth(), pdfView.getHeight());
     }
 
     @Override

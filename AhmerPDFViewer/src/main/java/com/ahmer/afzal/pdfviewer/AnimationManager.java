@@ -1,3 +1,18 @@
+/**
+ * Copyright 2016 Bartosz Schiller
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.ahmer.afzal.pdfviewer;
 
 import android.animation.Animator;
@@ -9,7 +24,6 @@ import android.graphics.PointF;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.OverScroller;
 
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This manager is used by the PDFView to launch animations.
@@ -23,10 +37,10 @@ class AnimationManager {
     private final OverScroller scroller;
     private ValueAnimator animation;
     private boolean flinging = false;
-    private boolean pageFlinging = false;
-    private long animationDuration = 400;
 
-    public AnimationManager(@NotNull PDFView pdfView) {
+    private boolean pageFlinging = false;
+
+    public AnimationManager(PDFView pdfView) {
         this.pdfView = pdfView;
         scroller = new OverScroller(pdfView.getContext());
     }
@@ -38,7 +52,7 @@ class AnimationManager {
         animation.setInterpolator(new DecelerateInterpolator());
         animation.addUpdateListener(xAnimation);
         animation.addListener(xAnimation);
-        animation.setDuration(animationDuration);
+        animation.setDuration(400);
         animation.start();
     }
 
@@ -49,7 +63,7 @@ class AnimationManager {
         animation.setInterpolator(new DecelerateInterpolator());
         animation.addUpdateListener(yAnimation);
         animation.addListener(yAnimation);
-        animation.setDuration(animationDuration);
+        animation.setDuration(400);
         animation.start();
     }
 
@@ -60,12 +74,11 @@ class AnimationManager {
         ZoomAnimation zoomAnim = new ZoomAnimation(centerX, centerY);
         animation.addUpdateListener(zoomAnim);
         animation.addListener(zoomAnim);
-        animation.setDuration(animationDuration);
+        animation.setDuration(400);
         animation.start();
     }
 
-    public void startFlingAnimation(int startX, int startY, int velocityX, int velocityY,
-                                    int minX, int maxX, int minY, int maxY) {
+    public void startFlingAnimation(int startX, int startY, int velocityX, int velocityY, int minX, int maxX, int minY, int maxY) {
         stopAll();
         flinging = true;
         scroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY);
@@ -94,7 +107,6 @@ class AnimationManager {
 
     public void stopAll() {
         if (animation != null) {
-            animation.removeAllUpdateListeners();
             animation.cancel();
             animation = null;
         }
@@ -116,23 +128,10 @@ class AnimationManager {
         }
     }
 
-    public long getAnimationDuration() {
-        return animationDuration;
-    }
-
-    public void setAnimationDuration(long animationDuration) {
-        this.animationDuration = animationDuration;
-    }
-
     class XAnimation extends AnimatorListenerAdapter implements AnimatorUpdateListener {
-
-        private boolean isCancelled = false;
 
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
-            if (isCancelled) {
-                return;
-            }
             float offset = (Float) animation.getAnimatedValue();
             pdfView.moveTo(offset, pdfView.getCurrentYOffset());
             pdfView.loadPageByOffset();
@@ -140,7 +139,6 @@ class AnimationManager {
 
         @Override
         public void onAnimationCancel(Animator animation) {
-            isCancelled = true;
             pdfView.loadPages();
             pageFlinging = false;
             hideHandle();
@@ -156,13 +154,8 @@ class AnimationManager {
 
     class YAnimation extends AnimatorListenerAdapter implements AnimatorUpdateListener {
 
-        private boolean isCancelled = false;
-
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
-            if (isCancelled) {
-                return;
-            }
             float offset = (Float) animation.getAnimatedValue();
             pdfView.moveTo(pdfView.getCurrentXOffset(), offset);
             pdfView.loadPageByOffset();
@@ -177,7 +170,6 @@ class AnimationManager {
 
         @Override
         public void onAnimationEnd(Animator animation) {
-            isCancelled = true;
             pdfView.loadPages();
             pageFlinging = false;
             hideHandle();
@@ -195,7 +187,7 @@ class AnimationManager {
         }
 
         @Override
-        public void onAnimationUpdate(@NotNull ValueAnimator animation) {
+        public void onAnimationUpdate(ValueAnimator animation) {
             float zoom = (Float) animation.getAnimatedValue();
             pdfView.zoomCenteredTo(zoom, new PointF(centerX, centerY));
         }
@@ -220,5 +212,7 @@ class AnimationManager {
         @Override
         public void onAnimationStart(Animator animation) {
         }
+
     }
+
 }

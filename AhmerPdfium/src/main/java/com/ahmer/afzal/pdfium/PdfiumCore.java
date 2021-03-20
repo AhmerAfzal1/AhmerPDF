@@ -207,6 +207,8 @@ public class PdfiumCore {
 
     public native boolean nativeGetAttachmentPoints(long pagePtr, long annotPtr, int idx, int width, int height, PointF p1, PointF p2, PointF p3, PointF p4);
 
+    private static native int nativeGetPageRotation(long docPtr, int pageIndex);
+
     /**
      * Create new document from file
      */
@@ -905,6 +907,15 @@ public class PdfiumCore {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Get page rotation in degrees
+     * @param pageIndex the page index
+     * @return page rotation
+     */
+    public int getPageRotation(int pageIndex){
+        return nativeGetPageRotation(mNativeDocPtr, pageIndex);
     }
 
     /**

@@ -18,8 +18,6 @@ import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.afzal.pdfviewer.R;
 import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 
-import org.jetbrains.annotations.NotNull;
-
 public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle {
 
     private final static int HANDLE_LONG = 65;
@@ -54,7 +52,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     @Override
-    public void setupLayout(@NotNull PDFView pdfView) {
+    public void setupLayout(PDFView pdfView) {
         int align;
         int width;
         int height;
@@ -142,10 +140,6 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             pos = getY();
             viewSize = getHeight();
             pdfViewSize = pdfView.getHeight();
-        } else if (pdfView.isOnDualPageMode()) {
-            pos = getX();
-            viewSize = getWidth() / 2f;
-            pdfViewSize = pdfView.getWidth() / 2f;
         } else {
             pos = getX();
             viewSize = getWidth();

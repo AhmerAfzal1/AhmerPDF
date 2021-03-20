@@ -17,6 +17,7 @@ using namespace android;
 
 #include <fpdfview.h>
 #include <fpdf_doc.h>
+#include <fpdf_edit.h>
 #include <fpdf_text.h>
 #include <fpdf_annot.h>
 #include <fpdf_save.h>
@@ -302,6 +303,7 @@ JNI_FUNC(jlong, PdfiumCore, nativeLoadPage)(JNI_ARGS, jlong docPtr, jint pageInd
     auto *doc = reinterpret_cast<DocumentFile *>(docPtr);
     return loadPageInternal(env, doc, (int) pageIndex);
 }
+
 JNI_FUNC(jlongArray, PdfiumCore, nativeLoadPages)(JNI_ARGS, jlong docPtr, jint fromIndex,
                                                   jint toIndex) {
     auto *doc = reinterpret_cast<DocumentFile *>(docPtr);
@@ -314,6 +316,16 @@ JNI_FUNC(jlongArray, PdfiumCore, nativeLoadPages)(JNI_ARGS, jlong docPtr, jint f
     jlongArray javaPages = env->NewLongArray((jsize) (toIndex - fromIndex + 1));
     env->SetLongArrayRegion(javaPages, 0, (jsize) (toIndex - fromIndex + 1), (const jlong *) pages);
     return javaPages;
+}
+
+JNI_FUNC(jint, PdfiumCore, nativeGetPageRotation)(JNI_ARGS, jlong docPtr, jint pageIndex) {
+    auto *doc = reinterpret_cast<DocumentFile *>(docPtr);
+    FPDF_PAGE page = FPDF_LoadPage(doc->pdfDocument, pageIndex);
+    if (page == NULL) {
+        LOGE("nativeGetPageRotation: Loaded page is null");
+        return -1;
+    }
+    return FPDFPage_GetRotation(page);
 }
 
 JNI_FUNC(void, PdfiumCore, nativeClosePage)(JNI_ARGS, jlong pagePtr) {

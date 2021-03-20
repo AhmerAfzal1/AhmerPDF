@@ -16,8 +16,6 @@ import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.pdfviewer.util.PageSizeCalculator;
 import com.ahmer.afzal.pdfviewer.util.PdfConstants;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +30,6 @@ class PdfFile {
      * else the largest page fits and other pages scale relatively
      */
     private final boolean fitEachPage;
-    private final boolean isLandscape;
     private final Queue<Integer> openedPageQueue;
     private final PdfiumCore pdfiumCore;
     /**
@@ -47,10 +44,6 @@ class PdfFile {
      * Opened pages with indicator whether opening was successful
      */
     private final SparseBooleanArray openedPages = new SparseBooleanArray();
-    /**
-     * True if dualPageMode is on
-     */
-    private final boolean showTwoPages;
     /**
      * True if scrolling is vertical, else it's horizontal
      */
@@ -99,9 +92,7 @@ class PdfFile {
     private int[] originalUserPages;
 
     PdfFile(PdfiumCore pdfiumCore, FitPolicy pageFitPolicy, Size viewSize, int[] originalUserPages,
-            boolean showTwoPages, boolean isVertical, int spacing, boolean autoSpacing,
-            boolean fitEachPage, boolean isLandscape) {
-        this.showTwoPages = showTwoPages;
+            boolean isVertical, int spacing, boolean autoSpacing, boolean fitEachPage) {
         this.pdfiumCore = pdfiumCore;
         this.pageFitPolicy = pageFitPolicy;
         this.originalUserPages = originalUserPages;
@@ -109,7 +100,6 @@ class PdfFile {
         spacingPx = spacing;
         this.autoSpacing = autoSpacing;
         this.fitEachPage = fitEachPage;
-        this.isLandscape = isLandscape;
         this.openedPageQueue = new LinkedList<>();
         setup(viewSize);
     }
@@ -146,7 +136,7 @@ class PdfFile {
         maxWidthPageSize = calculator.getOptimalMaxWidthPageSize();
         maxHeightPageSize = calculator.getOptimalMaxHeightPageSize();
         for (Size size : originalPageSizes) {
-            pageSizes.add(calculator.calculate(size, showTwoPages, isLandscape));
+            pageSizes.add(calculator.calculate(size));
         }
         if (autoSpacing) {
             prepareAutoSpacing(viewSize);
@@ -185,16 +175,8 @@ class PdfFile {
         return getMaxPageSize().getWidth();
     }
 
-    public float getMaxPageWidth(int index) {
-        return Math.max(getPageSize(index).getWidth(), getMaxPageSize().getWidth());
-    }
-
     public float getMaxPageHeight() {
         return getMaxPageSize().getHeight();
-    }
-
-    public float getMaxPageHeight(int index) {
-        return Math.max(getPageSize(index).getHeight(), getMaxPageSize().getHeight());
     }
 
     private void prepareAutoSpacing(Size viewSize) {
@@ -283,7 +265,7 @@ class PdfFile {
             float maxWidth = getMaxPageWidth();
             return zoom * (maxWidth - pageSize.getWidth()) / 2; //x
         } else {
-            float maxHeight = getMaxPageHeight(pageIndex);
+            float maxHeight = getMaxPageHeight();
             return zoom * (maxHeight - pageSize.getHeight()) / 2; //y
         }
     }
@@ -338,7 +320,7 @@ class PdfFile {
         return !openedPages.get(docPage, false);
     }
 
-    public void renderPageBitmap(Bitmap bitmap, int pageIndex, @NotNull Rect bounds, boolean annotationRendering) {
+    public void renderPageBitmap(Bitmap bitmap, int pageIndex, Rect bounds, boolean annotationRendering) {
         int docPage = documentPage(pageIndex);
         pdfiumCore.renderPageBitmap(bitmap, docPage, bounds.left, bounds.top, bounds.width(),
                 bounds.height(), annotationRendering);

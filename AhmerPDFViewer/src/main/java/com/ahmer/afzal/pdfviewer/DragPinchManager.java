@@ -13,8 +13,6 @@ import com.ahmer.afzal.pdfviewer.model.LinkTapEvent;
 import com.ahmer.afzal.pdfviewer.scroll.ScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.SnapEdge;
 
-import org.jetbrains.annotations.NotNull;
-
 import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Pinch.MAXIMUM_ZOOM;
 import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Pinch.MINIMUM_ZOOM;
 
@@ -33,7 +31,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     private boolean scaling = false;
     private boolean enabled = false;
 
-    DragPinchManager(@NotNull PDFView pdfView, AnimationManager animationManager) {
+    DragPinchManager(PDFView pdfView, AnimationManager animationManager) {
         this.pdfView = pdfView;
         this.animationManager = animationManager;
         gestureDetector = new GestureDetector(pdfView.getContext(), this);
@@ -207,11 +205,11 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
             minY = -(pdfFile.getDocLen(pdfView.getZoom()) - pdfView.getHeight());
         } else {
             minX = -(pdfFile.getDocLen(pdfView.getZoom()) - pdfView.getWidth());
-            minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight(pdfView.getCurrentPage())) -
-                    pdfView.getHeight());
+            minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight()) - pdfView.getHeight());
         }
         animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY),
-                (int) minX, 0, (int) minY, 0);
+                (int) minX, 0, (int) minY - Math.round(pdfView.toCurrentScale(pdfView.defaultOffset)),
+                Math.round(pdfView.toCurrentScale(pdfView.defaultOffset)));
         return true;
     }
 
@@ -232,8 +230,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
             maxY = pageStart;
         } else {
             minX = pageEnd + pdfView.getWidth();
-            minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight(pdfView.getCurrentPage())) -
-                    pdfView.getHeight());
+            minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight()) - pdfView.getHeight());
             maxX = pageStart;
             maxY = 0;
         }
@@ -243,7 +240,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     }
 
     @Override
-    public boolean onScale(@NotNull ScaleGestureDetector detector) {
+    public boolean onScale(ScaleGestureDetector detector) {
         float dr = detector.getScaleFactor();
         float wantedZoom = pdfView.getZoom() * dr;
         float minZoom = Math.min(MINIMUM_ZOOM, pdfView.getMinZoom());

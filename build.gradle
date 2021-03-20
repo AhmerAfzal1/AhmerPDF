@@ -26,8 +26,8 @@ Properties properties = new Properties()
 properties.load(new FileInputStream('local.properties'))
 
 project.ext {
-    set('idPdfViewerVersion', '2.8.2')
-    set('idPdfiumVersion', '7.7.3')
+    set('idPdfViewerVersion', '2.8.3')
+    set('idPdfiumVersion', '7.7.4')
     set('idUser', properties.getProperty('bintray.user'))
     set('idPass', properties.getProperty('bintray.apikey'))
     set('idDeveloperID', 'ahmerafzal')

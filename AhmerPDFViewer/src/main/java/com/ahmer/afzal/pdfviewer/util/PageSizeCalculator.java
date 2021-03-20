@@ -3,8 +3,6 @@ package com.ahmer.afzal.pdfviewer.util;
 import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfium.util.SizeF;
 
-import org.jetbrains.annotations.NotNull;
-
 public class PageSizeCalculator {
 
     private final Size originalMaxWidthPageSize;
@@ -27,44 +25,11 @@ public class PageSizeCalculator {
         calculateMaxPages();
     }
 
-    private static SizeF fitWidth(@NotNull Size pageSize, float maxWidth) {
-        float w = pageSize.getWidth(), h = pageSize.getHeight();
-        float ratio = w / h;
-        w = maxWidth;
-        h = (float) Math.floor(maxWidth / ratio);
-        return new SizeF(w, h);
-    }
-
-    private static SizeF fitHeight(@NotNull Size pageSize, float maxHeight) {
-        float w = pageSize.getWidth(), h = pageSize.getHeight();
-        float ratio = h / w;
-        h = maxHeight;
-        w = (float) Math.floor(maxHeight / ratio);
-        return new SizeF(w, h);
-    }
-
-    private static SizeF fitBoth(@NotNull Size pageSize, float maxWidth, float maxHeight) {
-        float w = pageSize.getWidth(), h = pageSize.getHeight();
-        float ratio = w / h;
-        w = maxWidth;
-        h = (float) Math.floor(maxWidth / ratio);
-        if (h > maxHeight) {
-            h = maxHeight;
-            w = (float) Math.floor(maxHeight * ratio);
-        }
-        return new SizeF(w, h);
-    }
-
-    public SizeF calculate(@NotNull Size pageSize, boolean showTwoPages, boolean isLandscape) {
+    public SizeF calculate(Size pageSize) {
         if (pageSize.getWidth() <= 0 || pageSize.getHeight() <= 0) {
             return new SizeF(0, 0);
         }
-        float maxWidth;
-        if (showTwoPages && !isLandscape) {
-            maxWidth = fitEachPage ? viewSize.getWidth() : pageSize.getWidth() / 2f * widthRatio;
-        } else {
-            maxWidth = fitEachPage ? viewSize.getWidth() : pageSize.getWidth() * widthRatio;
-        }
+        float maxWidth = fitEachPage ? viewSize.getWidth() : pageSize.getWidth() * widthRatio;
         float maxHeight = fitEachPage ? viewSize.getHeight() : pageSize.getHeight() * heightRatio;
         switch (fitPolicy) {
             case HEIGHT:
@@ -105,9 +70,40 @@ public class PageSizeCalculator {
             default:
                 optimalMaxWidthPageSize = fitWidth(originalMaxWidthPageSize, viewSize.getWidth());
                 widthRatio = optimalMaxWidthPageSize.getWidth() / originalMaxWidthPageSize.getWidth();
-                optimalMaxHeightPageSize = fitWidth(originalMaxHeightPageSize,
-                        originalMaxHeightPageSize.getWidth() * widthRatio);
+                final SizeF newPageSize = fitWidth(originalMaxHeightPageSize, originalMaxHeightPageSize.getWidth() * widthRatio);
+                if (this.optimalMaxHeightPageSize == null || newPageSize.getHeight() > this.optimalMaxHeightPageSize.getHeight()) {
+                    this.optimalMaxHeightPageSize = newPageSize;
+                }
                 break;
         }
     }
+
+    private SizeF fitWidth(Size pageSize, float maxWidth) {
+        float w = pageSize.getWidth(), h = pageSize.getHeight();
+        float ratio = w / h;
+        w = maxWidth;
+        h = (float) Math.floor(maxWidth / ratio);
+        return new SizeF(w, h);
+    }
+
+    private SizeF fitHeight(Size pageSize, float maxHeight) {
+        float w = pageSize.getWidth(), h = pageSize.getHeight();
+        float ratio = h / w;
+        h = maxHeight;
+        w = (float) Math.floor(maxHeight / ratio);
+        return new SizeF(w, h);
+    }
+
+    private SizeF fitBoth(Size pageSize, float maxWidth, float maxHeight) {
+        float w = pageSize.getWidth(), h = pageSize.getHeight();
+        float ratio = w / h;
+        w = maxWidth;
+        h = (float) Math.floor(maxWidth / ratio);
+        if (h > maxHeight) {
+            h = maxHeight;
+            w = (float) Math.floor(maxHeight * ratio);
+        }
+        return new SizeF(w, h);
+    }
+
 }
