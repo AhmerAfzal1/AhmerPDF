@@ -1,4 +1,4 @@
-rootProject.name='AhmerPDF'
+rootProject.name = 'AhmerPDF'
 include ':AhmerPDFActivity'
 include ':AhmerPDFViewer'
 include ':AhmerPdfium'

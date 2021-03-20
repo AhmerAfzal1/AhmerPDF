@@ -2,8 +2,6 @@ package com.ahmer.afzal.pdfviewer.util;
 
 import android.content.Context;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,7 +14,7 @@ public class PdfFileUtils {
         // Prevents instantiation
     }
 
-    public static @NotNull File fileFromAsset(@NotNull Context context, @NotNull String assetName) throws IOException {
+    public static File fileFromAsset(Context context, String assetName) throws IOException {
         File outFile = new File(context.getCacheDir(), assetName + "-pdfview.pdf");
         if (assetName.contains("/")) {
             outFile.getParentFile().mkdirs();
@@ -25,7 +23,7 @@ public class PdfFileUtils {
         return outFile;
     }
 
-    public static void copy(@NotNull InputStream inputStream, File output) throws IOException {
+    public static void copy(InputStream inputStream, File output) throws IOException {
         OutputStream outputStream = null;
         try {
             outputStream = new FileOutputStream(output);

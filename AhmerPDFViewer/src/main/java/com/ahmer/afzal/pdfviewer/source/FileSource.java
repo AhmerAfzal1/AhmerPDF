@@ -5,8 +5,6 @@ import android.os.ParcelFileDescriptor;
 
 import com.ahmer.afzal.pdfium.PdfiumCore;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -19,7 +17,7 @@ public class FileSource implements DocumentSource {
     }
 
     @Override
-    public void createDocument(Context context, @NotNull PdfiumCore core, String password) throws IOException {
+    public void createDocument(Context context, PdfiumCore core, String password) throws IOException {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
         core.newDocument(pfd, password);
     }

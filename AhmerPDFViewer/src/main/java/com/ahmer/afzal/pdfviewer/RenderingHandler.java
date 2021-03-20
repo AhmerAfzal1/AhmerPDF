@@ -16,9 +16,6 @@ import android.util.Log;
 import com.ahmer.afzal.pdfviewer.exception.PageRenderingException;
 import com.ahmer.afzal.pdfviewer.model.PagePart;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * A {@link Handler} that will process incoming {@link RenderingTask} messages
  * and alert {@link PDFView#onBitmapRendered(PagePart)} when the portion of the
@@ -41,7 +38,7 @@ class RenderingHandler extends Handler {
         this.pdfView = pdfView;
     }
 
-    private static Bitmap toNightMode(@NotNull Bitmap bmpOriginal, boolean bestQuality) {
+    private static Bitmap toNightMode(Bitmap bmpOriginal, boolean bestQuality) {
         int width;
         int height;
         height = bmpOriginal.getHeight();
@@ -75,7 +72,7 @@ class RenderingHandler extends Handler {
     }
 
     @Override
-    public void handleMessage(@NotNull Message message) {
+    public void handleMessage(Message message) {
         RenderingTask task = (RenderingTask) message.obj;
         try {
             PagePart part = proceed(task);
@@ -101,7 +98,7 @@ class RenderingHandler extends Handler {
         }
     }
 
-    private @Nullable PagePart proceed(@NotNull RenderingTask renderingTask) throws PageRenderingException {
+    private PagePart proceed(RenderingTask renderingTask) throws PageRenderingException {
         PdfFile pdfFile = pdfView.pdfFile;
         pdfFile.openPage(renderingTask.page);
         int w = Math.round(renderingTask.width);
@@ -127,7 +124,7 @@ class RenderingHandler extends Handler {
                 renderingTask.thumbnail, renderingTask.cacheOrder);
     }
 
-    private void calculateBounds(int width, int height, @NotNull RectF pageSliceBounds) {
+    private void calculateBounds(int width, int height, RectF pageSliceBounds) {
         renderMatrix.reset();
         renderMatrix.postTranslate(-pageSliceBounds.left * width, -pageSliceBounds.top * height);
         renderMatrix.postScale(1 / pageSliceBounds.width(), 1 / pageSliceBounds.height());

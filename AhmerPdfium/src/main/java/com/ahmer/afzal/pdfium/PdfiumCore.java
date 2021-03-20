@@ -86,6 +86,8 @@ public class PdfiumCore {
         return mNativeTextPagesPtr.containsKey(index);
     }
 
+    private static native int nativeGetPageRotation(long docPtr, int pageIndex);
+
     private native long nativeOpenDocument(int fd, String password);
 
     private native long nativeOpenMemDocument(byte[] data, String password);
@@ -96,11 +98,11 @@ public class PdfiumCore {
 
     private native long nativeLoadPage(long docPtr, int pageIndex);
 
-    private native long[] nativeLoadPages(long docPtr, int fromIndex, int toIndex);
-
     //private native long nativeGetNativeWindow(Surface surface);
 
     //private native void nativeRenderPage(long pagePtr, long nativeWindowPtr);
+
+    private native long[] nativeLoadPages(long docPtr, int fromIndex, int toIndex);
 
     private native void nativeClosePage(long pagePtr);
 
@@ -206,8 +208,6 @@ public class PdfiumCore {
     public native void nativeSetAnnotColor(long annotPtr, int R, int G, int B, int A);
 
     public native boolean nativeGetAttachmentPoints(long pagePtr, long annotPtr, int idx, int width, int height, PointF p1, PointF p2, PointF p3, PointF p4);
-
-    private static native int nativeGetPageRotation(long docPtr, int pageIndex);
 
     /**
      * Create new document from file
@@ -911,10 +911,11 @@ public class PdfiumCore {
 
     /**
      * Get page rotation in degrees
+     *
      * @param pageIndex the page index
      * @return page rotation
      */
-    public int getPageRotation(int pageIndex){
+    public int getPageRotation(int pageIndex) {
         return nativeGetPageRotation(mNativeDocPtr, pageIndex);
     }
 

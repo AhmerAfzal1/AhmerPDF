@@ -13,7 +13,7 @@ add_library(pdfium SHARED IMPORTED)
 set_target_properties(pdfium PROPERTIES IMPORTED_LOCATION
         ${CMAKE_SOURCE_DIR}/src/main/libs/${ANDROID_ABI}/libpdfium.so)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${CMAKE_SOURCE_DIR}/src/main/libs/${ANDROID_ABI})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/main/libs/${ANDROID_ABI})
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.

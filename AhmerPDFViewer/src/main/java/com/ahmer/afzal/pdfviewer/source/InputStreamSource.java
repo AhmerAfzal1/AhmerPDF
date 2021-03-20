@@ -5,8 +5,6 @@ import android.content.Context;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -19,7 +17,7 @@ public class InputStreamSource implements DocumentSource {
     }
 
     @Override
-    public void createDocument(Context context, @NotNull PdfiumCore core, String password) throws IOException {
+    public void createDocument(Context context, PdfiumCore core, String password) throws IOException {
         core.newDocument(PdfUtils.toByteArray(inputStream), password);
     }
 }
