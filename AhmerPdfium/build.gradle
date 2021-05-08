@@ -1,9 +1,8 @@
-apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
-
-version = project.idPdfiumVersion
-group = project.idGroup
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'signing'
+}
 
 android {
     compileSdkVersion 30
@@ -14,7 +13,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
-        versionName project.idPdfiumVersion
+        versionName verPdfium
         consumerProguardFiles 'consumer-rules.pro'
 
         ndk {
@@ -58,14 +57,22 @@ android {
     }
 }
 
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.collection:collection:1.1.0'
+    implementation 'org.jetbrains:annotations:20.1.0'
+}
+
 task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
     archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
 }
 
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
+    classpath += configurations.compile
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    failOnError = false
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -78,62 +85,64 @@ artifacts {
     archives sourcesJar
 }
 
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'aar'
-                groupId project.idGroup
-                artifactId project.idArtifactPdfium
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId groupId
+            artifactId artifactPdfium
+            version verPdfium
+            artifact sourcesJar
+            artifact javadocJar
 
-                name project.idArtifactPdfium
-                description project.idDescriptionPdfium
-                url project.idUrl
-
+            pom {
+                name = artifactPdfium
+                description = descriptionPdfium
+                url = url
                 licenses {
                     license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = licenseName
+                        url = licenseUrl
                     }
                 }
-
                 developers {
                     developer {
-                        id project.idDeveloperID
-                        name project.idDeveloperName
-                        email project.idDeveloperEmail
+                        id = developerID
+                        name = developerName
+                        email = developerEmail
                     }
                 }
-
                 scm {
-                    connection project.idVcsUrl
-                    developerConnection project.idVcsUrl
-                    url project.idUrl
+                    url = 'https://github.com/AhmerAfzal1/AhmerPDF/tree/master/AhmerPdfium'
+                    connection = scmUrl
+                    developerConnection = scmSshUrl
                 }
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    project.configurations.implementation.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'maven'
+            def releasesRepoUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
             }
         }
     }
 }
 
-bintray {
-    user = project.idUser
-    key = project.idPass
-
-    pkg {
-        repo = project.idRepo
-        name = project.idArtifactPdfium
-        configurations = ['archives']
-        desc = project.idDescriptionPdfium
-        websiteUrl = project.idUrl
-        vcsUrl = project.idVcsUrl
-        licenses = ['Apache-2.0']
-        publish = true
-        publicDownloadNumbers = true
-    }
-}
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.collection:collection:1.1.0'
-    implementation 'org.jetbrains:annotations:20.1.0'
+signing {
+    sign publishing.publications.mavenJava
+    sign configurations.archives
 }

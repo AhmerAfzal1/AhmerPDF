@@ -1,4 +1,26 @@
 buildscript {
+    ext.'artifactPdfium' = 'ahmer-pdfium'
+    ext.'artifactPdfViewer' = 'ahmer-pdfviewer'
+    ext.'descriptionPdfium' = 'Ahmer Pdfium Library for Android (API 19 binding)'
+    ext.'descriptionPdfViewer' = 'Android view for displaying PDFs rendered with PdfiumAndroid'
+    ext.'developerEmail' = 'ahmerafzal@yahoo.com'
+    ext.'developerID' = 'ahmerafzal'
+    ext.'developerName' = 'Ahmer Afzal'
+    ext.'groupId' = 'io.github.ahmerafzal1'
+    ext.'licenseName' = 'The Apache License, Version 2.0'
+    ext.'licenseUrl' = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    ext.'scmSshUrl' = 'scm:git:ssh://github.com/AhmerAfzal1/AhmerPDF.git'
+    ext.'scmUrl' = 'scm:git@github.com:AhmerAfzal1/AhmerPDF.git'
+    ext.'url' = 'https://github.com/AhmerAfzal1/AhmerPDF'
+    ext.'verPdfium' = '1.0.0'
+    ext.'verPdfViewer' = '1.0.0'
+
+    ext.'signing.keyId' = System.getenv('SIGNING_KEY_ID')
+    ext.'signing.password' = System.getenv('SIGNING_PASSWORD')
+    ext.'signing.secretKeyRingFile' = "D:\\Keys\\secring.gpg"
+
+    ext.'ossrhUsername' = System.getenv('OSSRH_USERNAME')
+    ext.'ossrhPassword' = System.getenv('OSSRH_PASSWORD')
     repositories {
         google()
         mavenCentral()
@@ -6,8 +28,6 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.0'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
     }
 }
 
@@ -20,25 +40,4 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-
-Properties properties = new Properties()
-properties.load(new FileInputStream('local.properties'))
-
-project.ext {
-    set('idPdfViewerVersion', '2.8.3')
-    set('idPdfiumVersion', '7.7.4')
-    set('idUser', properties.getProperty('bintray.user'))
-    set('idPass', properties.getProperty('bintray.apikey'))
-    set('idDeveloperID', 'ahmerafzal')
-    set('idDeveloperName', 'Ahmer Afzal')
-    set('idDeveloperEmail', 'ahmerafzal@yahoo.com')
-    set('idGroup', 'com.github.ahmerafzal1')
-    set('idRepo', 'maven')
-    set('idUrl', 'https://github.com/AhmerAfzal1/AhmerPDF')
-    set('idVcsUrl', 'https://github.com/AhmerAfzal1/AhmerPDF.git')
-    set('idArtifactPdfium', 'AhmerPdfium')
-    set('idDescriptionPdfium', 'Ahmer Pdfium Library for Android (API 19) binding')
-    set('idArtifactPdfViewer', 'AhmerPDFViewer')
-    set('idDescriptionPdfViewer', 'Android view for displaying PDFs rendered with PdfiumAndroid')
 }
