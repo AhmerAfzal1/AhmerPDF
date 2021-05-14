@@ -13,7 +13,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
-        versionName verPdfium
+        versionName '1.0.0'
         consumerProguardFiles 'consumer-rules.pro'
 
         ndk {
@@ -36,10 +36,6 @@ android {
         }
     }
 
-    tasks.withType(Javadoc).all {
-        enabled false
-    }
-
     lintOptions {
         abortOnError false
     }
@@ -58,9 +54,12 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.collection:collection:1.1.0'
     implementation 'org.jetbrains:annotations:20.1.0'
+}
+
+tasks.withType(Javadoc).all {
+    enabled false
 }
 
 task sourcesJar(type: Jar) {
@@ -88,11 +87,12 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId groupId
-            artifactId artifactPdfium
-            version verPdfium
             artifact sourcesJar
             artifact javadocJar
+            artifact "$buildDir/outputs/aar/AhmerPdfium-release.aar"
+            groupId groupId
+            artifactId artifactPdfium
+            version android.defaultConfig.versionName
 
             pom {
                 name = artifactPdfium

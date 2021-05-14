@@ -13,12 +13,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
-        versionName verPdfViewer
+        versionName '1.0.0'
         consumerProguardFiles 'consumer-rules.pro'
-    }
-
-    tasks.withType(Javadoc).all {
-        enabled false
     }
 
     lintOptions {
@@ -41,8 +37,12 @@ android {
 
 dependencies {
     implementation project(path: ':AhmerPdfium')
-    implementation 'com.github.ahmerafzal1:AhmerUtils:4.2.5'
     implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'io.github.ahmerafzal1:ahmer-utils:1.0.5'
+}
+
+tasks.withType(Javadoc).all {
+    enabled false
 }
 
 task sourcesJar(type: Jar) {
@@ -70,11 +70,12 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId groupId
-            artifactId artifactPdfViewer
-            version verPdfViewer
             artifact sourcesJar
             artifact javadocJar
+            artifact "$buildDir/outputs/aar/AhmerPDFViewer-release.aar"
+            groupId groupId
+            artifactId artifactPdfViewer
+            version android.defaultConfig.versionName
 
             pom {
                 name = artifactPdfViewer
