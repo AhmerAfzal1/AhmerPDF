@@ -7,10 +7,11 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 
-import com.ahmer.afzal.utils.utilcode.ToastUtils;
 import com.ahmer.ahmerpdf.databinding.DialogPdfJumptoBinding;
 
 import java.util.Objects;
+
+import io.ahmer.utils.utilcode.ToastUtils;
 
 public class DialogJumpTo extends Dialog {
 

@@ -29,10 +29,6 @@ import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.pdfviewer.util.PdfFileUtils;
-import com.ahmer.afzal.utils.utilcode.SPUtils;
-import com.ahmer.afzal.utils.utilcode.StringUtils;
-import com.ahmer.afzal.utils.utilcode.ThrowableUtils;
-import com.ahmer.afzal.utils.utilcode.ToastUtils;
 import com.ahmer.ahmerpdf.databinding.ActivityPdfBinding;
 
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +37,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
+import io.ahmer.utils.utilcode.SPUtils;
+import io.ahmer.utils.utilcode.StringUtils;
+import io.ahmer.utils.utilcode.ThrowableUtils;
+import io.ahmer.utils.utilcode.ToastUtils;
 
 public class PdfActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener {
 

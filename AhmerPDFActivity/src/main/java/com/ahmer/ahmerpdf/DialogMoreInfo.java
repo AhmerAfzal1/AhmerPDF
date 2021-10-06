@@ -10,11 +10,12 @@ import androidx.annotation.NonNull;
 import com.ahmer.afzal.pdfium.Meta;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 import com.ahmer.afzal.pdfviewer.PDFView;
-import com.ahmer.afzal.utils.utilcode.FileUtils;
 import com.ahmer.ahmerpdf.databinding.DialogPdfInfoBinding;
 
 import java.io.File;
 import java.util.Locale;
+
+import io.ahmer.utils.utilcode.FileUtils;
 
 public class DialogMoreInfo extends Dialog {
 
