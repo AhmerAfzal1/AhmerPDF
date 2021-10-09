@@ -11,6 +11,8 @@ import android.view.Surface;
 
 import androidx.collection.ArrayMap;
 
+import com.ahmer.afzal.pdfium.search.FPDFTextSearchContext;
+import com.ahmer.afzal.pdfium.search.TextSearchContext;
 import com.ahmer.afzal.pdfium.util.Size;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,13 +29,13 @@ import java.util.Map;
 
 public class PdfiumCore {
 
-    public static final Object searchLock = new Object();
     private static final Class FD_CLASS = FileDescriptor.class;
     /* synchronize native methods */
     private static final Object lock = new Object();
     private static final String FD_FIELD_NAME = "descriptor";
     private static final String TAG = PdfiumCore.class.getName();
     private static final Map<Integer, Long> mNativePagesPtr = new ArrayMap<>();
+    private static final Map<Integer, Long> mNativeSearchHandlePtr = new ArrayMap<>();
     private static final Map<Integer, Long> mNativeTextPagesPtr = new ArrayMap<>();
     private static Field mFdField = null;
     private static long mNativeDocPtr = 0L;
@@ -86,8 +88,6 @@ public class PdfiumCore {
         return mNativeTextPagesPtr.containsKey(index);
     }
 
-    private static native int nativeGetPageRotation(long docPtr, int pageIndex);
-
     private native long nativeOpenDocument(int fd, String password);
 
     private native long nativeOpenMemDocument(byte[] data, String password);
@@ -97,10 +97,6 @@ public class PdfiumCore {
     private native int nativeGetPageCount(long docPtr);
 
     private native long nativeLoadPage(long docPtr, int pageIndex);
-
-    //private native long nativeGetNativeWindow(Surface surface);
-
-    //private native void nativeRenderPage(long pagePtr, long nativeWindowPtr);
 
     private native long[] nativeLoadPages(long docPtr, int fromIndex, int toIndex);
 
@@ -116,6 +112,8 @@ public class PdfiumCore {
 
     private native int nativeGetPageHeightPoint(long pagePtr);
 
+    private native int nativeGetPageRotation(long pagePtr);
+
     private native void nativeRenderPage(long pagePtr, Surface surface, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
 
     private native void nativeRenderPageBitmap(long pagePtr, Bitmap bitmap, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
@@ -130,9 +128,31 @@ public class PdfiumCore {
 
     private native long nativeGetBookmarkDestIndex(long docPtr, long bookmarkPtr);
 
-    private native long nativeLoadTextPage(long docPtr, long pagePtr);
+    private native Size nativeGetPageSizeByIndex(long docPtr, int pageIndex, int dpi);
+
+    private native long[] nativeGetPageLinks(long pagePtr);
+
+    private native Integer nativeGetDestPageIndex(long docPtr, long linkPtr);
+
+    private native String nativeGetLinkURI(long docPtr, long linkPtr);
+
+    private native RectF nativeGetLinkRect(long linkPtr);
+
+    private native Point nativePageCoordinateToDevice(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY);
+
+    private native PointF nativeDeviceCoordinateToPage(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, int deviceX, int deviceY);
+
+    /**
+     * API PDF TextPage
+     */
+
+    private native long nativeLoadTextPage(long docPtr, int pageIndex);
+
+    private native long[] nativeLoadTextPages(long docPtr, int fromIndex, int toIndex);
 
     private native void nativeCloseTextPage(long pagePtr);
+
+    private native void nativeCloseTextPages(long[] pagesPtr);
 
     private native int nativeTextCountChars(long textPagePtr);
 
@@ -148,66 +168,44 @@ public class PdfiumCore {
 
     private native double[] nativeTextGetRect(long textPagePtr, int rect_index);
 
-    private native int nativeTextGetBoundedText(long textPagePtr, double left, double top, double right, double bottom, short[] arr);
-
-    private native Size nativeGetPageSizeByIndex(long docPtr, int pageIndex, int dpi);
-
-    private native long[] nativeGetPageLinks(long pagePtr);
-
-    private native Integer nativeGetDestPageIndex(long docPtr, long linkPtr);
-
-    private native String nativeGetLinkURI(long docPtr, long linkPtr);
-
-    private native RectF nativeGetLinkRect(long linkPtr);
-
-    private native Point nativePageCoordsToDevice(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY);
-
-    private native PointF nativeDeviceCoordsToPage(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, int deviceX, int deviceY);
-
-    private native long nativeLoadTextPage(long docPtr, int pageIndex);
-
-    private native long[] nativeLoadTextPages(long docPtr, int fromIndex, int toIndex);
-
     private native int nativeTextGetBoundedTextLength(long textPagePtr, double left, double top, double right, double bottom);
 
-    /*
-     * New add
+    private native int nativeTextGetBoundedText(long textPagePtr, double left, double top, double right, double bottom, short[] arr);
+
+    /**
+     * API PDF Search
      */
-    public native int nativeGetCharIndexAtCoord(long pagePtr, double width, double height, long textPtr, double posX, double posY, double tolX, double tolY);
 
-    private native int nativeCountAndGetRects(long pagePtr, int offsetY, int offsetX, int width, int height, ArrayList<RectF> arr, long tid, int selSt, int selEd);
+    private native long nativeSearchStart(long textPagePtr, String query, boolean matchCase, boolean matchWholeWord);
 
-    public native String nativeGetText(long textPtr);
+    private native void nativeSearchStop(long searchHandlePtr);
 
-    public native int nativeGetCharPos(long pagePtr, int offsetY, int offsetX, int width, int height, RectF pt, long tid, int index, boolean loose);
+    private native boolean nativeSearchNext(long searchHandlePtr);
 
-    public native int nativeGetMixedLooseCharPos(long pagePtr, int offsetY, int offsetX, int width, int height, RectF pt, long tid, int index, boolean loose);
+    private native boolean nativeSearchPrev(long searchHandlePtr);
 
-    public native void nativeFindAll(long mNativeDocPtr, int pages, String key, int flag, ArrayList<SearchRecord> arr);
+    private native int nativeGetCharIndexOfSearchResult(long searchHandlePtr);
 
-    public native SearchRecord nativeFindPage(long mNativeDocPtr, String key, int pageIdx, int flag);
+    private native int nativeCountSearchResult(long searchHandlePtr);
 
-    public native int nativeFindTextPage(long pagePtr, String key, int flag);
+    /**
+     * API PDF Annotation
+     */
 
-    public native RectF nativeGetAnnotRect(long pagePtr, int index, int width, int height);
+    private native long nativeAddTextAnnotation(long docPtr, int pageIndex, String text, int[] color, int[] bound);
 
-    public native int nativeCountAnnot(long pagePtr);
+    /**
+     * PDF Native Callbacks
+     */
 
-    public native long nativeOpenAnnot(long page, int idx);
+    private void onAnnotationAdded(int pageIndex, long pageNewPtr) {
+    }
 
-    public native void nativeCloseAnnot(long annotPtr);
+    private void onAnnotationUpdated(int pageIndex, long pageNewPtr) {
+    }
 
-    public native int nativeCountAttachmentPoints(long annotPtr);
-
-    public native long nativeCreateAnnot(long pagePtr, int type);
-
-    public native void nativeSetAnnotRect(long pagePtr, long annotPtr, float left, float top, float right, float bottom, double width, double height);
-
-    public native void nativeAppendAnnotPoints(long pagePtr, long annotPtr, double left, double top, double right, double bottom, double width, double height);
-
-    public native void nativeSetAnnotColor(long annotPtr, int R, int G, int B, int A);
-
-    public native boolean nativeGetAttachmentPoints(long pagePtr, long annotPtr, int idx, int width, int height, PointF p1, PointF p2, PointF p3, PointF p4);
+    private void onAnnotationRemoved(int pageIndex, long pageNewPtr) {
+    }
 
     /**
      * Create new document from file
@@ -538,7 +536,7 @@ public class PdfiumCore {
      */
     public Point mapPageCoordsToDevice(int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY) {
         long pagePtr = mNativePagesPtr.get(pageIndex);
-        return nativePageCoordsToDevice(pagePtr, startX, startY, sizeX, sizeY, rotate, pageX, pageY);
+        return nativePageCoordinateToDevice(pagePtr, startX, startY, sizeX, sizeY, rotate, pageX, pageY);
     }
 
     /**
@@ -577,7 +575,7 @@ public class PdfiumCore {
      */
     public PointF mapDeviceCoordsToPage(int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, int deviceX, int deviceY) {
         long pagePtr = mNativePagesPtr.get(pageIndex);
-        return nativeDeviceCoordsToPage(pagePtr, startX, startY, sizeX, sizeY, rotate, deviceX, deviceY);
+        return nativeDeviceCoordinateToPage(pagePtr, startX, startY, sizeX, sizeY, rotate, deviceX, deviceY);
     }
 
     /**
@@ -605,7 +603,7 @@ public class PdfiumCore {
             long page = openPage(pageIndex);
             Long textPagePtr = mNativeTextPagesPtr.get(pageIndex);
             if (textPagePtr == null) {
-                textPagePtr = nativeLoadTextPage(mNativeDocPtr, page);
+                textPagePtr = nativeLoadTextPage(mNativeDocPtr, (int) page);
                 mNativeTextPagesPtr.put(pageIndex, textPagePtr);
             }
             return textPagePtr;
@@ -916,7 +914,7 @@ public class PdfiumCore {
      * @return page rotation
      */
     public int getPageRotation(int pageIndex) {
-        return nativeGetPageRotation(mNativeDocPtr, pageIndex);
+        return nativeGetPageRotation(pageIndex);
     }
 
     /**
@@ -1065,12 +1063,85 @@ public class PdfiumCore {
         }
     }
 
-    /*
-     * New Add
+    /**
+     * A handle class for the search context. stopSearch must be called to release this handle.
+     *
+     * @param pageIndex      index of page.
+     * @param query          A unicode match pattern.
+     * @param matchCase      match case
+     * @param matchWholeWord match the whole word
+     * @return A handle for the search context.
      */
-    public int getTextRects(long pagePtr, int offsetY, int offsetX, Size size, ArrayList<RectF> arr, long textPtr, int selSt, int selEd) {
-        synchronized (lock) {
-            return nativeCountAndGetRects(pagePtr, offsetY, offsetX, size.getWidth(), size.getHeight(), arr, textPtr, selSt, selEd);
-        }
+    public TextSearchContext newPageSearch(int pageIndex, String query, boolean matchCase, boolean matchWholeWord) {
+        return new FPDFTextSearchContext(pageIndex, query, matchCase, matchWholeWord) {
+
+            private Long mSearchHandlePtr;
+
+            @Override
+            public void prepareSearch() {
+
+                long textPage = prepareTextInfo(pageIndex);
+
+                if (hasSearchHandle(pageIndex)) {
+                    long sPtr = mNativeSearchHandlePtr.get(pageIndex);
+                    nativeSearchStop(sPtr);
+                }
+
+                this.mSearchHandlePtr = nativeSearchStart(textPage, query, matchCase, matchWholeWord);
+            }
+
+            @Override
+            public int countResult() {
+                if (validPtr(mSearchHandlePtr)) {
+                    return nativeCountSearchResult(mSearchHandlePtr);
+                }
+                return -1;
+            }
+
+            @Override
+            public RectF searchNext() {
+                if (validPtr(mSearchHandlePtr)) {
+                    mHasNext = nativeSearchNext(mSearchHandlePtr);
+                    if (mHasNext) {
+                        int index = nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
+                        if (index > -1) {
+                            return measureCharacterBox(this.getPageIndex(), index);
+                        }
+                    }
+                }
+
+                mHasNext = false;
+                return null;
+            }
+
+            @Override
+            public RectF searchPrev() {
+                if (validPtr(mSearchHandlePtr)) {
+                    mHasPrev = nativeSearchPrev(mSearchHandlePtr);
+                    if (mHasPrev) {
+                        int index = nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
+                        if (index > -1) {
+                            return measureCharacterBox(this.getPageIndex(), index);
+                        }
+                    }
+                }
+
+                mHasPrev = false;
+                return null;
+            }
+
+            @Override
+            public void stopSearch() {
+                super.stopSearch();
+                if (validPtr(mSearchHandlePtr)) {
+                    nativeSearchStop(mSearchHandlePtr);
+                    mNativeSearchHandlePtr.remove(getPageIndex());
+                }
+            }
+        };
+    }
+
+    public boolean hasSearchHandle(int index) {
+        return mNativeSearchHandlePtr.containsKey(index);
     }
 }
