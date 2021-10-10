@@ -24,8 +24,8 @@ android {
     defaultConfig {
         minSdk 19
         targetSdk 31
-        versionCode 1
-        versionName "1.0.0"
+        versionCode 2
+        versionName "1.0.1"
         consumerProguardFiles 'consumer-rules.pro'
     }
 
@@ -113,18 +113,6 @@ publishing {
                     connection = 'scm:git:git://github.com:AhmerAfzal1/AhmerPDF.git'
                     developerConnection = 'scm:git:ssh://github.com/AhmerAfzal1/AhmerPDF.git'
                     url = 'https://github.com/AhmerAfzal1/AhmerPDF/tree/master'
-                }
-                // A slightly hacky fix so that your POM will include any transitive dependencies
-                // that your library builds upon
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-
-                    project.configurations.implementation.allDependencies.each {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
                 }
             }
         }
