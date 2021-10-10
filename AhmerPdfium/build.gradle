@@ -4,15 +4,29 @@ plugins {
     id 'signing'
 }
 
+ext.'signing.keyId' = System.getenv('SIGNING_KEY_ID')
+ext.'signing.password' = System.getenv('SIGNING_PASSWORD')
+ext.'signing.secretKeyRingFile' = "D:\\Keys\\secring.gpg"
+
+ext.'ossrhUsername' = System.getenv('OSSRH_USERNAME')
+ext.'ossrhPassword' = System.getenv('OSSRH_PASSWORD')
+
 android {
+    compileSdk 31
     compileSdkVersion 31
     buildToolsVersion '31.0.0'
     ndkVersion '23.0.7599858'
 
+    buildFeatures {
+        viewBinding true
+    }
+
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 31
-        consumerProguardFiles 'consumer-rules.pro'
+        minSdk 19
+        targetSdk 31
+        versionCode 2
+        versionName "1.0.0"
+
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-19',
@@ -20,6 +34,7 @@ android {
                 cppFlags '-std=c++17 -frtti -fexceptions'
             }
         }
+
         ndk {
             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
         }
@@ -27,13 +42,14 @@ android {
 
     externalNativeBuild {
         cmake {
-            path 'CMakeLists.txt'
+            path file('src/main/cpp/CMakeLists.txt')
             version '3.18.1'
         }
     }
 
     lintOptions {
         abortOnError false
+        disable 'TypographyFractions','TypographyQuotes'
     }
 
     buildTypes {
@@ -42,6 +58,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
 }
 
 dependencies {
@@ -49,106 +70,101 @@ dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
 }
 
-subprojects {
-    id 'java'
+tasks.withType(Javadoc).all {
+    enabled false
+}
 
-    ext.'signing.keyId' = System.getenv('SIGNING_KEY_ID')
-    ext.'signing.password' = System.getenv('SIGNING_PASSWORD')
-    ext.'signing.secretKeyRingFile' = "D:\\Keys\\secring.gpg"
+task sourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
 
-    ext.'ossrhUsername' = System.getenv('OSSRH_USERNAME')
-    ext.'ossrhPassword' = System.getenv('OSSRH_PASSWORD')
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    failOnError = false
+}
 
-    jar {
-        dependsOn 'generatePomFileForMavenJavaPublication'
-        into("META-INF/maven/$project.group/$project.archivesBaseName") {
-            from new File(project.buildDir, 'publications/mavenJava')
-            rename ".*", "pom.xml"
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
 
-        }
-    }
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
 
-    task sourcesJar(type: Jar) {
-        archiveClassifier.set('sources')
-        from android.sourceSets.main.java.srcDirs
-    }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // The coordinates of the library, being set from variables that we'll set up in a moment
+            artifact sourcesJar
+            artifact javadocJar
+            artifact "$buildDir/outputs/aar/AhmerPdfium-release.aar"
+            groupId 'io.github.ahmerafzal1'
+            artifactId 'ahmer-pdfium'
+            version android.defaultConfig.versionName
 
-    task javadoc(type: Javadoc) {
-        source = android.sourceSets.main.java.srcDirs
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-
-        android.libraryVariants.all { variant ->
-            if (variant.name == 'release') {
-                owner.classpath += variant.javaCompileProvider.get().classpath
-            }
-        }
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        archiveClassifier.set('javadoc')
-        from javadoc.destinationDir
-    }
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifact sourcesJar
-                artifact javadocJar
-                artifact "$buildDir/outputs/aar/AhmerPdfium-release.aar"
-                groupId groupId
-                artifactId artifactPdfium
-                version android.defaultConfig.versionName
-
-                pom {
-                    name = artifactPdfium
-                    description = descriptionPdfium
-                    url = url
-                    licenses {
-                        license {
-                            name = licenseName
-                            url = licenseUrl
-                        }
+            // Self-explanatory metadata for the most part
+            pom {
+                name = 'AhmerPdfium'
+                description = 'Ahmer Pdfium Library for Android (API 19 binding)'
+                url = 'https://github.com/AhmerAfzal1/AhmerPDF'
+                packaging = 'aar'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
-                    developers {
-                        developer {
-                            id = developerID
-                            name = developerName
-                            email = developerEmail
-                        }
+                }
+                developers {
+                    developer {
+                        id = 'ahmerafzal1'
+                        name = 'Ahmer Afzal'
+                        email = 'ahmerafzal@yahoo.com'
                     }
-                    scm {
-                        url = 'https://github.com/AhmerAfzal1/AhmerPDF/tree/master/AhmerPdfium'
-                        connection = scmUrl
-                        developerConnection = scmSshUrl
-                    }
-                    withXml {
-                        def dependenciesNode = asNode().appendNode('dependencies')
-                        project.configurations.implementation.allDependencies.each {
-                            def dependencyNode = dependenciesNode.appendNode('dependency')
-                            dependencyNode.appendNode('groupId', it.group)
-                            dependencyNode.appendNode('artifactId', it.name)
-                            dependencyNode.appendNode('version', it.version)
-                        }
+                }
+                // Version control info, if you're using GitHub, follow the format as seen here
+                scm {
+                    connection = 'scm:git:git://github.com:AhmerAfzal1/AhmerPDF.git'
+                    developerConnection = 'scm:git:ssh://github.com/AhmerAfzal1/AhmerPDF.git'
+                    url = 'https://github.com/AhmerAfzal1/AhmerPDF/tree/master'
+                }
+                // A slightly hacky fix so that your POM will include any transitive dependencies
+                // that your library builds upon
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    project.configurations.implementation.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
                     }
                 }
             }
         }
-        repositories {
-            maven {
-                name = 'maven'
-                def releasesRepoUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-                def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-                credentials {
-                    username ossrhUsername
-                    password ossrhPassword
-                }
+    }
+    repositories {
+        maven {
+            name = 'maven'
+
+            def releasesRepoUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            // You only need this if you want to publish snapshots, otherwise just set the URL
+            // to the release repo directly
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
             }
         }
     }
+}
 
-    signing {
-        sign publishing.publications.mavenJava
-        sign configurations.archives
-    }
+signing {
+    sign publishing.publications.mavenJava
+    sign configurations.archives
 }

@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/ahmerafzal/maven/AhmerPDFViewer/images/download.svg) ](https://bintray.com/ahmerafzal/maven/AhmerPDFViewer/_latestVersion)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # AhmerPdfViewer
 Android view for displaying PDFs rendered with PdfiumAndroid from API 19
@@ -6,12 +6,13 @@ Android view for displaying PDFs rendered with PdfiumAndroid from API 19
 ## Installation
 
 Add to _build.gradle_:
-
-`implementation 'com.github.ahmerafzal1:AhmerPDFViewer:2.8.3'`
-
-or if you want to use more stable version:
- 
-`implementation 'com.github.ahmerafzal1:AhmerPdfium:7.7.4''`
+```groovy
+implementation 'io.github.ahmerafzal1:ahmer-pdfium:1.0.0'
+```
+And
+```groovy
+implementation 'io.github.ahmerafzal1:ahmer-pdfviewer:1.0.0'
+```
 
 ## Include PDFView in your layout
 

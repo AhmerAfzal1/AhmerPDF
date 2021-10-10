@@ -322,7 +322,7 @@ JNI_FUNC(jlongArray, PdfiumCore, nativeLoadPages)(JNI_ARGS, jlong docPtr, jint f
     return javaPages;
 }
 
-JNI_FUNC(jint, Pdfium, nativeGetPageRotation)(JNI_ARGS, jlong pagePtr) {
+JNI_FUNC(jint, PdfiumCore, nativeGetPageRotation)(JNI_ARGS, jlong pagePtr) {
     auto page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     return (jint) FPDFPage_GetRotation(page);
 }

@@ -1,18 +1,4 @@
 buildscript {
-    ext.'artifactPdfium' = 'ahmer-pdfium'
-    ext.'artifactPdfViewer' = 'ahmer-pdfviewer'
-    ext.'descriptionPdfium' = 'Ahmer Pdfium Library for Android (API 19 binding)'
-    ext.'descriptionPdfViewer' = 'Android view for displaying PDFs rendered with PdfiumAndroid'
-    ext.'developerEmail' = 'ahmerafzal@yahoo.com'
-    ext.'developerID' = 'ahmerafzal'
-    ext.'developerName' = 'Ahmer Afzal'
-    ext.'groupId' = 'io.github.ahmerafzal1'
-    ext.'licenseName' = 'The Apache License, Version 2.0'
-    ext.'licenseUrl' = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    ext.'scmSshUrl' = 'scm:git:ssh://github.com/AhmerAfzal1/AhmerPDF.git'
-    ext.'scmUrl' = 'scm:git@github.com:AhmerAfzal1/AhmerPDF.git'
-    ext.'url' = 'https://github.com/AhmerAfzal1/AhmerPDF'
-
     repositories {
         google()
         mavenCentral()

@@ -1,19 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
-
+    compileSdk 31
     compileSdkVersion 31
     buildToolsVersion '31.0.0'
+    ndkVersion '23.0.7599858'
 
     buildFeatures {
         viewBinding true
-        dataBinding true
     }
 
     defaultConfig {
+        minSdk 19
+        targetSdk 31
         applicationId 'com.ahmer.ahmerpdf'
-        minSdkVersion 19
-        targetSdkVersion 31
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
     }
@@ -26,8 +26,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 }
 
