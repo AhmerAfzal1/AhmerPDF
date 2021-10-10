@@ -45,7 +45,7 @@ class RenderingHandler extends Handler {
         width = bmpOriginal.getWidth();
         Bitmap nightModeBitmap = Bitmap.createBitmap(width, height,
                 bestQuality ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
-        Canvas c = new Canvas(nightModeBitmap);
+        Canvas canvas = new Canvas(nightModeBitmap);
         Paint paint = new Paint();
         ColorMatrix grayScaleMatrix = new ColorMatrix();
         grayScaleMatrix.setSaturation(0);
@@ -59,7 +59,7 @@ class RenderingHandler extends Handler {
         nightModeMatrix.postConcat(grayScaleMatrix);
         nightModeMatrix.postConcat(invertMatrix);
         paint.setColorFilter(new ColorMatrixColorFilter(nightModeMatrix));
-        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        canvas.drawBitmap(bmpOriginal, 0, 0, paint);
         return nightModeBitmap;
     }
 
@@ -73,6 +73,9 @@ class RenderingHandler extends Handler {
 
     @Override
     public void handleMessage(Message message) {
+        if (!running) {
+            return;
+        }
         RenderingTask task = (RenderingTask) message.obj;
         try {
             PagePart part = proceed(task);
@@ -81,7 +84,11 @@ class RenderingHandler extends Handler {
                     pdfView.post(new Runnable() {
                         @Override
                         public void run() {
-                            pdfView.onBitmapRendered(part);
+                            if (running) {
+                                pdfView.onBitmapRendered(part);
+                            } else {
+                                part.getRenderedBitmap().recycle();
+                            }
                         }
                     });
                 } else {
@@ -92,7 +99,9 @@ class RenderingHandler extends Handler {
             pdfView.post(new Runnable() {
                 @Override
                 public void run() {
-                    pdfView.onPageError(ex);
+                    if (running) {
+                        pdfView.onPageError(ex);
+                    }
                 }
             });
         }
@@ -135,6 +144,11 @@ class RenderingHandler extends Handler {
 
     void stop() {
         running = false;
+        removeMessages(MSG_RENDER_TASK);
+    }
+
+    void purge() {
+        removeMessages(MSG_RENDER_TASK);
     }
 
     void start() {

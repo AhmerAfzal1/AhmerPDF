@@ -1,7 +1,93 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+# AhmerPdfium
+Ahmer Pdfium library fork [barteksc/PdfiumAndroid](https://github.com/barteksc/PdfiumAndroid)
+
+## Installation
+
+Add to _build.gradle_:
+```groovy
+implementation 'io.github.ahmerafzal1:ahmer-pdfium:1.0.0'
+```
+
+## Sample usage:
+``` java
+PdfiumCore core = ...;
+PdfDocument document = ...;
+int pageIndex = 0;
+core.openPage(document, pageIndex);
+List<PdfDocument.Link> links = core.getPageLinks(document, pageIndex);
+for (PdfDocument.Link link : links) {
+    RectF mappedRect = core.mapRectToDevice(document, pageIndex, ..., link.getBounds())
+    if (clickedArea(mappedRect)) {
+        String uri = link.getUri();
+        if (link.getDestPageIdx() != null) {
+            // jump to page
+        } else if (uri != null && !uri.isEmpty()) {
+            // open URI using Intent
+        }
+    }
+}
+```
+
+## Simple example
+``` java
+void openPdf() {
+    ImageView iv = (ImageView) findViewById(R.id.imageView);
+    ParcelFileDescriptor fd = ...;
+    int pageNum = 0;
+    PdfiumCore pdfiumCore = new PdfiumCore(context);
+    try {
+        PdfDocument pdfDocument = pdfiumCore.newDocument(fd);
+        pdfiumCore.openPage(pdfDocument, pageNum);
+        int width = pdfiumCore.getPageWidthPoint(pdfDocument, pageNum);
+        int height = pdfiumCore.getPageHeightPoint(pdfDocument, pageNum);
+        // ARGB_8888 - best quality, high memory usage, higher possibility of OutOfMemoryError
+        // RGB_565 - little worse quality, twice less memory usage
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        pdfiumCore.renderPageBitmap(pdfDocument, bitmap, pageNum, 0, 0, width, height);
+        //if you need to render annotations and form fields, you can use
+        //the same method above adding 'true' as last param
+        iv.setImageBitmap(bitmap);
+        printInfo(pdfiumCore, pdfDocument);
+        pdfiumCore.closeDocument(pdfDocument); // important!
+    } catch(IOException ex) {
+        ex.printStackTrace();
+    }
+}
+
+public void printInfo(PdfiumCore core, PdfDocument doc) {
+    PdfDocument.Meta meta = core.getDocumentMeta(doc);
+    Log.e(TAG, "title = " + meta.getTitle());
+    Log.e(TAG, "author = " + meta.getAuthor());
+    Log.e(TAG, "subject = " + meta.getSubject());
+    Log.e(TAG, "keywords = " + meta.getKeywords());
+    Log.e(TAG, "creator = " + meta.getCreator());
+    Log.e(TAG, "producer = " + meta.getProducer());
+    Log.e(TAG, "creationDate = " + meta.getCreationDate());
+    Log.e(TAG, "modDate = " + meta.getModDate());
+    printBookmarksTree(core.getTableOfContents(doc), "-");
+}
+
+public void printBookmarksTree(List<PdfDocument.Bookmark> tree, String sep) {
+    for (PdfDocument.Bookmark b : tree) {
+        Log.e(TAG, String.format("%s %s, p %d", sep, b.getTitle(), b.getPageIdx()));
+        if (b.hasChildren()) {
+            printBookmarksTree(b.getChildren(), sep + "-");
+        }
+    }
+}
+```
+
 # AhmerPdfViewer
 Android view for displaying PDFs rendered with PdfiumAndroid from API 19
+
+## Installation
+
+Add to _build.gradle_:
+```groovy
+implementation 'io.github.ahmerafzal1:ahmer-pdfviewer:1.0.0'
+```
 
 ## Include PDFView in your layout
 
@@ -127,7 +213,7 @@ void setMaxZoom(float zoom);
 ```
 
 ### Why I cannot open PDF from URL?
-Downloading files is long running process which must be aware of Activity lifecycle, must support some configuration, 
+Downloading files is long running process which must be aware of Activity lifecycle, must support some configuration,
 data cleanup and caching, so creating such module will probably end up as new library.
 
 ### How can I show last opened page after configuration change?
@@ -151,4 +237,21 @@ You can use a combination of the following settings to get scroll and fling beha
 .pageSnap(true)
 .autoSpacing(true)
 .pageFling(true)
+```
+
+# License
+```
+Copyright 2021 Ahmer Afzal
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```

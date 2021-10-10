@@ -687,7 +687,7 @@ public class PDFView extends RelativeLayout {
             return;
         }
         // Cancel all current tasks
-        renderingHandler.removeMessages(RenderingHandler.MSG_RENDER_TASK);
+        renderingHandler.purge();
         cacheManager.makeANewSet();
         pagesLoader.loadPages();
         redraw();
@@ -699,21 +699,22 @@ public class PDFView extends RelativeLayout {
     void loadComplete(PdfFile pdfFile) {
         state = State.LOADED;
         this.pdfFile = pdfFile;
-        if (renderingHandlerThread != null) {
-            if (!renderingHandlerThread.isAlive()) {
-                renderingHandlerThread.start();
-            }
-            renderingHandler = new RenderingHandler(renderingHandlerThread.getLooper(), this);
-            renderingHandler.start();
-            if (scrollHandle != null) {
-                scrollHandle.setupLayout(this);
-                isScrollHandleInit = true;
-            }
-            dragPinchManager.enable();
-            SizeF size = pdfFile.getPageSize(defaultPage);
-            callbacks.callOnLoadComplete(pdfFile.getPagesCount());
-            jumpTo(defaultPage, false);
+        if (renderingHandlerThread == null) {
+            renderingHandlerThread = new HandlerThread("PDF renderer");
         }
+        if (!renderingHandlerThread.isAlive()) {
+            renderingHandlerThread.start();
+        }
+        renderingHandler = new RenderingHandler(renderingHandlerThread.getLooper(), this);
+        renderingHandler.start();
+        if (scrollHandle != null) {
+            scrollHandle.setupLayout(this);
+            isScrollHandleInit = true;
+        }
+        dragPinchManager.enable();
+        SizeF size = pdfFile.getPageSize(defaultPage);
+        callbacks.callOnLoadComplete(pdfFile.getPagesCount());
+        jumpTo(defaultPage, false);
     }
 
     void loadError(Throwable t) {
