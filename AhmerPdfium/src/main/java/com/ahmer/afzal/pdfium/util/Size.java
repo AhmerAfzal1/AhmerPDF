@@ -1,5 +1,6 @@
 package com.ahmer.afzal.pdfium.util;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 public class Size {
@@ -7,6 +8,7 @@ public class Size {
     private final int width;
     private final int height;
 
+    @Keep
     public Size(int width, int height) {
         this.width = width;
         this.height = height;

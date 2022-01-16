@@ -8,6 +8,8 @@
 #include <fpdf_save.h>
 #include <fpdf_text.h>
 #include <fpdfview.h>
+#include "java_env.h"
+#include <fpdf_save.h>
 #include <Mutex.h>
 #include <string>
 #include <vector>
@@ -177,6 +179,43 @@ void rgbBitmapTo565(void *source, int sourceStride, void *dest, AndroidBitmapInf
         source = (char *) source + sourceStride;
         dest = (char *) dest + info->stride;
     }
+}
+
+// Add method for writer pdf
+jobject j_writer;
+#define SIG_BYTE_BUFFER "Ljava/nio/ByteBuffer;"
+
+
+struct PdfToFdWriter : FPDF_FILEWRITE {
+    int dstFd;
+};
+
+static bool writeAllBytes(const int fd, const void *buffer, const size_t byteCount) {
+    char *writeBuffer = static_cast<char *>(const_cast<void *>(buffer));
+    size_t remainingBytes = byteCount;
+    while (remainingBytes > 0) {
+        ssize_t writtenByteCount = write(fd, writeBuffer, remainingBytes);
+        if (writtenByteCount == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
+            LOGE("Error writing to buffer: %d", errno);
+            return false;
+        }
+        remainingBytes -= writtenByteCount;
+        writeBuffer += writtenByteCount;
+    }
+    return true;
+}
+
+static int writeBlock(FPDF_FILEWRITE *owner, const void *buffer, unsigned long size) {
+    const PdfToFdWriter *writer = reinterpret_cast<PdfToFdWriter *>(owner);
+    const bool success = writeAllBytes(writer->dstFd, buffer, size);
+    if (!success) {
+        LOGE("Cannot write to file descriptor. Error:%d", errno);
+        return 0;
+    }
+    return 1;
 }
 
 extern "C" { //For JNI support
@@ -955,6 +994,82 @@ JNI_FUNC(jlong, PdfiumCore, nativeAddTextAnnotation)(JNI_ARGS, jlong docPtr, int
     return reinterpret_cast<jlong>(annot);
 }
 
+// Add method for insert image
+JNI_FUNC(void, PdfiumCore, nativeInsertImage)(JNI_ARGS, jlong docPtr, jint pageIndex,
+                                              jobject bitmap, jfloat a, jfloat b, jfloat c,
+                                              jfloat d, jfloat e, jfloat f) {
+    auto *doc = reinterpret_cast<DocumentFile *>(docPtr);
+    FPDF_PAGE page = FPDF_LoadPage(doc->pdfDocument, pageIndex);
+    if (page == nullptr) {
+        LOGE("nativeInsertImage: Loaded page is null");
+        return;
+    }
+
+    AndroidBitmapInfo info;
+    int ret;
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("Fetching bitmap info failed: %s", strerror(ret * -1));
+        return;
+    }
+
+    int w = info.width;
+    int h = info.height;
+
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap format must be RGBA_8888");
+        return;
+    }
+
+    void *addr;
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &addr)) != 0) {
+        LOGE("Locking bitmap failed: %s", strerror(ret * -1));
+        return;
+    }
+    auto *oldAddr = static_cast<unsigned char *>(addr);
+
+    unsigned char *tmp;
+    tmp = static_cast<unsigned char *>(malloc(h * w * sizeof(uint8_t) * 4));
+
+    //convert data
+    for (int ih = 0; ih < h; ++ih) {
+        for (int iw = 0; iw < w; ++iw) {
+            int i = ih * w + iw;
+            int idx = i * 4;
+            //argb -> bgra
+            tmp[idx] = oldAddr[idx + 3];
+            tmp[idx + 1] = oldAddr[idx + 2];
+            tmp[idx + 2] = oldAddr[idx + 1];
+            tmp[idx + 3] = oldAddr[idx];
+        }
+    }
+
+    FPDF_BITMAP pdfBitmap = FPDFBitmap_CreateEx(w, h, FPDFBitmap_BGRA, tmp, info.stride);
+
+    auto imgObj = FPDFPageObj_NewImageObj(doc->pdfDocument);
+    FPDFImageObj_SetBitmap(&page, 1, imgObj, pdfBitmap);
+    FPDFPageObj_Transform(imgObj, a, b, c, d, e, f);
+    FPDFPage_InsertObject(page, imgObj);
+}
+
+// Add method for save pdf
+JNI_FUNC(void, PdfiumCore, nativeSavePdf)(JNI_ARGS, jlong docPtr, jstring path,
+                                          jboolean incremental) {
+    auto str = env->GetStringUTFChars(path, nullptr);
+    //clear and allow write
+    auto pFile = fopen(str, "wb+");
+    auto *doc = reinterpret_cast<DocumentFile *>(docPtr);
+
+    PdfToFdWriter writer{};
+    writer.dstFd = fileno(pFile);
+    writer.WriteBlock = &writeBlock;
+    FPDF_BOOL success = FPDF_SaveAsCopy(doc->pdfDocument, &writer,
+                                        incremental ? FPDF_INCREMENTAL : FPDF_NO_INCREMENTAL);
+    fclose(pFile);
+    if (!success) {
+        jniThrowExceptionFmt(env, "java/io/IOException",
+                             "Cannot write to fd. Error: %d", errno);
+    }
+}
 }//extern C
 
 #pragma clang diagnostic pop

@@ -14,8 +14,8 @@ ext.'ossrhPassword' = System.getenv('OSSRH_PASSWORD')
 android {
     compileSdk 31
     compileSdkVersion 31
-    buildToolsVersion '31.0.0'
-    ndkVersion '23.0.7599858'
+    buildToolsVersion '32.0.0'
+    ndkVersion '23.1.7779620'
 
     buildFeatures {
         viewBinding true
@@ -24,8 +24,6 @@ android {
     defaultConfig {
         minSdk 19
         targetSdk 31
-        versionCode 2
-        versionName "1.0.0"
 
         externalNativeBuild {
             cmake {
@@ -66,8 +64,8 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.collection:collection:1.1.0'
-    implementation 'org.jetbrains:annotations:22.0.0'
+    implementation 'androidx.collection:collection:1.2.0'
+    implementation 'org.jetbrains:annotations:23.0.0'
 }
 
 tasks.withType(Javadoc).all {

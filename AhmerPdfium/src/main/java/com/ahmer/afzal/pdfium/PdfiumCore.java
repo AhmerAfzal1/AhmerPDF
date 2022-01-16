@@ -2,6 +2,7 @@ package com.ahmer.afzal.pdfium;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -29,22 +30,19 @@ import java.util.Map;
 
 public class PdfiumCore {
 
-    private static final Class FD_CLASS = FileDescriptor.class;
     /* synchronize native methods */
     private static final Object lock = new Object();
-    private static final String FD_FIELD_NAME = "descriptor";
     private static final String TAG = PdfiumCore.class.getName();
     private static final Map<Integer, Long> mNativePagesPtr = new ArrayMap<>();
     private static final Map<Integer, Long> mNativeSearchHandlePtr = new ArrayMap<>();
     private static final Map<Integer, Long> mNativeTextPagesPtr = new ArrayMap<>();
-    private static Field mFdField = null;
     private static long mNativeDocPtr = 0L;
     private static ParcelFileDescriptor parcelFileDescriptor = null;
     private static int mCurrentDpi = 0;
 
     static {
-        System.loadLibrary("pdfium");
-        System.loadLibrary("jniPdfium");
+        System.loadLibrary("pdfsdk");
+        System.loadLibrary("pdfsdk_jni");
     }
 
     /**
@@ -57,10 +55,8 @@ public class PdfiumCore {
 
     public static int getNumFd(ParcelFileDescriptor fileDescriptor) {
         try {
-            if (mFdField == null) {
-                mFdField = FD_CLASS.getDeclaredField(FD_FIELD_NAME);
-                mFdField.setAccessible(true);
-            }
+            Field mFdField = FileDescriptor.class.getDeclaredField("descriptor");
+            mFdField.setAccessible(true);
             return mFdField.getInt(fileDescriptor.getFileDescriptor());
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
@@ -88,89 +84,92 @@ public class PdfiumCore {
         return mNativeTextPagesPtr.containsKey(index);
     }
 
-    private native long nativeOpenDocument(int fd, String password);
+    private native double[] nativeTextGetCharBox(long textPagePtr, int index);
 
-    private native long nativeOpenMemDocument(byte[] data, String password);
-
-    private native void nativeCloseDocument(long docPtr);
+    private native double[] nativeTextGetRect(long textPagePtr, int rect_index);
 
     private native int nativeGetPageCount(long docPtr);
 
-    private native long nativeLoadPage(long docPtr, int pageIndex);
-
-    private native long[] nativeLoadPages(long docPtr, int fromIndex, int toIndex);
-
-    private native void nativeClosePage(long pagePtr);
-
-    private native void nativeClosePages(long[] pagesPtr);
-
-    private native int nativeGetPageWidthPixel(long pagePtr, int dpi);
-
     private native int nativeGetPageHeightPixel(long pagePtr, int dpi);
-
-    private native int nativeGetPageWidthPoint(long pagePtr);
 
     private native int nativeGetPageHeightPoint(long pagePtr);
 
     private native int nativeGetPageRotation(long pagePtr);
 
-    private native void nativeRenderPage(long pagePtr, Surface surface, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
+    private native int nativeGetPageWidthPixel(long pagePtr, int dpi);
 
-    private native void nativeRenderPageBitmap(long pagePtr, Bitmap bitmap, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
-
-    private native String nativeGetDocumentMetaText(long docPtr, String tag);
-
-    private native Long nativeGetFirstChildBookmark(long docPtr, Long bookmarkPtr);
-
-    private native Long nativeGetSiblingBookmark(long docPtr, long bookmarkPtr);
-
-    private native String nativeGetBookmarkTitle(long bookmarkPtr);
-
-    private native long nativeGetBookmarkDestIndex(long docPtr, long bookmarkPtr);
-
-    private native Size nativeGetPageSizeByIndex(long docPtr, int pageIndex, int dpi);
-
-    private native long[] nativeGetPageLinks(long pagePtr);
-
-    private native Integer nativeGetDestPageIndex(long docPtr, long linkPtr);
-
-    private native String nativeGetLinkURI(long docPtr, long linkPtr);
-
-    private native RectF nativeGetLinkRect(long linkPtr);
-
-    private native Point nativePageCoordinateToDevice(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY);
-
-    private native PointF nativeDeviceCoordinateToPage(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, int deviceX, int deviceY);
-
-    /**
-     * API PDF TextPage
-     */
-
-    private native long nativeLoadTextPage(long docPtr, int pageIndex);
-
-    private native long[] nativeLoadTextPages(long docPtr, int fromIndex, int toIndex);
-
-    private native void nativeCloseTextPage(long pagePtr);
-
-    private native void nativeCloseTextPages(long[] pagesPtr);
+    private native int nativeGetPageWidthPoint(long pagePtr);
 
     private native int nativeTextCountChars(long textPagePtr);
+
+    private native int nativeTextCountRects(long textPagePtr, int start_index, int count);
+
+    private native int nativeTextGetBoundedText(long textPagePtr, double left, double top, double right, double bottom, short[] arr);
+
+    private native int nativeTextGetBoundedTextLength(long textPagePtr, double left, double top, double right, double bottom);
+
+    private native int nativeTextGetCharIndexAtPos(long textPagePtr, double x, double y, double xTolerance, double yTolerance);
 
     private native int nativeTextGetText(long textPagePtr, int start_index, int count, short[] result);
 
     private native int nativeTextGetUnicode(long textPagePtr, int index);
 
-    private native double[] nativeTextGetCharBox(long textPagePtr, int index);
+    private native Integer nativeGetDestPageIndex(long docPtr, long linkPtr);
 
-    private native int nativeTextGetCharIndexAtPos(long textPagePtr, double x, double y, double xTolerance, double yTolerance);
+    private native long nativeAddTextAnnotation(long docPtr, int pageIndex, String text, int[] color, int[] bound);
 
-    private native int nativeTextCountRects(long textPagePtr, int start_index, int count);
+    private native long nativeGetBookmarkDestIndex(long docPtr, long bookmarkPtr);
 
-    private native double[] nativeTextGetRect(long textPagePtr, int rect_index);
+    private native Long nativeGetFirstChildBookmark(long docPtr, Long bookmarkPtr);
 
-    private native int nativeTextGetBoundedTextLength(long textPagePtr, double left, double top, double right, double bottom);
+    private native Long nativeGetSiblingBookmark(long docPtr, long bookmarkPtr);
 
-    private native int nativeTextGetBoundedText(long textPagePtr, double left, double top, double right, double bottom, short[] arr);
+    private native long nativeLoadPage(long docPtr, int pageIndex);
+
+    private native long nativeLoadTextPage(long docPtr, int pageIndex);
+
+    private native long nativeOpenDocument(int fd, String password);
+
+    private native long nativeOpenMemDocument(byte[] data, String password);
+
+    private native long[] nativeGetPageLinks(long pagePtr);
+
+    private native long[] nativeLoadPages(long docPtr, int fromIndex, int toIndex);
+
+    private native long[] nativeLoadTextPages(long docPtr, int fromIndex, int toIndex);
+
+    private native Point nativePageCoordinateToDevice(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY);
+
+    private native PointF nativeDeviceCoordinateToPage(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, int deviceX, int deviceY);
+
+    private native RectF nativeGetLinkRect(long linkPtr);
+
+    private native Size nativeGetPageSizeByIndex(long docPtr, int pageIndex, int dpi);
+
+    private native String nativeGetBookmarkTitle(long bookmarkPtr);
+
+    private native String nativeGetDocumentMetaText(long docPtr, String tag);
+
+    private native String nativeGetLinkURI(long docPtr, long linkPtr);
+
+    private native void nativeCloseDocument(long docPtr);
+
+    private native void nativeClosePage(long pagePtr);
+
+    private native void nativeClosePages(long[] pagesPtr);
+
+    private native void nativeCloseTextPage(long pagePtr);
+
+    private native void nativeCloseTextPages(long[] pagesPtr);
+
+    private native void nativeRenderPage(long pagePtr, Surface surface, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
+
+    private native void nativeRenderPageBitmap(long pagePtr, Bitmap bitmap, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
+
+    // Add a image to pdf
+    private native void nativeInsertImage(long docPtr, int pageIndex, Bitmap bitmap, float a, float b, float c, float d, float e, float f);
+
+    private native void nativeSavePdf(long docPtr, String path, boolean incremental);
 
     /**
      * API PDF Search
@@ -187,12 +186,6 @@ public class PdfiumCore {
     private native int nativeGetCharIndexOfSearchResult(long searchHandlePtr);
 
     private native int nativeCountSearchResult(long searchHandlePtr);
-
-    /**
-     * API PDF Annotation
-     */
-
-    private native long nativeAddTextAnnotation(long docPtr, int pageIndex, String text, int[] color, int[] bound);
 
     /**
      * PDF Native Callbacks
@@ -254,9 +247,6 @@ public class PdfiumCore {
      */
     public long openPage(int pageIndex) {
         synchronized (lock) {
-            if (mNativePagesPtr == null) {
-                return -1;
-            }
             Long pagePtr = mNativePagesPtr.get(pageIndex);
             if (pagePtr == null) {
                 pagePtr = nativeLoadPage(mNativeDocPtr, pageIndex);
@@ -429,12 +419,10 @@ public class PdfiumCore {
      */
     public void closeDocument() {
         synchronized (lock) {
-            if (mNativePagesPtr != null) {
-                for (Integer index : mNativePagesPtr.keySet()) {
-                    nativeClosePage(mNativePagesPtr.get(index));
-                }
-                mNativePagesPtr.clear();
+            for (Integer index : mNativePagesPtr.keySet()) {
+                nativeClosePage(mNativePagesPtr.get(index));
             }
+            mNativePagesPtr.clear();
             nativeCloseDocument(mNativeDocPtr);
             if (parcelFileDescriptor != null) { //if document was loaded from file
                 try {
@@ -872,6 +860,19 @@ public class PdfiumCore {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    public void addImage(int pageIndex, Bitmap bitmap, Matrix matrix) {
+        float[] arr = new float[9];
+        matrix.getValues(arr);
+        /* @li a    c   e  // 0, 2, 4
+         * @li b    d   f  // 1, 3, 5
+         * @li 0    0   1 */
+        nativeInsertImage(mNativeDocPtr, pageIndex, bitmap, arr[0], arr[2], arr[4], arr[1], arr[3], arr[5]);
+    }
+
+    public void savePdf(String path, boolean incremental) {
+        nativeSavePdf(mNativeDocPtr, path, incremental);
     }
 
     /**
