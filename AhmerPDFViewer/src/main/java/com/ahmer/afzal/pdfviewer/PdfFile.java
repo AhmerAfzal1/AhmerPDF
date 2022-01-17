@@ -298,12 +298,10 @@ class PdfFile {
                      *Fix memory leak https://github.com/barteksc/AndroidPdfViewer/issues/495
                      */
                     openedPageQueue.add(pageIndex);
-                    if (openedPageQueue != null) {
-                        if (openedPageQueue.size() > PdfConstants.MAX_PAGES) {
-                            int oldPage = openedPageQueue.poll();
-                            pdfiumCore.closePage(oldPage);
-                            openedPages.delete(oldPage);
-                        }
+                    if (openedPageQueue.size() > PdfConstants.MAX_PAGES) {
+                        int oldPage = openedPageQueue.poll();
+                        pdfiumCore.closePage(oldPage);
+                        openedPages.delete(oldPage);
                     }
                     return true;
                 } catch (Exception e) {

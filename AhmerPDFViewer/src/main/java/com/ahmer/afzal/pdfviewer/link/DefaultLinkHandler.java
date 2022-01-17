@@ -1,5 +1,6 @@
 package com.ahmer.afzal.pdfviewer.link;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,7 +9,6 @@ import android.util.Log;
 
 import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.afzal.pdfviewer.model.LinkTapEvent;
-
 
 public class DefaultLinkHandler implements LinkHandler {
 
@@ -38,9 +38,9 @@ public class DefaultLinkHandler implements LinkHandler {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
         Context context = pdfView.getContext();
-        if (intent.resolveActivity(context.getPackageManager()) != null) {
+        try {
             context.startActivity(intent);
-        } else {
+        } catch (ActivityNotFoundException e) {
             Log.w(TAG, "No activity found for URI: " + uri);
         }
     }

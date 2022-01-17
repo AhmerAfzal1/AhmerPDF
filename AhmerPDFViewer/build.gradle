@@ -24,8 +24,8 @@ android {
     defaultConfig {
         minSdk 19
         targetSdk 31
-        versionCode 3
-        versionName "1.1.0"
+        versionCode 5
+        versionName "1.2.1"
         consumerProguardFiles 'consumer-rules.pro'
     }
 
@@ -138,4 +138,11 @@ publishing {
 signing {
     sign publishing.publications.mavenJava
     sign configurations.archives
+}
+
+nexusStaging {
+    serverUrl = 'https://s01.oss.sonatype.org/service/local/'
+    username = ossrhUsername
+    password = ossrhPassword
+    packageGroup = 'io.github.ahmerafzal1'
 }

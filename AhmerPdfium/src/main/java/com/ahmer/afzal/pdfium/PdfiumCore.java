@@ -369,7 +369,6 @@ public class PdfiumCore {
     public void renderPage(Surface surface, int pageIndex, int startX, int startY, int drawSizeX, int drawSizeY, boolean renderAnnot) {
         synchronized (lock) {
             try {
-                //nativeRenderPage(mNativePagesPtr.get(pageIndex), surface, mCurrentDpi);
                 nativeRenderPage(mNativePagesPtr.get(pageIndex), surface, mCurrentDpi, startX, startY, drawSizeX, drawSizeY, renderAnnot);
             } catch (NullPointerException e) {
                 Log.e(TAG, "Context may be null");

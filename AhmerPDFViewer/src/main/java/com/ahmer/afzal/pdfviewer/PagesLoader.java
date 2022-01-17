@@ -13,6 +13,8 @@ import java.util.List;
 import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.CACHE_SIZE;
 import static com.ahmer.afzal.pdfviewer.util.PdfConstants.PRELOAD_OFFSET;
 
+import androidx.annotation.NonNull;
+
 class PagesLoader {
 
     private final RectF thumbnailRect = new RectF(0, 0, 1, 1);
@@ -251,6 +253,7 @@ class PagesLoader {
         int row;
         int col;
 
+        @NonNull
         @Override
         public String toString() {
             return "Holder{" +
@@ -262,9 +265,9 @@ class PagesLoader {
 
     private class RenderRange {
         int page;
-        GridSize gridSize;
-        Holder leftTop;
-        Holder rightBottom;
+        final GridSize gridSize;
+        final Holder leftTop;
+        final Holder rightBottom;
 
         RenderRange() {
             this.page = 0;
@@ -273,6 +276,7 @@ class PagesLoader {
             this.rightBottom = new Holder();
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "RenderRange{" +
@@ -284,10 +288,11 @@ class PagesLoader {
         }
     }
 
-    private class GridSize {
+    private static class GridSize {
         int rows;
         int cols;
 
+        @NonNull
         @Override
         public String toString() {
             return "GridSize{" +

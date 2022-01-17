@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 
 public class PdfFileUtils {
 
@@ -17,7 +18,7 @@ public class PdfFileUtils {
     public static File fileFromAsset(Context context, String assetName) throws IOException {
         File outFile = new File(context.getCacheDir(), assetName + "-pdfview.pdf");
         if (assetName.contains("/")) {
-            outFile.getParentFile().mkdirs();
+            Objects.requireNonNull(outFile.getParentFile()).mkdirs();
         }
         copy(context.getAssets().open(assetName), outFile);
         return outFile;

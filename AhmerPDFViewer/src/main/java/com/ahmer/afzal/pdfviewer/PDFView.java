@@ -12,7 +12,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.HandlerThread;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -165,7 +164,7 @@ public class PDFView extends RelativeLayout {
      */
     private boolean swipeVertical = true;
     private boolean enableSwipe = true;
-    private boolean doubletapEnabled = true;
+    private boolean doubleTapEnabled = true;
     private boolean nightMode = false;
     private boolean pageSnap = true;
     /**
@@ -315,7 +314,7 @@ public class PDFView extends RelativeLayout {
         pageNb = pdfFile.determineValidPageNumberFrom(pageNb);
         currentPage = pageNb;
         loadPages();
-        if (scrollHandle != null && !documentFitsView()) {
+        if (scrollHandle != null && documentFitsView()) {
             scrollHandle.setPageNum(currentPage + 1);
         }
         callbacks.callOnPageChange(currentPage, pdfFile.getPagesCount());
@@ -374,12 +373,12 @@ public class PDFView extends RelativeLayout {
         this.nightMode = nightMode;
     }
 
-    void enableDoubletap(boolean enableDoubletap) {
-        this.doubletapEnabled = enableDoubletap;
+    void enableDoubleTap(boolean enableDoubleTap) {
+        this.doubleTapEnabled = enableDoubleTap;
     }
 
-    boolean isDoubletapEnabled() {
-        return doubletapEnabled;
+    boolean isDoubleTapEnabled() {
+        return doubleTapEnabled;
     }
 
     void onPageError(PageRenderingException ex) {
@@ -454,11 +453,7 @@ public class PDFView extends RelativeLayout {
     public void dispose() {
         recycle();
         if (renderingHandlerThread != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                renderingHandlerThread.quitSafely();
-            } else {
-                renderingHandlerThread.quit();
-            }
+            renderingHandlerThread.quitSafely();
             renderingHandlerThread = null;
         }
     }
@@ -475,7 +470,7 @@ public class PDFView extends RelativeLayout {
         // Calculates the position of the point which in the center of view relative to big strip
         float centerPointInStripXOffset = -currentXOffset + oldW * 0.5f;
         float centerPointInStripYOffset = -currentYOffset + oldH * 0.5f;
-        float relativeCenterPointInStripXOffset = 0;
+        float relativeCenterPointInStripXOffset;
         float relativeCenterPointInStripYOffset;
         if (swipeVertical) {
             relativeCenterPointInStripXOffset = centerPointInStripXOffset / pdfFile.getMaxPageWidth();
@@ -837,7 +832,7 @@ public class PDFView extends RelativeLayout {
         currentXOffset = offsetX;
         currentYOffset = offsetY;
         float positionOffset = getPositionOffset();
-        if (moveHandle && scrollHandle != null && !documentFitsView()) {
+        if (moveHandle && scrollHandle != null && documentFitsView()) {
             scrollHandle.setScroll(positionOffset);
         }
         callbacks.callOnPageScroll(getCurrentPage(), positionOffset);
@@ -1017,9 +1012,9 @@ public class PDFView extends RelativeLayout {
     public boolean documentFitsView() {
         float len = pdfFile.getDocLen(1);
         if (swipeVertical) {
-            return len < getHeight();
+            return !(len < getHeight());
         } else {
-            return len < getWidth();
+            return !(len < getWidth());
         }
     }
 
@@ -1316,7 +1311,7 @@ public class PDFView extends RelativeLayout {
         private final DocumentSource documentSource;
         private int[] pageNumbers = null;
         private boolean enableSwipe = true;
-        private boolean enableDoubletap = true;
+        private boolean enableDoubleTap = true;
         private OnDrawListener onDrawListener;
         private OnDrawListener onDrawAllListener;
         private OnLoadCompleteListener onLoadCompleteListener;
@@ -1356,8 +1351,8 @@ public class PDFView extends RelativeLayout {
             return this;
         }
 
-        public Configurator enableDoubletap(boolean enableDoubletap) {
-            this.enableDoubletap = enableDoubletap;
+        public Configurator enableDoubleTap(boolean enableDoubleTap) {
+            this.enableDoubleTap = enableDoubleTap;
             return this;
         }
 
@@ -1481,8 +1476,8 @@ public class PDFView extends RelativeLayout {
             return this;
         }
 
-        public Configurator disableLongpress() {
-            PDFView.this.dragPinchManager.disableLongpress();
+        public Configurator disableLongPress() {
+            PDFView.this.dragPinchManager.disableLongPress();
             return this;
         }
 
@@ -1505,7 +1500,7 @@ public class PDFView extends RelativeLayout {
             PDFView.this.callbacks.setLinkHandler(linkHandler);
             PDFView.this.setSwipeEnabled(enableSwipe);
             PDFView.this.setNightMode(nightMode);
-            PDFView.this.enableDoubletap(enableDoubletap);
+            PDFView.this.enableDoubleTap(enableDoubleTap);
             PDFView.this.setDefaultPage(defaultPage);
             PDFView.this.setSwipeVertical(!swipeHorizontal);
             PDFView.this.enableAnnotationRendering(annotationRendering);

@@ -47,7 +47,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         enabled = false;
     }
 
-    void disableLongpress() {
+    void disableLongPress() {
         gestureDetector.setIsLongpressEnabled(false);
     }
 
@@ -57,7 +57,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         boolean linkTapped = checkLinkTapped(e.getX(), e.getY());
         if (!onTapHandled && !linkTapped) {
             ScrollHandle ps = pdfView.getScrollHandle();
-            if (ps != null && !pdfView.documentFitsView()) {
+            if (ps != null && pdfView.documentFitsView()) {
                 if (!ps.shown()) {
                     ps.show();
                 } else {
@@ -123,7 +123,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        if (!pdfView.isDoubletapEnabled()) {
+        if (!pdfView.isDoubleTapEnabled()) {
             return false;
         }
         if (pdfView.getZoom() < pdfView.getMidZoom()) {

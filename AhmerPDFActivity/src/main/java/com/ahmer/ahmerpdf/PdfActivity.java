@@ -189,7 +189,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 .pageSnap(true) // snap pages to screen boundaries
                 .autoSpacing(true) // add dynamic spacing to fit each page on its own on the screen
                 .pageFling(false) // make a fling change only a single page like ViewPager
-                .enableDoubletap(true)
+                .enableDoubleTap(true)
                 .enableAnnotationRendering(true)
                 .password(password)
                 .scrollHandle(new DefaultScrollHandle(getApplicationContext()))
