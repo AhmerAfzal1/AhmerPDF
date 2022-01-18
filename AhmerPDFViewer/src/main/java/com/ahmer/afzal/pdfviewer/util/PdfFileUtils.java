@@ -16,7 +16,7 @@ public class PdfFileUtils {
     }
 
     public static File fileFromAsset(Context context, String assetName) throws IOException {
-        File outFile = new File(context.getCacheDir(), assetName + "-pdfview.pdf");
+        File outFile = new File(context.getCacheDir(), assetName);
         if (assetName.contains("/")) {
             Objects.requireNonNull(outFile.getParentFile()).mkdirs();
         }

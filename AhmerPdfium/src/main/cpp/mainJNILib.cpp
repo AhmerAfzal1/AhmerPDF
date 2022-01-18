@@ -174,43 +174,6 @@ void rgbBitmapTo565(void *source, int sourceStride, void *dest, AndroidBitmapInf
     }
 }
 
-// Add method for writer pdf
-jobject j_writer;
-#define SIG_BYTE_BUFFER "Ljava/nio/ByteBuffer;"
-
-
-struct PdfToFdWriter : FPDF_FILEWRITE {
-    int dstFd;
-};
-
-static bool writeAllBytes(const int fd, const void *buffer, const size_t byteCount) {
-    char *writeBuffer = static_cast<char *>(const_cast<void *>(buffer));
-    size_t remainingBytes = byteCount;
-    while (remainingBytes > 0) {
-        ssize_t writtenByteCount = write(fd, writeBuffer, remainingBytes);
-        if (writtenByteCount == -1) {
-            if (errno == EINTR) {
-                continue;
-            }
-            LOGE("Error writing to buffer: %d", errno);
-            return false;
-        }
-        remainingBytes -= writtenByteCount;
-        writeBuffer += writtenByteCount;
-    }
-    return true;
-}
-
-static int writeBlock(FPDF_FILEWRITE *owner, const void *buffer, unsigned long size) {
-    const PdfToFdWriter *writer = reinterpret_cast<PdfToFdWriter *>(owner);
-    const bool success = writeAllBytes(writer->dstFd, buffer, size);
-    if (!success) {
-        LOGE("Cannot write to file descriptor. Error:%d", errno);
-        return 0;
-    }
-    return 1;
-}
-
 extern "C" { //For JNI support
 
 static constexpr char kContentsKey[] = "Contents";
@@ -836,6 +799,44 @@ JNI_FUNC(jint, PdfiumCore, nativeTextGetBoundedText)(JNI_ARGS, jlong textPagePtr
     return output;
 }
 
+class FileWrite : public FPDF_FILEWRITE {
+public:
+    jobject callbackObject;
+    jmethodID callbackMethodID;
+    _JNIEnv *env;
+
+    static int
+    WriteBlockCallback(FPDF_FILEWRITE *pFileWrite, const void *data, unsigned long size) {
+        auto *pThis = static_cast<FileWrite *>(pFileWrite);
+        _JNIEnv *env = pThis->env;
+        //Convert the native array to Java array.
+        jbyteArray a = env->NewByteArray(size);
+        if (a != nullptr) {
+            env->SetByteArrayRegion(a, 0, size, (const jbyte *) data);
+            return env->CallIntMethod(pThis->callbackObject, pThis->callbackMethodID, a);
+        }
+        return -1;
+    }
+};
+
+JNI_FUNC(jboolean, PdfiumCore, nativeSaveAsCopy)(JNI_ARGS, jlong documentPtr, jobject callback) {
+    jclass callbackClass = env->FindClass("com/ahmer/afzal/pdfium/writer/PdfWriteCallback");
+    if (callback != nullptr && env->IsInstanceOf(callback, callbackClass)) {
+        //Setup the callback to Java.
+        FileWrite fw{};
+        fw.version = 1;
+        fw.FPDF_FILEWRITE::WriteBlock = FileWrite::WriteBlockCallback;
+        fw.callbackObject = callback;
+        fw.callbackMethodID = env->GetMethodID(callbackClass, "WriteBlock", "([B)I");
+        fw.env = env;
+
+        auto *doc = reinterpret_cast<DocumentFile *>(documentPtr);
+        auto output = (jboolean) FPDF_SaveAsCopy(doc->pdfDocument, &fw, 0);
+        return output;
+    }
+    return false;
+}
+
 //////////////////////////////////////////
 // Begin PDF SDK Search
 //////////////////////////////////////////
@@ -906,87 +907,6 @@ JNI_FUNC(jint, PdfiumCore, nativeCountSearchResult)(JNI_ARGS, jlong searchHandle
     return FPDFText_GetSchCount(search);
 }
 
-//////////////////////////////////////////
-// Begin PDF Annotation api
-//////////////////////////////////////////
-JNI_FUNC(jlong, PdfiumCore, nativeAddTextAnnotation)(JNI_ARGS, jlong docPtr, int page_index,
-                                                     jstring text_, jintArray color_,
-                                                     jintArray bound_) {
-
-    FPDF_PAGE page;
-    auto *doc = reinterpret_cast<DocumentFile *>(docPtr);
-    int pagePtr = loadPageInternal(env, doc, page_index);
-    if (pagePtr == -1) {
-        return -1;
-    } else {
-        page = reinterpret_cast<FPDF_PAGE>(pagePtr);
-    }
-
-    // Get the bound array
-    jint *bounds = env->GetIntArrayElements(bound_, nullptr);
-    int boundsLen = (int) (env->GetArrayLength(bound_));
-    if (boundsLen != 4) {
-        return -1;
-    }
-
-    // Set the annotation rectangle.
-    FS_RECTF rect;
-    rect.left = bounds[0];
-    rect.top = bounds[1];
-    rect.right = bounds[2];
-    rect.bottom = bounds[3];
-
-    // Get the text color
-    unsigned int R, G, B, A;
-    jint *colors = env->GetIntArrayElements(color_, nullptr);
-    int colorsLen = (int) (env->GetArrayLength(color_));
-    if (colorsLen == 4) {
-        R = colors[0];
-        G = colors[1];
-        B = colors[2];
-        A = colors[3];
-    } else {
-        R = 51u;
-        G = 102u;
-        B = 153u;
-        A = 204u;
-    }
-
-    // Add a text annotation to the page.
-    FPDF_ANNOTATION annot = FPDFPage_CreateAnnot(page, FPDF_ANNOT_TEXT);
-
-    // set the rectangle of the annotation
-    FPDFAnnot_SetRect(annot, &rect);
-    env->ReleaseIntArrayElements(bound_, bounds, 0);
-
-    // Set the color of the annotation.
-    FPDFAnnot_SetColor(annot, FPDFANNOT_COLORTYPE_Color, R, G, B, A);
-    env->ReleaseIntArrayElements(color_, colors, 0);
-
-    // Set the content of the annotation.
-    unsigned short *kContents = convertWideString(env, text_);
-    FPDFAnnot_SetStringValue(annot, kContentsKey, kContents);
-
-    // save page
-    FPDF_DOCUMENT pdfDoc = doc->pdfDocument;
-    if (!FPDF_SaveAsCopy(pdfDoc, nullptr, FPDF_INCREMENTAL)) {
-        return -1;
-    }
-
-    // close page
-    closePageInternal(pagePtr);
-
-    // reload page
-    pagePtr = loadPageInternal(env, doc, page_index);
-
-    jclass clazz = env->FindClass("com/ahmer/afzal/pdfium/PdfiumCore");
-    jmethodID callback = env->GetMethodID(clazz, "onAnnotationAdded",
-                                          "(Ljava/lang/Integer;)Ljava/lang/Long;");
-    env->CallObjectMethod(thiz, callback, page_index, pagePtr);
-
-    return reinterpret_cast<jlong>(annot);
-}
-
 // Add method for insert image
 JNI_FUNC(void, PdfiumCore, nativeInsertImage)(JNI_ARGS, jlong docPtr, jint pageIndex,
                                               jobject bitmap, jfloat a, jfloat b, jfloat c,
@@ -1043,26 +963,4 @@ JNI_FUNC(void, PdfiumCore, nativeInsertImage)(JNI_ARGS, jlong docPtr, jint pageI
     FPDFPageObj_Transform(imgObj, a, b, c, d, e, f);
     FPDFPage_InsertObject(page, imgObj);
 }
-
-// Add method for save pdf
-JNI_FUNC(void, PdfiumCore, nativeSavePdf)(JNI_ARGS, jlong docPtr, jstring path,
-                                          jboolean incremental) {
-    auto str = env->GetStringUTFChars(path, nullptr);
-    //clear and allow write
-    auto pFile = fopen(str, "wb+");
-    auto *doc = reinterpret_cast<DocumentFile *>(docPtr);
-
-    PdfToFdWriter writer{};
-    writer.dstFd = fileno(pFile);
-    writer.WriteBlock = &writeBlock;
-    FPDF_BOOL success = FPDF_SaveAsCopy(doc->pdfDocument, &writer,
-                                        incremental ? FPDF_INCREMENTAL : FPDF_NO_INCREMENTAL);
-    fclose(pFile);
-    if (!success) {
-        jniThrowExceptionFmt(env, "java/io/IOException",
-                             "Cannot write to fd. Error: %d", errno);
-    }
-}
 }//extern C
-
-#pragma clang diagnostic pop
