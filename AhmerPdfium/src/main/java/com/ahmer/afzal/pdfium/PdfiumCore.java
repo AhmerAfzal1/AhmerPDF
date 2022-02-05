@@ -2,7 +2,6 @@ package com.ahmer.afzal.pdfium;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -13,17 +12,11 @@ import android.view.Surface;
 import androidx.collection.ArrayMap;
 import androidx.core.util.ObjectsCompat;
 
-import com.ahmer.afzal.pdfium.search.FPDFTextSearchContext;
-import com.ahmer.afzal.pdfium.search.TextSearchContext;
 import com.ahmer.afzal.pdfium.util.Size;
-import com.ahmer.afzal.pdfium.writer.PdfWriteCallback;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,14 +24,14 @@ import java.util.Map;
 public class PdfiumCore {
 
     /* synchronize native methods */
-    private static final Map<Integer, Long> mNativePagesPtr = new ArrayMap<>();
-    private static final Map<Integer, Long> mNativeSearchHandlePtr = new ArrayMap<>();
-    private static final Map<Integer, Long> mNativeTextPagesPtr = new ArrayMap<>();
-    private static final Object lock = new Object();
     private static final String TAG = PdfiumCore.class.getName();
     private static int mCurrentDpi = 0;
-    private static long mNativeDocPtr = 0L;
     private static ParcelFileDescriptor parcelFileDescriptor = null;
+    public static final Map<Integer, Long> mNativePagesPtr = new ArrayMap<>();
+    public static final Map<Integer, Long> mNativeTextPagesPtr = new ArrayMap<>();
+    public static final Object lock = new Object();
+    public static final Object searchLock = new Object();
+    public static long mNativeDocPtr = 0L;
 
     static {
         System.loadLibrary("pdfsdk");
@@ -53,31 +46,7 @@ public class PdfiumCore {
         Log.d(TAG, "Starting AhmerPdfium...");
     }
 
-    private static boolean validPtr(Long ptr) {
-        return ptr != null && ptr != -1;
-    }
-
-    public static int getCurrentDpi() {
-        return mCurrentDpi;
-    }
-
-    public static void setCurrentDpi(int currentDpi) {
-        mCurrentDpi = currentDpi;
-    }
-
-    public static boolean hasPage(int index) {
-        return mNativePagesPtr.containsKey(index);
-    }
-
-    public static boolean hasTextPage(int index) {
-        return mNativeTextPagesPtr.containsKey(index);
-    }
-
-    private native boolean nativeSaveAsCopy(long docPtr, PdfWriteCallback callback);
-
-    private native double[] nativeTextGetCharBox(long textPagePtr, int index);
-
-    private native double[] nativeTextGetRect(long textPagePtr, int rect_index);
+    private native int nativeCountAndGetRects(long pagePtr, int offsetY, int offsetX, int width, int height, ArrayList<RectF> arr, long tid, int selSt, int selEd);
 
     private native int nativeGetPageCount(long docPtr);
 
@@ -91,20 +60,6 @@ public class PdfiumCore {
 
     private native int nativeGetPageWidthPoint(long pagePtr);
 
-    private native int nativeTextCountChars(long textPagePtr);
-
-    private native int nativeTextCountRects(long textPagePtr, int start_index, int count);
-
-    private native int nativeTextGetBoundedText(long textPagePtr, double left, double top, double right, double bottom, short[] arr);
-
-    private native int nativeTextGetBoundedTextLength(long textPagePtr, double left, double top, double right, double bottom);
-
-    private native int nativeTextGetCharIndexAtPos(long textPagePtr, double x, double y, double xTolerance, double yTolerance);
-
-    private native int nativeTextGetText(long textPagePtr, int start_index, int count, short[] result);
-
-    private native int nativeTextGetUnicode(long textPagePtr, int index);
-
     private native Integer nativeGetDestPageIndex(long docPtr, long linkPtr);
 
     private native long nativeGetBookmarkDestIndex(long docPtr, long bookmarkPtr);
@@ -115,8 +70,6 @@ public class PdfiumCore {
 
     private native long nativeLoadPage(long docPtr, int pageIndex);
 
-    private native long nativeLoadTextPage(long docPtr, int pageIndex);
-
     private native long nativeOpenDocument(int fd, String password);
 
     private native long nativeOpenMemDocument(byte[] data, String password);
@@ -124,8 +77,6 @@ public class PdfiumCore {
     private native long[] nativeGetPageLinks(long pagePtr);
 
     private native long[] nativeLoadPages(long docPtr, int fromIndex, int toIndex);
-
-    private native long[] nativeLoadTextPages(long docPtr, int fromIndex, int toIndex);
 
     private native Point nativePageCoordinateToDevice(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY);
 
@@ -147,32 +98,43 @@ public class PdfiumCore {
 
     private native void nativeClosePages(long[] pagesPtr);
 
-    private native void nativeCloseTextPage(long pagePtr);
+    private native void nativeRenderPage(long pagePtr, Surface surface, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
 
-    private native void nativeCloseTextPages(long[] pagesPtr);
+    private native void nativeRenderPageBitmap(long docPtr, long pagePtr, Bitmap bitmap, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
 
-    // Add a image to pdf
-    private native void nativeInsertImage(long docPtr, int pageIndex, Bitmap bitmap, float a, float b, float c, float d, float e, float f);
+    private native void nativeRenderPageBitmap(long pagePtr, Bitmap bitmap, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
 
-    private native void nativeRenderPage(long pagePtr, Surface surface, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
+    public native boolean nativeFindTextPageNext(long searchPtr);
 
-    private native void nativeRenderPageBitmap(long pagePtr, Bitmap bitmap, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
+    public native boolean nativeGetRect(long pagePtr, int offsetY, int offsetX, int width, int height, long textPtr, RectF rect, int idx);
 
-    /**
-     * API PDF Search
-     */
+    public native int nativeCountRects(long textPtr, int st, int ed);
 
-    private native long nativeSearchStart(long textPagePtr, String query, boolean matchCase, boolean matchWholeWord);
+    public native int nativeFindTextPage(long pagePtr, String key, int flag);
 
-    private native void nativeSearchStop(long searchHandlePtr);
+    public native int nativeGetCharIndexAtCoord(long pagePtr, double width, double height, long textPtr, double posX, double posY, double tolX, double tolY);
 
-    private native boolean nativeSearchNext(long searchHandlePtr);
+    public native int nativeGetCharPos(long pagePtr, int offsetY, int offsetX, int width, int height, RectF pt, long tid, int index, boolean loose);
 
-    private native boolean nativeSearchPrev(long searchHandlePtr);
+    public native int nativeGetFindIdx(long searchPtr);
 
-    private native int nativeGetCharIndexOfSearchResult(long searchHandlePtr);
+    public native int nativeGetFindLength(long searchPtr);
 
-    private native int nativeCountSearchResult(long searchHandlePtr);
+    public native int nativeGetMixedLooseCharPos(long pagePtr, int offsetY, int offsetX, int width, int height, RectF pt, long tid, int index, boolean loose);
+
+    public native long nativeFindTextPageStart(long textPtr, long keyStr, int flag, int startIdx);
+
+    public native long nativeGetLinkAtCoord(long pagePtr, double width, double height, double posX, double posY);
+
+    public native long nativeLoadTextPage(long pagePtr);
+
+    public native String nativeGetLinkTarget(long docPtr, long linkPtr);
+
+    public native String nativeGetText(long textPtr);
+
+    public native void nativeFindTextPageEnd(long searchPtr);
+
+    public static native long nativeGetStringChars(String key, boolean isCopy);
 
     /**
      * Create new document from file
@@ -262,6 +224,18 @@ public class PdfiumCore {
         }
     }
 
+    public long openText(long pagePtr) {
+        synchronized (lock) {
+            return nativeLoadTextPage(pagePtr);
+        }
+    }
+
+    public int getTextRects(long pagePtr, int offsetY, int offsetX, Size size, ArrayList<RectF> arr, long textPtr, int selSt, int selEd) {
+        synchronized (lock) {
+            return nativeCountAndGetRects(pagePtr, offsetY, offsetX, size.getWidth(), size.getHeight(), arr, textPtr, selSt, selEd);
+        }
+    }
+
     /**
      * Get page width in pixels.
      * This method requires page to be opened.
@@ -343,7 +317,7 @@ public class PdfiumCore {
     public void renderPage(Surface surface, int pageIndex, int startX, int startY, int drawSizeX, int drawSizeY, boolean renderAnnot) {
         synchronized (lock) {
             try {
-                nativeRenderPage(ObjectsCompat.requireNonNull(mNativePagesPtr.get(pageIndex)), surface, mCurrentDpi, startX, startY, drawSizeX, drawSizeY, renderAnnot);
+                nativeRenderPage(ObjectsCompat.requireNonNull(mNativePagesPtr.get(pageIndex)), surface, startX, startY, drawSizeX, drawSizeY, renderAnnot);
             } catch (NullPointerException e) {
                 Log.e(TAG, "Context may be null");
                 e.printStackTrace();
@@ -376,7 +350,7 @@ public class PdfiumCore {
     public void renderPageBitmap(Bitmap bitmap, int pageIndex, int startX, int startY, int drawSizeX, int drawSizeY, boolean renderAnnot) {
         synchronized (lock) {
             try {
-                nativeRenderPageBitmap(ObjectsCompat.requireNonNull(mNativePagesPtr.get(pageIndex)), bitmap, mCurrentDpi, startX, startY, drawSizeX, drawSizeY, renderAnnot);
+                nativeRenderPageBitmap(ObjectsCompat.requireNonNull(mNativePagesPtr.get(pageIndex)), bitmap, startX, startY, drawSizeX, drawSizeY, renderAnnot);
             } catch (NullPointerException e) {
                 Log.e(TAG, "Context may be null");
                 e.printStackTrace();
@@ -559,328 +533,6 @@ public class PdfiumCore {
         return new RectF(leftTop.x, leftTop.y, rightBottom.x, rightBottom.y);
     }
 
-    public long openTextPage(int pageIndex) {
-        synchronized (lock) {
-            long page = openPage(pageIndex);
-            Long textPagePtr = mNativeTextPagesPtr.get(pageIndex);
-            if (textPagePtr == null) {
-                textPagePtr = nativeLoadTextPage(mNativeDocPtr, (int) page);
-                mNativeTextPagesPtr.put(pageIndex, textPagePtr);
-            }
-            return textPagePtr;
-        }
-
-    }
-
-    public void closeTextPage(int pageIndex) {
-        synchronized (lock) {
-            Long nativeLoadTextPage = mNativeTextPagesPtr.get(pageIndex);
-            if (nativeLoadTextPage != null) {
-                nativeCloseTextPage(nativeLoadTextPage);
-                mNativeTextPagesPtr.remove(pageIndex);
-            }
-        }
-    }
-
-    public long[] openTextPage(int fromIndex, int toIndex) {
-        long[] textPagesPtr;
-        synchronized (lock) {
-            textPagesPtr = nativeLoadPages(mNativeDocPtr, fromIndex, toIndex);
-            int pageIndex = fromIndex;
-            for (long page : textPagesPtr) {
-                if (pageIndex > toIndex) {
-                    break;
-                }
-                mNativeTextPagesPtr.put(pageIndex, page);
-                pageIndex++;
-            }
-            return textPagesPtr;
-        }
-    }
-
-    public int textPageCountChars(int textPageIndex) {
-        synchronized (lock) {
-            try {
-                return nativeTextCountChars(ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(textPageIndex)));
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Context may be null");
-                e.printStackTrace();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception throw from native");
-                e.printStackTrace();
-            }
-        }
-        return -1;
-    }
-
-    public String textPageGetText(int textPageIndex, int startIndex, int length) {
-        synchronized (lock) {
-            try {
-                short[] buf = new short[length + 1];
-                int r = nativeTextGetText(ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(textPageIndex)), startIndex, length, buf);
-                byte[] bytes = new byte[(r - 1) * 2];
-                ByteBuffer bb = ByteBuffer.wrap(bytes);
-                bb.order(ByteOrder.LITTLE_ENDIAN);
-                for (int i = 0; i < r - 1; i++) {
-                    short s = buf[i];
-                    bb.putShort(s);
-                }
-                return new String(bytes, StandardCharsets.UTF_16LE);
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Context may be null");
-                e.printStackTrace();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception throw from native");
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
-    public char textPageGetUnicode(int textPageIndex, int index) {
-        synchronized (lock) {
-            try {
-                return (char) nativeTextGetUnicode(ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(textPageIndex)), index);
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Context may be null");
-                e.printStackTrace();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception throw from native");
-                e.printStackTrace();
-            }
-        }
-        return 0;
-    }
-
-    public RectF textPageGetCharBox(int textPageIndex, int index) {
-        synchronized (lock) {
-            try {
-                double[] o = nativeTextGetCharBox(ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(textPageIndex)), index);
-                RectF r = new RectF();
-                r.left = (float) o[0];
-                r.right = (float) o[1];
-                r.bottom = (float) o[2];
-                r.top = (float) o[3];
-                return r;
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Context may be null");
-                e.printStackTrace();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception throw from native");
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
-    public int textPageGetCharIndexAtPos(int textPageIndex, double x, double y, double xTolerance, double yTolerance) {
-        synchronized (lock) {
-            try {
-                return nativeTextGetCharIndexAtPos(ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(textPageIndex)), x, y, xTolerance, yTolerance);
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Context may be null");
-                e.printStackTrace();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception throw from native");
-                e.printStackTrace();
-            }
-        }
-        return -1;
-    }
-
-    public int textPageCountRects(int textPageIndex, int start_index, int count) {
-        synchronized (lock) {
-            try {
-                return nativeTextCountRects(ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(textPageIndex)), start_index, count);
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Context may be null");
-                e.printStackTrace();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception throw from native");
-                e.printStackTrace();
-            }
-        }
-        return -1;
-    }
-
-    public RectF textPageGetRect(int textPageIndex, int rect_index) {
-        synchronized (lock) {
-            try {
-                double[] o = nativeTextGetRect(ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(textPageIndex)), rect_index);
-                RectF r = new RectF();
-                r.left = (float) o[0];
-                r.top = (float) o[1];
-                r.right = (float) o[2];
-                r.bottom = (float) o[3];
-                return r;
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Context may be null");
-                e.printStackTrace();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception throw from native");
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
-    public String textPageGetBoundedText(int textPageIndex, RectF rect, int length) {
-        synchronized (lock) {
-            try {
-                short[] buf = new short[length + 1];
-                int r = nativeTextGetBoundedText(ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(textPageIndex)), rect.left, rect.top, rect.right, rect.bottom, buf);
-                byte[] bytes = new byte[(r - 1) * 2];
-                ByteBuffer bb = ByteBuffer.wrap(bytes);
-                bb.order(ByteOrder.LITTLE_ENDIAN);
-                for (int i = 0; i < r - 1; i++) {
-                    short s = buf[i];
-                    bb.putShort(s);
-                }
-                return new String(bytes, StandardCharsets.UTF_16LE);
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Context may be null");
-                e.printStackTrace();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception throw from native");
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
-    /**
-     * Prepare information about all characters in a page.
-     * Application must call FPDFText_ClosePage to release the text page information.
-     *
-     * @param pageIndex index of page.
-     * @return A handle to the text page information structure. NULL if something goes wrong.
-     */
-    public long prepareTextInfo(int pageIndex) {
-        long textPagePtr;
-        textPagePtr = nativeLoadTextPage(mNativeDocPtr, pageIndex);
-        if (validPtr(textPagePtr)) {
-            mNativeTextPagesPtr.put(pageIndex, textPagePtr);
-        }
-        return textPagePtr;
-    }
-
-    /**
-     * Release all resources allocated for a text page information structure.
-     *
-     * @param pageIndex index of page.
-     */
-    public void releaseTextInfo(int pageIndex) {
-        long textPagePtr;
-        textPagePtr = ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(pageIndex));
-        if (validPtr(textPagePtr)) {
-            nativeCloseTextPage(textPagePtr);
-        }
-    }
-
-    /**
-     * Prepare information about all characters in a range of pages.
-     * Application must call FPDFText_ClosePage to release the text page information.
-     *
-     * @param fromIndex start index of page.
-     * @param toIndex   end index of page.
-     * @return list of handles to the text page information structure. NULL if something goes wrong.
-     */
-    public long[] prepareTextInfo(int fromIndex, int toIndex) {
-        long[] textPagesPtr;
-        textPagesPtr = nativeLoadTextPages(mNativeDocPtr, fromIndex, toIndex);
-        int pageIndex = fromIndex;
-        for (long page : textPagesPtr) {
-            if (pageIndex > toIndex) {
-                break;
-            }
-            if (validPtr(page)) {
-                mNativeTextPagesPtr.put(pageIndex, page);
-            }
-            pageIndex++;
-        }
-
-        return textPagesPtr;
-    }
-
-    /**
-     * Release all resources allocated for a text page information structure.
-     *
-     * @param fromIndex start index of page.
-     * @param toIndex   end index of page.
-     */
-    public void releaseTextInfo(int fromIndex, int toIndex) {
-        long textPagesPtr;
-        for (int i = fromIndex; i < toIndex + 1; i++) {
-            textPagesPtr = ObjectsCompat.requireNonNull(mNativeTextPagesPtr.get(i));
-            if (validPtr(textPagesPtr)) {
-                nativeCloseTextPage(textPagesPtr);
-            }
-        }
-    }
-
-    private Long ensureTextPage(int pageIndex) {
-        Long ptr = mNativeTextPagesPtr.get(pageIndex);
-        if (!validPtr(ptr)) {
-            return prepareTextInfo(pageIndex);
-        }
-        return ptr;
-    }
-
-    public int countCharactersOnPage(int pageIndex) {
-        try {
-            Long ptr = ensureTextPage(pageIndex);
-            return validPtr(ptr) ? nativeTextCountChars(ptr) : 0;
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    public void addImage(int pageIndex, Bitmap bitmap, Matrix matrix) {
-        float[] arr = new float[9];
-        matrix.getValues(arr);
-        /* @li a    c   e  // 0, 2, 4
-         * @li b    d   f  // 1, 3, 5
-         * @li 0    0   1 */
-        nativeInsertImage(mNativeDocPtr, pageIndex, bitmap, arr[0], arr[2], arr[4], arr[1], arr[3], arr[5]);
-    }
-
-    public boolean saveAsCopy(PdfWriteCallback callback) {
-        return nativeSaveAsCopy(mNativeDocPtr, callback);
-    }
-
-    /**
-     * Extract unicode text string from the page.
-     *
-     * @param pageIndex  index of page.
-     * @param startIndex Index for the start characters.
-     * @param length     Number of characters to be extracted.
-     * @return Number of characters written into the result buffer, including the trailing terminator.
-     */
-    public String extractCharacters(int pageIndex, int startIndex, int length) {
-        try {
-            Long ptr = ensureTextPage(pageIndex);
-            if (!validPtr(ptr)) {
-                return null;
-            }
-            short[] buf = new short[length + 1];
-
-            int r = nativeTextGetText(ptr, startIndex, length, buf);
-
-            byte[] bytes = new byte[(r - 1) * 2];
-            ByteBuffer bb = ByteBuffer.wrap(bytes);
-            bb.order(ByteOrder.LITTLE_ENDIAN);
-
-            for (int i = 0; i < r - 1; i++) {
-                short s = buf[i];
-                bb.putShort(s);
-            }
-
-            return new String(bytes, StandardCharsets.UTF_16LE);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     /**
      * Get page rotation in degrees
      *
@@ -891,231 +543,19 @@ public class PdfiumCore {
         return nativeGetPageRotation(pageIndex);
     }
 
-    /**
-     * Get Unicode of a character in a page.
-     *
-     * @param pageIndex index of page.
-     * @param index     Zero-based index of the character.
-     * @return The Unicode of the particular character. If a character is not encoded in Unicode, the return value will be zero.
-     */
-    public char extractCharacter(int pageIndex, int index) {
-        try {
-            Long ptr = ensureTextPage(pageIndex);
-            return validPtr(ptr) ? (char) nativeTextGetUnicode(ptr, index) : (char) 0;
-        } catch (Exception e) {
-            return 0;
-        }
+    public static int getCurrentDpi() {
+        return mCurrentDpi;
     }
 
-    /**
-     * Get bounding box of a particular character.
-     *
-     * @param pageIndex index of page.
-     * @param index     Zero-based index of the character.
-     * @return the character position measured in PDF "user space".
-     */
-    public RectF measureCharacterBox(int pageIndex, int index) {
-        try {
-            Long ptr = ensureTextPage(pageIndex);
-            if (!validPtr(ptr)) {
-                return null;
-            }
-            double[] o = nativeTextGetCharBox(ptr, index);
-            RectF r = new RectF();
-            r.left = (float) o[0];
-            r.right = (float) o[1];
-            r.bottom = (float) o[2];
-            r.top = (float) o[3];
-            return r;
-        } catch (Exception e) {
-            return null;
-        }
+    public static void setCurrentDpi(int currentDpi) {
+        mCurrentDpi = currentDpi;
     }
 
-    /**
-     * Get the index of a character at or nearby a certain position on the page
-     *
-     * @param pageIndex  index of page.
-     * @param x          X position in PDF "user space".
-     * @param y          Y position in PDF "user space".
-     * @param xTolerance An x-axis tolerance value for character hit detection, in point unit.
-     * @param yTolerance A y-axis tolerance value for character hit detection, in point unit.
-     * @return The zero-based index of the character at, or nearby the point (x,y). If there is no character at or nearby the point, return value will be -1. If an error occurs, -3 will be returned.
-     */
-    public int getCharacterIndex(int pageIndex, double x, double y, double xTolerance, double yTolerance) {
-        try {
-            Long ptr = ensureTextPage(pageIndex);
-            return validPtr(ptr) ? nativeTextGetCharIndexAtPos(ptr, x, y, xTolerance, yTolerance) : -1;
-        } catch (Exception e) {
-            return -1;
-        }
+    public static boolean hasPage(int index) {
+        return mNativePagesPtr.containsKey(index);
     }
 
-    /**
-     * Count number of rectangular areas occupied by a segment of texts.
-     * <p>
-     * This function, along with FPDFText_GetRect can be used by applications to detect the position
-     * on the page for a text segment, so proper areas can be highlighted or something.
-     * FPDFTEXT will automatically merge small character boxes into bigger one if those characters
-     * are on the same line and use same font settings.
-     *
-     * @param pageIndex index of page.
-     * @param charIndex Index for the start characters.
-     * @param count     Number of characters.
-     * @return texts areas count.
-     */
-    public int countTextRect(int pageIndex, int charIndex, int count) {
-        try {
-            Long ptr = ensureTextPage(pageIndex);
-            return validPtr(ptr) ? nativeTextCountRects(ptr, charIndex, count) : -1;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
-    /**
-     * Get a rectangular area from the result generated by FPDFText_CountRects.
-     *
-     * @param pageIndex index of page.
-     * @param rectIndex Zero-based index for the rectangle.
-     * @return the text rectangle.
-     */
-    public RectF getTextRect(int pageIndex, int rectIndex) {
-        try {
-            Long ptr = ensureTextPage(pageIndex);
-            if (!validPtr(ptr)) {
-                return null;
-            }
-            double[] o = nativeTextGetRect(ptr, rectIndex);
-            RectF r = new RectF();
-            r.left = (float) o[0];
-            r.top = (float) o[1];
-            r.right = (float) o[2];
-            r.bottom = (float) o[3];
-            return r;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
-     * Extract unicode text within a rectangular boundary on the page.
-     * If the buffer is too small, as much text as will fit is copied into it.
-     *
-     * @param pageIndex index of page.
-     * @param rect      the text rectangle to extract.
-     * @return If buffer is NULL or buflen is zero, return number of characters (not bytes) of text
-     * present within the rectangle, excluding a terminating NUL.
-     * <p>
-     * Generally you should pass a buffer at least one larger than this if you want a terminating NUL,
-     * which will be provided if space is available. Otherwise, return number of characters copied
-     * into the buffer, including the terminating NUL  when space for it is available.
-     */
-    public String extractText(int pageIndex, RectF rect) {
-        try {
-            Long ptr = ensureTextPage(pageIndex);
-            if (!validPtr(ptr)) {
-                return null;
-            }
-            int length = nativeTextGetBoundedTextLength(ptr, rect.left, rect.top, rect.right, rect.bottom);
-            if (length <= 0) {
-                return null;
-            }
-            short[] buf = new short[length + 1];
-            int r = nativeTextGetBoundedText(ptr, rect.left, rect.top, rect.right, rect.bottom, buf);
-            byte[] bytes = new byte[(r - 1) * 2];
-            ByteBuffer bb = ByteBuffer.wrap(bytes);
-            bb.order(ByteOrder.LITTLE_ENDIAN);
-            for (int i = 0; i < r - 1; i++) {
-                short s = buf[i];
-                bb.putShort(s);
-            }
-            return new String(bytes, StandardCharsets.UTF_16LE);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
-     * A handle class for the search context. stopSearch must be called to release this handle.
-     *
-     * @param pageIndex      index of page.
-     * @param query          A unicode match pattern.
-     * @param matchCase      match case
-     * @param matchWholeWord match the whole word
-     * @return A handle for the search context.
-     */
-    public TextSearchContext newPageSearch(int pageIndex, String query, boolean matchCase, boolean matchWholeWord) {
-        return new FPDFTextSearchContext(pageIndex, query, matchCase, matchWholeWord) {
-
-            private Long mSearchHandlePtr;
-
-            @Override
-            public void prepareSearch() {
-
-                long textPage = prepareTextInfo(pageIndex);
-
-                if (hasSearchHandle(pageIndex)) {
-                    long sPtr = ObjectsCompat.requireNonNull(mNativeSearchHandlePtr.get(pageIndex));
-                    nativeSearchStop(sPtr);
-                }
-
-                this.mSearchHandlePtr = nativeSearchStart(textPage, query, matchCase, matchWholeWord);
-            }
-
-            @Override
-            public int countResult() {
-                if (validPtr(mSearchHandlePtr)) {
-                    return nativeCountSearchResult(mSearchHandlePtr);
-                }
-                return -1;
-            }
-
-            @Override
-            public RectF searchNext() {
-                if (validPtr(mSearchHandlePtr)) {
-                    mHasNext = nativeSearchNext(mSearchHandlePtr);
-                    if (mHasNext) {
-                        int index = nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
-                        if (index > -1) {
-                            return measureCharacterBox(this.getPageIndex(), index);
-                        }
-                    }
-                }
-
-                mHasNext = false;
-                return null;
-            }
-
-            @Override
-            public RectF searchPrev() {
-                if (validPtr(mSearchHandlePtr)) {
-                    mHasPrev = nativeSearchPrev(mSearchHandlePtr);
-                    if (mHasPrev) {
-                        int index = nativeGetCharIndexOfSearchResult(mSearchHandlePtr);
-                        if (index > -1) {
-                            return measureCharacterBox(this.getPageIndex(), index);
-                        }
-                    }
-                }
-
-                mHasPrev = false;
-                return null;
-            }
-
-            @Override
-            public void stopSearch() {
-                super.stopSearch();
-                if (validPtr(mSearchHandlePtr)) {
-                    nativeSearchStop(mSearchHandlePtr);
-                    mNativeSearchHandlePtr.remove(getPageIndex());
-                }
-            }
-        };
-    }
-
-    public boolean hasSearchHandle(int index) {
-        return mNativeSearchHandlePtr.containsKey(index);
+    public static boolean hasTextPage(int index) {
+        return mNativeTextPagesPtr.containsKey(index);
     }
 }

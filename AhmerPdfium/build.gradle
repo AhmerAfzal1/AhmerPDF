@@ -68,6 +68,7 @@ android {
 dependencies {
     implementation 'androidx.core:core:1.7.0'
     implementation 'androidx.collection:collection:1.2.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'org.jetbrains:annotations:23.0.0'
 }
 
