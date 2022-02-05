@@ -1,6 +1,7 @@
 package com.ahmer.afzal.pdfviewer.util;
 
 public class PdfConstants {
+    public static final String TAG = "AhmerPdfium";
 
     public static final boolean DEBUG_MODE = false;
 
@@ -27,7 +28,6 @@ public class PdfConstants {
     public static final int MAX_PAGES = 15;
 
     public static class Cache {
-
         /**
          * The size of the cache (number of bitmaps kept)
          */
@@ -36,7 +36,6 @@ public class PdfConstants {
     }
 
     public static class Pinch {
-
         public static final float MAXIMUM_ZOOM = 10;
         public static final float MINIMUM_ZOOM = 1;
     }

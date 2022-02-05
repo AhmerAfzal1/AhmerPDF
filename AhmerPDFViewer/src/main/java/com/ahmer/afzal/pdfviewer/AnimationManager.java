@@ -9,7 +9,6 @@ import android.graphics.PointF;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.OverScroller;
 
-
 /**
  * This manager is used by the PDFView to launch animations.
  * It uses the ValueAnimator appeared in API 11 to start
@@ -22,7 +21,6 @@ class AnimationManager {
     private final OverScroller scroller;
     private ValueAnimator animation;
     private boolean flinging = false;
-
     private boolean pageFlinging = false;
 
     public AnimationManager(PDFView pdfView) {
@@ -199,5 +197,4 @@ class AnimationManager {
         }
 
     }
-
 }

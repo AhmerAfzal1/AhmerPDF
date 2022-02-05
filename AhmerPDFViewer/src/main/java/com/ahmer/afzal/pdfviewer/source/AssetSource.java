@@ -1,6 +1,5 @@
 package com.ahmer.afzal.pdfviewer.source;
 
-
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 

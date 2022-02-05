@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class FileSource implements DocumentSource {
 
-    private File file;
+    private final File file;
 
     public FileSource(File file) {
         this.file = file;

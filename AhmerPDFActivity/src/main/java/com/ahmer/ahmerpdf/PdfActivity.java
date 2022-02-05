@@ -23,9 +23,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfPasswordException;
+import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.afzal.pdfviewer.link.DefaultLinkHandler;
 import com.ahmer.afzal.pdfviewer.listener.OnLoadCompleteListener;
 import com.ahmer.afzal.pdfviewer.listener.OnPageChangeListener;
+import com.ahmer.afzal.pdfviewer.listener.OnSelection;
 import com.ahmer.afzal.pdfviewer.scroll.DefaultScrollHandle;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.pdfviewer.util.PdfFileUtils;
@@ -43,7 +45,7 @@ import io.ahmer.utils.utilcode.StringUtils;
 import io.ahmer.utils.utilcode.ThrowableUtils;
 import io.ahmer.utils.utilcode.ToastUtils;
 
-public class PdfActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener {
+public class PdfActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener{
 
     private static boolean isHorizontal = false;
     private String password = null;
@@ -53,6 +55,7 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
     private SPUtils prefPage = null;
     private SPUtils prefSwab = null;
     private ActivityPdfBinding binding;
+    int searchPage = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -101,7 +104,6 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 }
                 displayFromAsset();
             } else if (item.getItemId() == R.id.menuPdfNightMode) {
-
                 if (!isNightMode) {
                     isNightMode = true;
                     binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setIcon(R.drawable.ic_menu_pdf_sun);
@@ -111,15 +113,19 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
                 }
                 displayFromAsset();
             } else if (item.getItemId() == R.id.menuPdfSearch) {
-                /*
                 if (binding.layoutSearch.getVisibility() != View.VISIBLE) {
                     binding.layoutSearch.setVisibility(View.VISIBLE);
+                    binding.etSearch.requestFocus();
+                    binding.etSearch.postDelayed(() -> {
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        assert imm != null;
+                        imm.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT);
+                    }, 100);
                 } else {
                     binding.etSearch.setText("");
                     binding.layoutSearch.setVisibility(View.GONE);
                 }
-                */
-                ToastUtils.showLong(getString(R.string.under_progress));
+                //ToastUtils.showLong(getString(R.string.under_progress));
             }
             return false;
         });
@@ -136,6 +142,26 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
             binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).getIcon().setTint(Color.WHITE);
         }
         init();
+        binding.pdfView.setSelectionPaintView(binding.pdfSelection);
+        binding.pdfView.setOnSelection(new OnSelection() {
+            @Override
+            public void onSelection(boolean hasSelection) {
+                if (hasSelection) {
+                    setTitle("Select Text");
+                    setTitleColor(getResources().getColor(android.R.color.holo_blue_bright));
+                } else {
+                    setTitle(pdfFile);
+                    setTitleColor(getResources().getColor(android.R.color.white));
+                }
+            }
+        });
+
+        binding.ivCancelSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.pdfView.search(binding.etSearch.getText().toString());
+            }
+        });
     }
 
     private void init() {
@@ -202,6 +228,18 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         binding.pdfView.setMinZoom(1.0f);
         binding.pdfView.setMidZoom(2.5f);
         binding.pdfView.setMaxZoom(4.0f);
+    }
+
+    public int getNext(List<Object> myList) {
+        int idx = myList.indexOf(searchPage);
+        if (idx < 0 || idx + 1 == myList.size()) return 0;
+        return (int) myList.get(idx + 1);
+    }
+
+    public int getPrevious(List<Object> myList) {
+        int idx = myList.indexOf(searchPage);
+        if (idx <= 0) return 0;
+        return (int) myList.get(idx - 1);
     }
 
     private void showPasswordDialog() {

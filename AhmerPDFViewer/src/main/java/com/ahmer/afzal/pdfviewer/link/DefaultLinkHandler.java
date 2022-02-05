@@ -9,10 +9,10 @@ import android.util.Log;
 
 import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.afzal.pdfviewer.model.LinkTapEvent;
+import com.ahmer.afzal.pdfviewer.util.PdfConstants;
 
 public class DefaultLinkHandler implements LinkHandler {
 
-    private static final String TAG = DefaultLinkHandler.class.getSimpleName();
     private final PDFView pdfView;
 
     public DefaultLinkHandler(PDFView pdfView) {
@@ -41,7 +41,7 @@ public class DefaultLinkHandler implements LinkHandler {
         try {
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "No activity found for URI: " + uri);
+            Log.w(PdfConstants.TAG, "No activity found for URI: " + uri);
         }
     }
 

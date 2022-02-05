@@ -52,7 +52,7 @@
             android:paddingBottom="@dimen/margins_or_padding_05"
             android:singleLine="true"
             android:textAppearance="@style/Rose.TextAppearance.Normal"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/black" />
 
         <ImageView
             android:id="@+id/ivCancelSearch"
@@ -87,4 +87,9 @@
             android:minHeight="@dimen/progressbar_width_height"
             android:visibility="visible" />
     </com.ahmer.afzal.pdfviewer.PDFView>
+    <com.ahmer.afzal.pdfviewer.PDFViewSelection
+        android:id="@+id/pdfSelection"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/layoutSearch"/>
 </RelativeLayout>

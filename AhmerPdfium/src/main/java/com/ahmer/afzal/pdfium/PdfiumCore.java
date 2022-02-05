@@ -3,7 +3,6 @@ package com.ahmer.afzal.pdfium;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -35,16 +34,6 @@ public class PdfiumCore {
     public PdfiumCore(@NotNull Context context) {
         mCurrentDpi = context.getResources().getDisplayMetrics().densityDpi;
         Log.d(TAG, "Starting AhmerPdfium...");
-    }
-
-    public static native long nativeGetStringChars(String key, boolean isCopy);
-
-    public static int getCurrentDpi() {
-        return mCurrentDpi;
-    }
-
-    public static void setCurrentDpi(int currentDpi) {
-        mCurrentDpi = currentDpi;
     }
 
     private native int nativeCountAndGetRects(long pagePtr, int offsetY, int offsetX, int width, int height, ArrayList<RectF> arr, long tid, int selSt, int selEd);
@@ -79,9 +68,7 @@ public class PdfiumCore {
 
     private native long[] nativeLoadPages(long docPtr, int fromIndex, int toIndex);
 
-    private native Point nativePageCoordinateToDevice(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY);
-
-    private native PointF nativeDeviceCoordinateToPage(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, int deviceX, int deviceY);
+    private native Point nativePageCoordsToDevice(long pagePtr, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY);
 
     private native RectF nativeGetLinkRect(long linkPtr);
 
@@ -101,7 +88,7 @@ public class PdfiumCore {
 
     private native void nativeRenderPage(long pagePtr, Surface surface, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
 
-    private native void nativeRenderPageBitmap(long docPtr, long pagePtr, Bitmap bitmap, int dpi, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
+    private native void nativeRenderPageBitmap(long docPtr, long pagePtr, Bitmap bitmap, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
 
     private native void nativeRenderPageBitmap(long pagePtr, Bitmap bitmap, int startX, int startY, int drawSizeHor, int drawSizeVer, boolean renderAnnot);
 
@@ -134,6 +121,8 @@ public class PdfiumCore {
     public native String nativeGetText(long textPtr);
 
     public native void nativeFindTextPageEnd(long searchPtr);
+
+    public static native long nativeGetStringChars(String key);
 
     /**
      * Create new document from file
@@ -468,6 +457,7 @@ public class PdfiumCore {
     /**
      * Map page coordinates to device screen coordinates
      *
+     * @param doc       pdf document
      * @param pageIndex index of page
      * @param startX    left pixel position of the display area in device coordinates
      * @param startY    top pixel position of the display area in device coordinates
@@ -479,54 +469,12 @@ public class PdfiumCore {
      * @param pageY     Y value in page coordinate
      * @return mapped coordinates
      */
-    public Point mapPageCoordsToDevice(PdfDocument doc, int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, double pageX, double pageY) {
+    public Point mapPageCoordsToDevice(PdfDocument doc, int pageIndex, int startX, int startY, int sizeX,
+                                       int sizeY, int rotate, double pageX, double pageY) {
         Long mDoc = doc.mNativePagesPtr.get(pageIndex);
         Point point = null;
         if (mDoc != null) {
-            point = nativePageCoordinateToDevice(mDoc, startX, startY, sizeX, sizeY, rotate, pageX, pageY);
-        }
-        return point;
-    }
-
-    /**
-     * Convert the screen coordinates of a point to page coordinates.
-     * <p>
-     * The page coordinate system has its origin at the left-bottom corner
-     * of the page, with the X-axis on the bottom going to the right, and
-     * the Y-axis on the left side going up.
-     * <p>
-     * NOTE: this coordinate system can be altered when you zoom, scroll,
-     * or rotate a page, however, a point on the page should always have
-     * the same coordinate values in the page coordinate system.
-     * <p>
-     * The device coordinate system is device dependent. For screen device,
-     * its origin is at the left-top corner of the window. However this
-     * origin can be altered by the Windows coordinate transformation
-     * utilities.
-     * <p>
-     * You must make sure the start_x, start_y, size_x, size_y
-     * and rotate parameters have exactly same values as you used in
-     * the FPDF_RenderPage() function call.
-     *
-     * @param pageIndex index of page
-     * @param startX    Left pixel position of the display area in device coordinates.
-     * @param startY    Top pixel position of the display area in device coordinates.
-     * @param sizeX     Horizontal size (in pixels) for displaying the page.
-     * @param sizeY     Vertical size (in pixels) for displaying the page.
-     * @param rotate    Page orientation:
-     *                  0 (normal)
-     *                  1 (rotated 90 degrees clockwise)
-     *                  2 (rotated 180 degrees)
-     *                  3 (rotated 90 degrees counter-clockwise)
-     * @param deviceX   X value in device coordinates to be converted.
-     * @param deviceY   Y value in device coordinates to be converted.
-     * @return mapped coordinates
-     */
-    public PointF mapDeviceCoordsToPage(PdfDocument doc, int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, int deviceX, int deviceY) {
-        Long mDoc = doc.mNativePagesPtr.get(pageIndex);
-        PointF point = null;
-        if (mDoc != null) {
-            point = nativeDeviceCoordinateToPage(mDoc, startX, startY, sizeX, sizeY, rotate, deviceX, deviceY);
+            point = nativePageCoordsToDevice(mDoc, startX, startY, sizeX, sizeY, rotate, pageX, pageY);
         }
         return point;
     }
@@ -535,19 +483,9 @@ public class PdfiumCore {
      * @return mapped coordinates
      * @see PdfiumCore#mapPageCoordsToDevice(PdfDocument, int, int, int, int, int, int, double, double)
      */
-    public RectF mapRectToDevice(PdfDocument doc, int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, @NotNull RectF coords) {
+    public RectF mapRectToDevice(PdfDocument doc, int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, RectF coords) {
         Point leftTop = mapPageCoordsToDevice(doc, pageIndex, startX, startY, sizeX, sizeY, rotate, coords.left, coords.top);
         Point rightBottom = mapPageCoordsToDevice(doc, pageIndex, startX, startY, sizeX, sizeY, rotate, coords.right, coords.bottom);
-        return new RectF(leftTop.x, leftTop.y, rightBottom.x, rightBottom.y);
-    }
-
-    /**
-     * @return mapped coordinates
-     * @see PdfiumCore#mapDeviceCoordsToPage(PdfDocument, int, int, int, int, int, int, int, int)
-     */
-    public RectF mapRectToPage(PdfDocument doc, int pageIndex, int startX, int startY, int sizeX, int sizeY, int rotate, @NotNull RectF coords) {
-        PointF leftTop = mapDeviceCoordsToPage(doc, pageIndex, startX, startY, sizeX, sizeY, rotate, (int) coords.left, (int) coords.top);
-        PointF rightBottom = mapDeviceCoordsToPage(doc, pageIndex, startX, startY, sizeX, sizeY, rotate, (int) coords.right, (int) coords.bottom);
         return new RectF(leftTop.x, leftTop.y, rightBottom.x, rightBottom.y);
     }
 

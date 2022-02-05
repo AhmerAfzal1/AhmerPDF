@@ -4,10 +4,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.TypedValue;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,19 +21,19 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     private final static int HANDLE_LONG = 65;
     private final static int HANDLE_SHORT = 40;
     private final static int DEFAULT_TEXT_SIZE = 16;
-    protected final TextView textView;
-    protected final Context context;
+    public float currentPos;
+    protected TextView textView;
+    protected Context context;
+    private float relativeHandlerMiddle = 0f;
     private final boolean inverted;
-    private final Handler handler = new Handler(Looper.getMainLooper());
+    private PDFView pdfView;
+    private final Handler handler = new Handler();
     private final Runnable hidePageScrollerRunnable = new Runnable() {
         @Override
         public void run() {
             hide();
         }
     };
-    private float relativeHandlerMiddle = 0f;
-    private PDFView pdfView;
-    private float currentPos;
 
     public DefaultScrollHandle(Context context) {
         this(context, false);
@@ -46,7 +44,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         this.context = context;
         this.inverted = inverted;
         textView = new TextView(context);
-        setVisibility(View.INVISIBLE);
+        setVisibility(INVISIBLE);
         setTextColor(Color.BLACK);
         setTextSize(DEFAULT_TEXT_SIZE);
     }
@@ -62,29 +60,29 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             width = HANDLE_LONG;
             height = HANDLE_SHORT;
             if (inverted) { // left
-                align = RelativeLayout.ALIGN_PARENT_LEFT;
+                align = ALIGN_PARENT_LEFT;
                 background = ContextCompat.getDrawable(context, R.drawable.default_scroll_handle_left);
             } else { // right
-                align = RelativeLayout.ALIGN_PARENT_RIGHT;
+                align = ALIGN_PARENT_RIGHT;
                 background = ContextCompat.getDrawable(context, R.drawable.default_scroll_handle_right);
             }
         } else {
             width = HANDLE_SHORT;
             height = HANDLE_LONG;
             if (inverted) { // top
-                align = RelativeLayout.ALIGN_PARENT_TOP;
+                align = ALIGN_PARENT_TOP;
                 background = ContextCompat.getDrawable(context, R.drawable.default_scroll_handle_top);
             } else { // bottom
-                align = RelativeLayout.ALIGN_PARENT_BOTTOM;
+                align = ALIGN_PARENT_BOTTOM;
                 background = ContextCompat.getDrawable(context, R.drawable.default_scroll_handle_bottom);
             }
         }
         setBackground(background);
         LayoutParams lp = new LayoutParams(PdfUtils.getDP(context, width), PdfUtils.getDP(context, height));
         lp.setMargins(0, 0, 0, 0);
-        LayoutParams tvlp = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        tvlp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-        addView(textView, tvlp);
+        LayoutParams tvLp = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tvLp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        addView(textView, tvLp);
         lp.addRule(align);
         pdfView.addView(this, lp);
         this.pdfView = pdfView;
@@ -163,17 +161,17 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     @Override
     public boolean shown() {
-        return getVisibility() == View.VISIBLE;
+        return getVisibility() == VISIBLE;
     }
 
     @Override
     public void show() {
-        setVisibility(View.VISIBLE);
+        setVisibility(VISIBLE);
     }
 
     @Override
     public void hide() {
-        setVisibility(View.INVISIBLE);
+        setVisibility(INVISIBLE);
     }
 
     public void setTextColor(int color) {
@@ -188,7 +186,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private boolean isPDFViewReady() {
-        return pdfView != null && pdfView.getPageCount() > 0 && pdfView.documentFitsView();
+        return pdfView != null && pdfView.getPageCount() > 0 && !pdfView.documentFitsView();
     }
 
     @Override
@@ -224,10 +222,5 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         }
         performClick();
         return super.onTouchEvent(event);
-    }
-
-    @Override
-    public boolean performClick() {
-        return super.performClick();
     }
 }
