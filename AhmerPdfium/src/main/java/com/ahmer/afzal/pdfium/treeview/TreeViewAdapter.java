@@ -21,28 +21,24 @@ import java.util.List;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class TreeViewAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> implements View.OnClickListener {
     private static final String KEY_IS_EXPAND = "IS_EXPAND";
-    private final List<? extends TreeViewBinderInterface> viewBinders;
     protected final ArrayList<TreeViewNode> displayNodes = new ArrayList<>();
+    private final List<? extends TreeViewBinderInterface> viewBinders;
+    public int currentSchFlg;
+    public int currentExpChannel = 0x1;
     protected int padding = 30;
     protected OnTreeNodeListener onTreeNodeListener;
-    private boolean toCollapseChild;
-
     protected int lastSelectionOffset;
     protected long lastSelectionId;
     protected int lastSelectionPos;
     protected boolean findSelection;
-
     protected Object currentFilter;
-    public int currentSchFlg;
-
     protected TreeViewNode rootNode;
     protected TreeViewNode footNode;
 
     protected boolean isFolderView = false;
-
-    public int currentExpChannel = 0x1;
     protected int normalExpChannel = 0x1;
     protected int schViewExpChannel = 0x1;
+    private boolean toCollapseChild;
 
     public TreeViewAdapter(List<? extends TreeViewBinderInterface> viewBinders) {
         this(null, viewBinders);
@@ -92,12 +88,6 @@ public class TreeViewAdapter<VH extends RecyclerView.ViewHolder> extends Recycle
 
     public boolean getIsFolderView() {
         return isFolderView;
-    }
-
-    public interface TreeTraveller<T extends TreeViewNode> {
-        boolean onNodeReached(T node);
-
-        boolean ended();
     }
 
     public <T extends TreeViewNode> void TraverseChildTree(T pNode, TreeTraveller<T> treeTraveller) {
@@ -296,7 +286,6 @@ public class TreeViewAdapter<VH extends RecyclerView.ViewHolder> extends Recycle
         return removeChildCount;
     }
 
-
     private int removeChildNodes_fast(TreeViewNode pNode) {
         return removeChildNodes_fast(displayNodes.indexOf(pNode));
     }
@@ -364,22 +353,6 @@ public class TreeViewAdapter<VH extends RecyclerView.ViewHolder> extends Recycle
         } else {
             notifyItemRangeRemoved(positionStart, removeChildNodes(nodeI));
         }
-    }
-
-    public interface OnTreeNodeListener {
-        /**
-         * called when TreeNodes were clicked.
-         *
-         * @return weather consume the click event.
-         */
-        boolean onClick(TreeViewNode node, RecyclerView.ViewHolder holder);
-
-        /**
-         * called when TreeNodes were toggle.
-         *
-         * @param isExpand the status of TreeNodes after being toggled.
-         */
-        void onToggle(boolean isExpand, RecyclerView.ViewHolder holder);
     }
 
     public void refresh(List<TreeViewNode> treeViewNodes, int cap) {
@@ -566,6 +539,28 @@ public class TreeViewAdapter<VH extends RecyclerView.ViewHolder> extends Recycle
             }
         }
         notifyDiff(temp);
+    }
+
+    public interface TreeTraveller<T extends TreeViewNode> {
+        boolean onNodeReached(T node);
+
+        boolean ended();
+    }
+
+    public interface OnTreeNodeListener {
+        /**
+         * called when TreeNodes were clicked.
+         *
+         * @return weather consume the click event.
+         */
+        boolean onClick(TreeViewNode node, RecyclerView.ViewHolder holder);
+
+        /**
+         * called when TreeNodes were toggle.
+         *
+         * @param isExpand the status of TreeNodes after being toggled.
+         */
+        void onToggle(boolean isExpand, RecyclerView.ViewHolder holder);
     }
 
 //	@Override

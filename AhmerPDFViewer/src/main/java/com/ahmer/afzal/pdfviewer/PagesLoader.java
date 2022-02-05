@@ -1,6 +1,11 @@
 package com.ahmer.afzal.pdfviewer;
 
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.CACHE_SIZE;
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.PRELOAD_OFFSET;
+
 import android.graphics.RectF;
+
+import androidx.annotation.NonNull;
 
 import com.ahmer.afzal.pdfium.util.SizeF;
 import com.ahmer.afzal.pdfviewer.util.MathUtils;
@@ -9,11 +14,6 @@ import com.ahmer.afzal.pdfviewer.util.PdfUtils;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.CACHE_SIZE;
-import static com.ahmer.afzal.pdfviewer.util.PdfConstants.PRELOAD_OFFSET;
-
-import androidx.annotation.NonNull;
 
 class PagesLoader {
 
@@ -263,11 +263,25 @@ class PagesLoader {
         }
     }
 
+    private static class GridSize {
+        int rows;
+        int cols;
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "GridSize{" +
+                    "rows=" + rows +
+                    ", cols=" + cols +
+                    '}';
+        }
+    }
+
     private class RenderRange {
-        int page;
         final GridSize gridSize;
         final Holder leftTop;
         final Holder rightBottom;
+        int page;
 
         RenderRange() {
             this.page = 0;
@@ -284,20 +298,6 @@ class PagesLoader {
                     ", gridSize=" + gridSize +
                     ", leftTop=" + leftTop +
                     ", rightBottom=" + rightBottom +
-                    '}';
-        }
-    }
-
-    private static class GridSize {
-        int rows;
-        int cols;
-
-        @NonNull
-        @Override
-        public String toString() {
-            return "GridSize{" +
-                    "rows=" + rows +
-                    ", cols=" + cols +
                     '}';
         }
     }

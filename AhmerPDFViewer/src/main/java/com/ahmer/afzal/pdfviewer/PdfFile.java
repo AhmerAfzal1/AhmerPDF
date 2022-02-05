@@ -5,16 +5,13 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.SparseBooleanArray;
 
-import com.ahmer.afzal.pdfium.Bookmark;
-import com.ahmer.afzal.pdfium.Link;
-import com.ahmer.afzal.pdfium.Meta;
+import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfium.util.SizeF;
 import com.ahmer.afzal.pdfviewer.exception.PageRenderingException;
 import com.ahmer.afzal.pdfviewer.util.FitPolicy;
 import com.ahmer.afzal.pdfviewer.util.PageSizeCalculator;
-import com.ahmer.afzal.pdfviewer.util.PdfConstants;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -64,6 +61,7 @@ class PdfFile {
      * Calculated auto spacing for pages
      */
     private final List<Float> pageSpacing = new ArrayList<>();
+    public PdfDocument pdfDocument;
     private int pagesCount = 0;
     /**
      * Page with maximum width
@@ -91,13 +89,15 @@ class PdfFile {
      */
     private int[] originalUserPages;
 
-    PdfFile(PdfiumCore pdfiumCore, FitPolicy pageFitPolicy, Size viewSize, int[] originalUserPages,
-            boolean isVertical, int spacing, boolean autoSpacing, boolean fitEachPage) {
+    PdfFile(PdfiumCore pdfiumCore, PdfDocument doc, FitPolicy pageFitPolicy, Size viewSize,
+            int[] originalUserPages, boolean isVertical, int spacing, boolean autoSpacing,
+            boolean fitEachPage) {
         this.pdfiumCore = pdfiumCore;
         this.pageFitPolicy = pageFitPolicy;
+        this.pdfDocument = doc;
         this.originalUserPages = originalUserPages;
         this.isVertical = isVertical;
-        spacingPx = spacing;
+        this.spacingPx = spacing;
         this.autoSpacing = autoSpacing;
         this.fitEachPage = fitEachPage;
         this.openedPageQueue = new LinkedList<>();
@@ -108,10 +108,10 @@ class PdfFile {
         if (originalUserPages != null) {
             pagesCount = originalUserPages.length;
         } else {
-            pagesCount = pdfiumCore.getPageCount();
+            pagesCount = pdfiumCore.getPageCount(pdfDocument);
         }
         for (int i = 0; i < pagesCount; i++) {
-            Size pageSize = pdfiumCore.getPageSize(documentPage(i));
+            Size pageSize = pdfiumCore.getPageSize(pdfDocument, documentPage(i));
             if (pageSize.getWidth() > originalMaxWidthPageSize.getWidth()) {
                 originalMaxWidthPageSize = pageSize;
             }
@@ -291,18 +291,18 @@ class PdfFile {
         synchronized (lock) {
             if (openedPages.indexOfKey(docPage) < 0) {
                 try {
-                    pdfiumCore.openPage(docPage);
+                    pdfiumCore.openPage(pdfDocument, docPage);
                     openedPages.put(docPage, true);
                     /*
                      *Memory management
                      *Fix memory leak https://github.com/barteksc/AndroidPdfViewer/issues/495
-                     */
+
                     openedPageQueue.add(pageIndex);
                     if (openedPageQueue.size() > PdfConstants.MAX_PAGES) {
                         int oldPage = openedPageQueue.poll();
-                        pdfiumCore.closePage(oldPage);
+                        pdfiumCore.closePage(pdfDocument, oldPage);
                         openedPages.delete(oldPage);
-                    }
+                    }*/
                     return true;
                 } catch (Exception e) {
                     openedPages.put(docPage, false);
@@ -320,37 +320,37 @@ class PdfFile {
 
     public void renderPageBitmap(Bitmap bitmap, int pageIndex, Rect bounds, boolean annotationRendering) {
         int docPage = documentPage(pageIndex);
-        pdfiumCore.renderPageBitmap(bitmap, docPage, bounds.left, bounds.top, bounds.width(),
+        pdfiumCore.renderPageBitmap(pdfDocument, bitmap, docPage, bounds.left, bounds.top, bounds.width(),
                 bounds.height(), annotationRendering);
     }
 
-    public Meta getMetaData() {
+    public PdfDocument.Meta getMetaData() {
         if (pdfiumCore == null) {
             return null;
         }
-        return pdfiumCore.getDocumentMeta();
+        return pdfiumCore.getDocumentMeta(pdfDocument);
     }
 
-    public List<Bookmark> getBookmarks() {
+    public List<PdfDocument.Bookmark> getBookmarks() {
         if (pdfiumCore == null) {
             return new ArrayList<>();
         }
-        return pdfiumCore.getTableOfContents();
+        return pdfiumCore.getTableOfContents(pdfDocument);
     }
 
-    public List<Link> getPageLinks(int pageIndex) {
+    public List<PdfDocument.Link> getPageLinks(int pageIndex) {
         int docPage = documentPage(pageIndex);
-        return pdfiumCore.getPageLinks(docPage);
+        return pdfiumCore.getPageLinks(pdfDocument, docPage);
     }
 
     public RectF mapRectToDevice(int pageIndex, int startX, int startY, int sizeX, int sizeY, RectF rect) {
         int docPage = documentPage(pageIndex);
-        return pdfiumCore.mapRectToDevice(docPage, startX, startY, sizeX, sizeY, 0, rect);
+        return pdfiumCore.mapRectToDevice(pdfDocument, docPage, startX, startY, sizeX, sizeY, 0, rect);
     }
 
     public void dispose() {
         if (pdfiumCore != null) {
-            pdfiumCore.closeDocument();
+            pdfiumCore.closeDocument(pdfDocument);
         }
         originalUserPages = null;
     }

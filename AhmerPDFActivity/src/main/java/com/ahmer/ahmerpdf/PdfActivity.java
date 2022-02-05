@@ -21,7 +21,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.ahmer.afzal.pdfium.Bookmark;
+import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfPasswordException;
 import com.ahmer.afzal.pdfviewer.link.DefaultLinkHandler;
 import com.ahmer.afzal.pdfviewer.listener.OnLoadCompleteListener;
@@ -280,8 +280,8 @@ public class PdfActivity extends AppCompatActivity implements OnPageChangeListen
         binding.toolbar.getMenu().findItem(R.id.menuPdfNightMode).setEnabled(true);
     }
 
-    private void printBookmarksTree(@NotNull List<Bookmark> tree, String sep) {
-        for (Bookmark bookmark : tree) {
+    private void printBookmarksTree(@NotNull List<PdfDocument.Bookmark> tree, String sep) {
+        for (PdfDocument.Bookmark bookmark : tree) {
             Log.v(MainActivity.TAG, String.format(Locale.getDefault(), "%s %s, Page %d", sep,
                     bookmark.getTitle(), bookmark.getPageIdx()));
             if (bookmark.hasChildren()) {

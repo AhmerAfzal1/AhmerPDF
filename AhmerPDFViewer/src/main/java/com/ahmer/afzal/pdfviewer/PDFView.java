@@ -17,9 +17,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.RelativeLayout;
 
-import com.ahmer.afzal.pdfium.Bookmark;
-import com.ahmer.afzal.pdfium.Link;
-import com.ahmer.afzal.pdfium.Meta;
+import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 import com.ahmer.afzal.pdfium.util.Size;
 import com.ahmer.afzal.pdfium.util.SizeF;
@@ -315,7 +313,7 @@ public class PDFView extends RelativeLayout {
         currentPage = pageNb;
         loadPages();
         if (scrollHandle != null && documentFitsView()) {
-            scrollHandle.setPageNum(currentPage + 1);
+            scrollHandle.setPageNumber(currentPage + 1);
         }
         callbacks.callOnPageChange(currentPage, pdfFile.getPagesCount());
     }
@@ -1225,7 +1223,7 @@ public class PDFView extends RelativeLayout {
     /**
      * Returns null if document is not loaded
      */
-    public Meta getDocumentMeta() {
+    public PdfDocument.Meta getDocumentMeta() {
         if (pdfFile == null) {
             return null;
         }
@@ -1235,7 +1233,7 @@ public class PDFView extends RelativeLayout {
     /**
      * Will be empty until document is loaded
      */
-    public List<Bookmark> getTableOfContents() {
+    public List<PdfDocument.Bookmark> getTableOfContents() {
         if (pdfFile == null) {
             return Collections.emptyList();
         }
@@ -1245,7 +1243,7 @@ public class PDFView extends RelativeLayout {
     /**
      * Will be empty until document is loaded
      */
-    public List<Link> getLinks(int page) {
+    public List<PdfDocument.Link> getLinks(int page) {
         if (pdfFile == null) {
             return Collections.emptyList();
         }

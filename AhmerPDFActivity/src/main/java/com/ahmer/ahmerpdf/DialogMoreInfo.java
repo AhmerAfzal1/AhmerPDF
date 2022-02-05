@@ -7,7 +7,7 @@ import android.os.ParcelFileDescriptor;
 
 import androidx.annotation.NonNull;
 
-import com.ahmer.afzal.pdfium.Meta;
+import com.ahmer.afzal.pdfium.PdfDocument;
 import com.ahmer.afzal.pdfium.PdfiumCore;
 import com.ahmer.afzal.pdfviewer.PDFView;
 import com.ahmer.ahmerpdf.databinding.DialogPdfInfoBinding;
@@ -20,7 +20,7 @@ import io.ahmer.utils.utilcode.FileUtils;
 public class DialogMoreInfo extends Dialog {
 
     private final File file;
-    private Meta meta = null;
+    private PdfDocument.Meta meta = null;
 
     public DialogMoreInfo(@NonNull Context context, final File file) {
         super(context);
@@ -28,8 +28,8 @@ public class DialogMoreInfo extends Dialog {
         try {
             PdfiumCore pdfiumCore = new PdfiumCore(context);
             ParcelFileDescriptor fileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-            pdfiumCore.newDocument(fileDescriptor);
-            meta = pdfiumCore.getDocumentMeta();
+            PdfDocument pdfDocument = pdfiumCore.newDocument(fileDescriptor);
+            meta = pdfiumCore.getDocumentMeta(pdfDocument);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,8 +41,8 @@ public class DialogMoreInfo extends Dialog {
         try {
             PdfiumCore pdfiumCore = new PdfiumCore(context);
             ParcelFileDescriptor fileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-            pdfiumCore.newDocument(fileDescriptor, password);
-            meta = pdfiumCore.getDocumentMeta();
+            PdfDocument pdfDocument = pdfiumCore.newDocument(fileDescriptor, password);
+            meta = pdfiumCore.getDocumentMeta(pdfDocument);
         } catch (Exception e) {
             e.printStackTrace();
         }

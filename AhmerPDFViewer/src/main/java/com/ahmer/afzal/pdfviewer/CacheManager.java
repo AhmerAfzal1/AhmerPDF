@@ -1,5 +1,8 @@
 package com.ahmer.afzal.pdfviewer;
 
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.CACHE_SIZE;
+import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.THUMBNAILS_CACHE_SIZE;
+
 import android.graphics.RectF;
 
 import androidx.annotation.Nullable;
@@ -11,9 +14,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
-
-import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.CACHE_SIZE;
-import static com.ahmer.afzal.pdfviewer.util.PdfConstants.Cache.THUMBNAILS_CACHE_SIZE;
 
 class CacheManager {
 
