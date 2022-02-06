@@ -626,9 +626,9 @@ public class PDFView extends RelativeLayout {
         if (pdfFile == null) {
             return;
         }
-
         page = pdfFile.determineValidPageNumberFrom(page);
         float offset = page == 0 ? 0 : -pdfFile.getPageOffset(page, zoom);
+        offset += pdfFile.getPageSpacing(page, getZoom()) / 2f;
         if (page == 0 && initialRender) {
             initialRender = false;
             offset += this.spacingTopPx;
@@ -908,7 +908,8 @@ public class PDFView extends RelativeLayout {
         if (swipeVertical) {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth();
+            } else
+                return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth();
         } else {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
