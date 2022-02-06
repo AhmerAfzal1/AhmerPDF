@@ -1,22 +1,11 @@
-/**
- * Copyright 2016 Bartosz Schiller
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.ahmer.afzal.pdfviewer;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
@@ -39,10 +28,10 @@ class RenderingHandler extends Handler {
     static final int MSG_RENDER_TASK = 1;
 
     private static final String TAG = RenderingHandler.class.getName();
-    private PDFView pdfView;
-    private RectF renderBounds = new RectF();
-    private Rect roundedRenderBounds = new Rect();
-    private Matrix renderMatrix = new Matrix();
+    private final PDFView pdfView;
+    private final RectF renderBounds = new RectF();
+    private final Rect roundedRenderBounds = new Rect();
+    private final Matrix renderMatrix = new Matrix();
     private boolean running = false;
 
     RenderingHandler(Looper looper, PDFView pdfView) {
@@ -54,6 +43,31 @@ class RenderingHandler extends Handler {
         RenderingTask task = new RenderingTask(width, height, bounds, page, thumbnail, cacheOrder, bestQuality, annotationRendering);
         Message msg = obtainMessage(MSG_RENDER_TASK, task);
         sendMessage(msg);
+    }
+
+    private static Bitmap toNightMode(Bitmap bmpOriginal, boolean bestQuality) {
+        int width;
+        int height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+        Bitmap nightModeBitmap = Bitmap.createBitmap(width, height,
+                bestQuality ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(nightModeBitmap);
+        Paint paint = new Paint();
+        ColorMatrix grayScaleMatrix = new ColorMatrix();
+        grayScaleMatrix.setSaturation(0);
+        ColorMatrix invertMatrix =
+                new ColorMatrix(new float[]{
+                        -1, 0, 0, 0, 255,
+                        0, -1, 0, 0, 255,
+                        0, 0, -1, 0, 255,
+                        0, 0, 0, 1, 0});
+        ColorMatrix nightModeMatrix = new ColorMatrix();
+        nightModeMatrix.postConcat(grayScaleMatrix);
+        nightModeMatrix.postConcat(invertMatrix);
+        paint.setColorFilter(new ColorMatrixColorFilter(nightModeMatrix));
+        canvas.drawBitmap(bmpOriginal, 0, 0, paint);
+        return nightModeBitmap;
     }
 
     @Override
@@ -100,6 +114,9 @@ class RenderingHandler extends Handler {
         }
         calculateBounds(w, h, renderingTask.bounds);
         pdfFile.renderPageBitmap(render, renderingTask.page, roundedRenderBounds, renderingTask.annotationRendering);
+        if (pdfView.isNightMode()) {
+            render = toNightMode(render, renderingTask.bestQuality);
+        }
         return new PagePart(renderingTask.page, render, renderingTask.bounds, renderingTask.thumbnail, renderingTask.cacheOrder);
     }
 

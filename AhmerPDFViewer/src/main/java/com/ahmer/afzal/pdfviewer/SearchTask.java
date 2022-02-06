@@ -12,15 +12,15 @@ public class SearchTask implements Runnable {
     public final String key;
     public final int flag = 0;
     private final ArrayList<SearchRecord> arr = new ArrayList<>();
-    private final WeakReference<PDFView> pdoc;
+    private final WeakReference<PDFView> pdfView;
     private Thread t;
     private long keyStr;
 
     private boolean finished;
 
-    public SearchTask(PDFView pdoc, String key) {
+    public SearchTask(PDFView pdfView, String key) {
 
-        this.pdoc = new WeakReference<>(pdoc);
+        this.pdfView = new WeakReference<>(pdfView);
         this.key = key + "\0";
     }
 
@@ -33,7 +33,7 @@ public class SearchTask implements Runnable {
 
     @Override
     public void run() {
-        PDFView a = this.pdoc.get();
+        PDFView a = this.pdfView.get();
         if (a == null) {
             return;
         }
@@ -69,7 +69,7 @@ public class SearchTask implements Runnable {
             return;
         }
         if (t == null) {
-            PDFView a = this.pdoc.get();
+            PDFView a = this.pdfView.get();
             if (a != null) {
                 a.startSearch(arr, key, flag);
             }

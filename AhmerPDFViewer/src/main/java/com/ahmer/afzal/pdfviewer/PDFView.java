@@ -1,18 +1,3 @@
-/**
- * Copyright 2016 Bartosz Schiller
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.ahmer.afzal.pdfviewer;
 
 import android.content.Context;
@@ -21,8 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
@@ -785,30 +768,19 @@ public class PDFView extends RelativeLayout {
             return null;
         }
         int foundIdx = pdfiumCore.nativeFindTextPage(tid, key, flag);
-        SearchRecord ret = foundIdx == -1 ? null : new SearchRecord(pageIdx, foundIdx);
+        return foundIdx == -1 ? null : new SearchRecord(pageIdx, foundIdx);
+    }
 
-        return ret;
+    public boolean isNightMode() {
+        return nightMode;
     }
 
     public void setNightMode(boolean nightMode) {
         this.nightMode = nightMode;
-        if (nightMode) {
-            ColorMatrix colorMatrixInverted =
-                    new ColorMatrix(new float[]{
-                            -1, 0, 0, 0, 255,
-                            0, -1, 0, 0, 255,
-                            0, 0, -1, 0, 255,
-                            0, 0, 0, 1, 0});
-
-            ColorMatrixColorFilter filter = new ColorMatrixColorFilter(colorMatrixInverted);
-            paint.setColorFilter(filter);
-        } else {
-            paint.setColorFilter(null);
-        }
     }
 
-    void enableDoubleTap(boolean enableDoubletap) {
-        this.doubletapEnabled = enableDoubletap;
+    void enableDoubleTap(boolean enableDoubleTap) {
+        this.doubletapEnabled = enableDoubleTap;
     }
 
     boolean isDoubleTapEnabled() {
@@ -936,17 +908,12 @@ public class PDFView extends RelativeLayout {
         if (swipeVertical) {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth()) {
-                return true;
-            }
+            } else return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth();
         } else {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentXOffset + pdfFile.getDocLen(zoom) > getWidth()) {
-                return true;
-            }
+            } else return direction > 0 && currentXOffset + pdfFile.getDocLen(zoom) > getWidth();
         }
-        return false;
     }
 
     @Override
@@ -954,21 +921,16 @@ public class PDFView extends RelativeLayout {
         if (pdfFile == null) {
             return true;
         }
-
         if (swipeVertical) {
             if (direction < 0 && currentYOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentYOffset + pdfFile.getDocLen(zoom) > getHeight()) {
-                return true;
-            }
+            } else return direction > 0 && currentYOffset + pdfFile.getDocLen(zoom) > getHeight();
         } else {
             if (direction < 0 && currentYOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentYOffset + toCurrentScale(pdfFile.getMaxPageHeight()) > getHeight()) {
-                return true;
-            }
+            } else
+                return direction > 0 && currentYOffset + toCurrentScale(pdfFile.getMaxPageHeight()) > getHeight();
         }
-        return false;
     }
 
     @Override
@@ -1094,40 +1056,6 @@ public class PDFView extends RelativeLayout {
     public boolean hasSelection() {
         return hasSelection;
     }
-
-   /* public ArrayList<RectF> mergeLineRects(List<RectF> selRects, RectF box) {
-        RectF tmp = new RectF();
-        ArrayList<RectF> selLineRects = new ArrayList<>(selRects.size());
-        RectF currentLineRect = null;
-        for (RectF rI : selRects) {
-            //CMN.Log("RectF rI:selRects", rI);
-            if (currentLineRect != null && Math.abs((currentLineRect.top + currentLineRect.bottom) - (rI.top + rI.bottom)) < currentLineRect.bottom - currentLineRect.top) {
-                currentLineRect.left = Math.min(currentLineRect.left, rI.left);
-                currentLineRect.right = Math.max(currentLineRect.right, rI.right);
-                currentLineRect.top = Math.min(currentLineRect.top, rI.top);
-                currentLineRect.bottom = Math.max(currentLineRect.bottom, rI.bottom);
-            } else {
-                currentLineRect = new RectF();
-                currentLineRect.set(rI);
-                selLineRects.add(currentLineRect);
-                int cid = dragPinchManager.getCharIdxAtPos(rI.left + 1, rI.top + rI.height() / 2);
-                if (cid > 0) {
-                    getCharLoosePos(tmp, cid);
-                    currentLineRect.left = Math.min(currentLineRect.left, tmp.left);
-                    currentLineRect.right = Math.max(currentLineRect.right, tmp.right);
-                    currentLineRect.top = Math.min(currentLineRect.top, tmp.top);
-                    currentLineRect.bottom = Math.max(currentLineRect.bottom, tmp.bottom);
-                }
-            }
-            if (box != null) {
-                box.left = Math.min(box.left, currentLineRect.left);
-                box.right = Math.max(box.right, currentLineRect.right);
-                box.top = Math.min(box.top, currentLineRect.top);
-                box.bottom = Math.max(box.bottom, currentLineRect.bottom);
-            }
-        }
-        return selLineRects;
-    }*/
 
     private void drawWithListener(Canvas canvas, int page, OnDrawListener listener) {
         if (listener != null) {
@@ -1269,7 +1197,7 @@ public class PDFView extends RelativeLayout {
         if (onErrorListener != null) {
             onErrorListener.onError(t);
         } else {
-            Log.e("PDFView", "load pdf error", t);
+            Log.e(TAG, "Load PDF error: ", t);
         }
     }
 
@@ -1315,7 +1243,7 @@ public class PDFView extends RelativeLayout {
             // Check X offset
             float scaledPageWidth = toCurrentScale(pdfFile.getMaxPageWidth());
             if (scaledPageWidth < getWidth()) {
-                offsetX = getWidth() / 2 - scaledPageWidth / 2;
+                offsetX = getWidth() / 2f - scaledPageWidth / 2;
             } else {
                 if (offsetX > 0) {
                     offsetX = 0;
@@ -1347,7 +1275,7 @@ public class PDFView extends RelativeLayout {
             // Check Y offset
             float scaledPageHeight = toCurrentScale(pdfFile.getMaxPageHeight());
             if (scaledPageHeight < getHeight()) {
-                offsetY = getHeight() / 2 - scaledPageHeight / 2;
+                offsetY = getHeight() / 2f - scaledPageHeight / 2;
             } else {
                 if (offsetY > 0) {
                     offsetY = 0;
@@ -1384,9 +1312,7 @@ public class PDFView extends RelativeLayout {
         if (moveHandle && scrollHandle != null && !documentFitsView()) {
             scrollHandle.setScroll(positionOffset);
         }
-
         callbacks.callOnPageScroll(getCurrentPage(), positionOffset);
-
         redraw();
     }
 
@@ -1411,6 +1337,16 @@ public class PDFView extends RelativeLayout {
         } else {
             loadPages();
         }
+    }
+
+    /**
+     * Get the page rotation
+     *
+     * @param pageIndex the page index
+     * @return the rotation
+     */
+    public int getPageRotation(int pageIndex) {
+        return pdfiumCore.getPageRotation(pageIndex);
     }
 
     /**
